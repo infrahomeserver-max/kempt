@@ -1049,10 +1049,13 @@ mod tests {
         assert!(v.refresh());
         assert_eq!(v.idx.count(), 5);
         assert_eq!(v.line_bytes(3).unwrap(), b"four-more");
-        // truncate
-        f.as_file().set_len(4).unwrap();
-        assert!(v.refresh());
-        assert!(v.msg.contains("reloaded"));
+        // truncate (Windows refuses to shrink a file that is memory-mapped, so the other program could not do it either)
+        #[cfg(not(windows))]
+        {
+            f.as_file().set_len(4).unwrap();
+            assert!(v.refresh());
+            assert!(v.msg.contains("reloaded"));
+        }
     }
 
     #[test]

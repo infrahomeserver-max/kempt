@@ -580,6 +580,8 @@ Formatting is lossless: minifying the formatted output gives back the original, 
 
 ## Known limits
 
+- **Windows: a file you are viewing cannot be shortened by another program** (Windows blocks shrinking a memory-mapped file). Appending to it, which is what normal logging does, works and follow mode picks it up. Close the file in Kempt before truncating or emptying it.
+
 - Formatters that need the whole document (HTML, CSS, JS/TS, YAML, Markdown, Python, shell, SQL, C-family) run through external tools; files over `--max-size` (20 MB) are skipped unless you pass `--force`.
 - XML mixed content that starts with a child element (`<p><b>x</b> text</p>`) is indented before the first child. Text-first mixed content is preserved exactly.
 - Structural JSON diff holds both documents in memory (about 30 times the file size), hence the 40 MB default limit. Key order is not normalised in the streamed fallback.
