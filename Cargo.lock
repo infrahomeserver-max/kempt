@@ -701,7 +701,7 @@ dependencies = [
  "clap",
  "crossterm",
  "flate2",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "ksni",
  "memchr",
  "memmap2",
