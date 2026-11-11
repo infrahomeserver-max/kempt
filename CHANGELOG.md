@@ -3,6 +3,15 @@
 All notable changes are listed here. Format: [Keep a Changelog](https://keepachangelog.com/);
 versioning: [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+- New file can start in memory and is written only on the first Save.
+- Fix unescapes backslash-escaped JSON and expands JSON stored inside string values.
+- Excel binary workbooks (`.xlsb`) open like `.xlsx`, one tab per sheet.
+- Open dialog: folders are amber and bold, files plain. No stray scrollbar in the tab bar.
+- Meeting finder: neighbouring free times are joined into one block; the rare options are folded away.
+- Help lists the terminal commands.
+
 ## [0.1.0] - 2026-11-09
 
 First public release.

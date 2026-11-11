@@ -219,6 +219,23 @@ impl Doc {
         })
     }
 
+    /// a new document that exists only in memory until the first Save (the name decides colours and tools)
+    pub fn untitled(id: u64, name: &str, data: &[u8]) -> Result<Doc> {
+        let mut f = tempfile::tempfile()?;
+        f.write_all(data)?;
+        f.flush()?;
+        let copy = Arc::new(Copy::from_file(&f)?);
+        Ok(Doc {
+            id,
+            path: Mutex::new(None),
+            name: Mutex::new(name.to_string()),
+            h: Mutex::new(Hist { copies: vec![copy], cur: 0, saved: None }),
+            version: AtomicU64::new(1),
+            ops: Mutex::new(()),
+            forced: None,
+        })
+    }
+
     #[cfg(test)]
     pub fn from_bytes(id: u64, name: &str, data: &[u8]) -> Result<Doc> {
         let mut f = tempfile::tempfile()?;
@@ -422,7 +439,7 @@ impl Doc {
         };
         let r = self.transform_ex(true, |cur, w| {
             let rep = match lang {
-                Lang::Json => jsonfix::fix(cur.bytes(), &mut *w, Some(indent))?,
+                Lang::Json => jsonfix::fix_deep(cur.bytes(), &mut *w, Some(indent))?,
                 _ => xmlfmt::format_opts(BufReader::new(cur.bytes()), &mut *w, Some(indent), true)?,
             };
             Ok(Some(rep))

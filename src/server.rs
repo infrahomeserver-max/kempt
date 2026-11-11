@@ -491,7 +491,7 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
         "open" => {
             let path = gs(p, "path").ok_or(ApiError { status: 400, msg: "missing 'path'".into() })?;
             let lower = path.trim().to_ascii_lowercase();
-            if [".xlsx", ".xlsm", ".xltx", ".xltm"].iter().any(|e| lower.ends_with(e)) {
+            if [".xlsx", ".xlsm", ".xltx", ".xltm", ".xlsb"].iter().any(|e| lower.ends_with(e)) {
                 return app.open_book(path);
             }
             if lower.ends_with(".xls") || lower.ends_with(".ods") || lower.ends_with(".numbers") {
@@ -509,15 +509,6 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
             if name.is_empty() || name == "." || name == ".." || name.contains(['/', '\\', '\0']) || name.len() > 200 {
                 return bad("type a file name such as notes.txt (no slashes)");
             }
-            if !dir.is_dir() {
-                return bad(format!("the folder {} does not exist", dir.display()));
-            }
-            let target = dir.join(&name);
-            let mut f = match std::fs::OpenOptions::new().write(true).create_new(true).open(&target) {
-                Ok(f) => f,
-                Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => return bad(format!("{name} already exists in that folder")),
-                Err(e) => return bad(format!("cannot create {}: {e}", target.display())),
-            };
             let ext = name.rsplit_once('.').map(|(_, e)| e.to_ascii_lowercase()).unwrap_or_default();
             let starter: &str = match ext.as_str() {
                 "json" => "{\n  \n}\n",
@@ -526,6 +517,21 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
                 "sh" => "#!/usr/bin/env bash\nset -euo pipefail\n\n",
                 "py" => "#!/usr/bin/env python3\n\n",
                 _ => "",
+            };
+            // memory only: nothing is written until the first Save (which asks where)
+            if gb(p, "memory").unwrap_or(false) {
+                let doc = Arc::new(Doc::untitled(app.id(), &name, starter.as_bytes())?);
+                app.docs.lock().unwrap().insert(doc.id, doc.clone());
+                return Ok(json!({"info": info_json(&doc.info()), "path": ""}));
+            }
+            if !dir.is_dir() {
+                return bad(format!("the folder {} does not exist", dir.display()));
+            }
+            let target = dir.join(&name);
+            let mut f = match std::fs::OpenOptions::new().write(true).create_new(true).open(&target) {
+                Ok(f) => f,
+                Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => return bad(format!("{name} already exists in that folder")),
+                Err(e) => return bad(format!("cannot create {}: {e}", target.display())),
             };
             use std::io::Write as _;
             f.write_all(starter.as_bytes()).map_err(|e| ApiError { status: 500, msg: e.to_string() })?;
@@ -1227,7 +1233,7 @@ pub fn run(o: GuiOpts) -> Result<()> {
     // files given on the command line (an Excel workbook becomes one table tab per sheet)
     let is_book = |f: &std::path::Path| {
         let l = f.display().to_string().to_ascii_lowercase();
-        [".xlsx", ".xlsm", ".xltx", ".xltm"].iter().any(|e| l.ends_with(e))
+        [".xlsx", ".xlsm", ".xltx", ".xltm", ".xlsb"].iter().any(|e| l.ends_with(e))
     };
     let mut opened: Vec<Arc<Doc>> = Vec::new();
     let mut tabs = Vec::new();

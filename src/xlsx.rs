@@ -5,7 +5,7 @@
 //! Supported: shared and inline strings, numbers, booleans, errors, dates (from the cell's number format),
 //! empty rows/columns, several sheets. Not supported: formulas are shown as their last calculated value,
 //! cell formatting (colours, percent, currency) is not reproduced, charts/images are ignored, and the old
-//! binary .xls format is not read.
+//! old binary .xls format is not read. Excel binary workbooks (.xlsb) are read by the BIFF12 record reader below.
 
 use anyhow::{Context, Result, bail};
 use flate2::read::DeflateDecoder;
@@ -371,11 +371,215 @@ pub struct Book {
     strings: Vec<String>,
     dates: Vec<bool>,
     date1904: bool,
+    bin: bool,
+}
+
+// ───────────── .xlsb: a ZIP of BIFF12 binary records ─────────────
+
+/// next record: (id, payload). id and size use the 7-bits-per-byte encoding of the format.
+fn rec<'a>(b: &'a [u8], p: &mut usize) -> Option<(u32, &'a [u8])> {
+    let b0 = *b.get(*p)?;
+    let mut id = (b0 & 0x7F) as u32;
+    *p += 1;
+    if b0 & 0x80 != 0 {
+        id |= ((*b.get(*p)? & 0x7F) as u32) << 7;
+        *p += 1;
+    }
+    let (mut len, mut sh) = (0usize, 0);
+    loop {
+        let c = *b.get(*p)?;
+        *p += 1;
+        len |= ((c & 0x7F) as usize) << sh;
+        sh += 7;
+        if c & 0x80 == 0 || sh > 28 {
+            break;
+        }
+    }
+    let end = p.checked_add(len)?.min(b.len());
+    let r = &b[*p..end];
+    *p = end;
+    Some((id, r))
+}
+
+fn le32(b: &[u8], i: usize) -> Option<u32> {
+    Some(u32::from_le_bytes(b.get(i..i + 4)?.try_into().ok()?))
+}
+
+/// XLWideString: u32 length in UTF-16 units, then the units (0xFFFFFFFF = none)
+fn wstr(b: &[u8], i: usize) -> Option<(String, usize)> {
+    let n = le32(b, i)?;
+    if n == u32::MAX {
+        return Some((String::new(), i + 4));
+    }
+    let n = n as usize;
+    let raw = b.get(i + 4..i + 4 + n.checked_mul(2)?)?;
+    let u: Vec<u16> = raw.chunks_exact(2).map(|c| u16::from_le_bytes([c[0], c[1]])).collect();
+    Some((String::from_utf16_lossy(&u), i + 4 + n * 2))
+}
+
+fn rk_value(rk: u32) -> f64 {
+    let v = if rk & 2 != 0 { ((rk as i32) >> 2) as f64 } else { f64::from_bits(((rk & 0xFFFF_FFFC) as u64) << 32) };
+    if rk & 1 != 0 { v / 100.0 } else { v }
+}
+
+fn err_text(c: u8) -> &'static str {
+    match c {
+        0x00 => "#NULL!",
+        0x07 => "#DIV/0!",
+        0x0F => "#VALUE!",
+        0x17 => "#REF!",
+        0x1D => "#NAME?",
+        0x24 => "#NUM!",
+        0x2A => "#N/A",
+        _ => "#ERROR!",
+    }
+}
+
+impl Book {
+    fn open_bin(mut zip: Zip) -> Result<Book> {
+        let wb = zip.read("xl/workbook.bin")?;
+        let rels = if zip.has("xl/_rels/workbook.bin.rels") { String::from_utf8_lossy(&zip.read("xl/_rels/workbook.bin.rels")?).into_owned() } else { String::new() };
+        let mut targets: HashMap<String, String> = HashMap::new();
+        let mut p = 0;
+        while let Some((a, end, _)) = next_tag(&rels, "Relationship", p) {
+            let t = &rels[a..end];
+            if let (Some(id), Some(target)) = (attr(t, "Id"), attr(t, "Target")) {
+                let full = if let Some(abs) = target.strip_prefix('/') { abs.to_string() } else { format!("xl/{}", target.trim_start_matches("./")) };
+                targets.insert(id, full);
+            }
+            p = end;
+        }
+        let (mut names, mut date1904, mut n, mut pos) = (Vec::new(), false, 0, 0usize);
+        while let Some((id, d)) = rec(&wb, &mut pos) {
+            match id {
+                153 => date1904 = le32(d, 0).is_some_and(|f| f & 1 != 0),   // BrtWbProp
+                156 => {                                                    // BrtBundleSh
+                    n += 1;
+                    let state = le32(d, 0).unwrap_or(0);
+                    let Some((rid, i)) = wstr(d, 8) else { continue };
+                    let name = wstr(d, i).map(|x| x.0).filter(|x| !x.is_empty()).unwrap_or_else(|| format!("Sheet{n}"));
+                    let part = targets.get(&rid).cloned().unwrap_or_else(|| format!("xl/worksheets/sheet{n}.bin"));
+                    if state != 2 {
+                        names.push((name, part));
+                    }
+                }
+                _ => {}
+            }
+        }
+        if names.is_empty() {
+            bail!("this workbook has no worksheets");
+        }
+        let mut strings = Vec::new();
+        if zip.has("xl/sharedStrings.bin") {
+            let b = zip.read("xl/sharedStrings.bin")?;
+            let mut pos = 0;
+            while let Some((id, d)) = rec(&b, &mut pos) {
+                if id == 19 {
+                    strings.push(wstr(d, 1).map(|x| x.0).unwrap_or_default());   // BrtSSTItem: flags byte, then the text
+                }
+            }
+        }
+        let mut dates = Vec::new();
+        if zip.has("xl/styles.bin") {
+            let b = zip.read("xl/styles.bin")?;
+            let (mut pos, mut custom, mut in_xfs) = (0usize, HashMap::<u32, bool>::new(), false);
+            while let Some((id, d)) = rec(&b, &mut pos) {
+                match id {
+                    44 => {                                                // BrtFmt
+                        if let (Some(f), Some((code, _))) = (d.get(0..2).map(|x| u16::from_le_bytes([x[0], x[1]]) as u32), wstr(d, 2)) {
+                            custom.insert(f, custom_is_date(&code));
+                        }
+                    }
+                    617 => in_xfs = true,                                  // BrtBeginCellXFs
+                    618 => in_xfs = false,
+                    47 if in_xfs => {                                      // BrtXF: ixfeParent u16, numFmtId u16, ...
+                        let f = d.get(2..4).map(|x| u16::from_le_bytes([x[0], x[1]]) as u32).unwrap_or(0);
+                        dates.push(builtin_date_fmt(f) || custom.get(&f).copied().unwrap_or(false));
+                    }
+                    _ => {}
+                }
+            }
+        }
+        Ok(Book { zip, names, strings, dates, date1904, bin: true })
+    }
+
+    fn sheet_bin(&mut self, i: usize) -> Result<Sheet> {
+        let (name, part) = self.names[i].clone();
+        let b = self.zip.read(&part)?;
+        let mut csv: Vec<u8> = Vec::with_capacity(b.len());
+        let (mut next_row, mut max_cols, mut written, mut pos) = (0usize, 0usize, 0usize, 0usize);
+        let mut cells: Vec<String> = Vec::new();
+        let mut open = false;
+        let flush = |csv: &mut Vec<u8>, cells: &mut Vec<String>, max_cols: &mut usize, next_row: &mut usize, written: &mut usize, open: &mut bool| {
+            if !*open {
+                return;
+            }
+            *max_cols = (*max_cols).max(cells.len());
+            for (k, c) in cells.iter().enumerate() {
+                if k > 0 {
+                    csv.push(b',');
+                }
+                csv_field(csv, c);
+            }
+            csv.push(b'\n');
+            cells.clear();
+            *next_row += 1;
+            *written += 1;
+            *open = false;
+        };
+        while let Some((id, d)) = rec(&b, &mut pos) {
+            if id == 0 {                                                    // BrtRowHdr
+                flush(&mut csv, &mut cells, &mut max_cols, &mut next_row, &mut written, &mut open);
+                let rnum = le32(d, 0).unwrap_or(next_row as u32) as usize;
+                while next_row < rnum && next_row < 1_048_576 {
+                    csv.push(b'\n');
+                    next_row += 1;
+                    written += 1;
+                }
+                open = true;
+                if written >= 1_048_576 {
+                    break;
+                }
+                continue;
+            }
+            if !(1..=11).contains(&id) || !open {
+                continue;
+            }
+            let col = le32(d, 0).unwrap_or(0) as usize;
+            let style = (le32(d, 4).unwrap_or(0) & 0x00FF_FFFF) as usize;
+            let is_date = self.dates.get(style).copied().unwrap_or(false);
+            let num = |x: f64| if is_date { excel_date(x, self.date1904) } else { num_text(&format!("{x}")) };
+            let f64at = |o: usize| d.get(o..o + 8).map(|x| f64::from_le_bytes(x.try_into().unwrap()));
+            let text = match id {
+                2 => le32(d, 8).map(|r| num(rk_value(r))).unwrap_or_default(),
+                3 | 11 => d.get(8).map(|&c| err_text(c).to_string()).unwrap_or_default(),
+                4 | 10 => if d.get(8) == Some(&1) { "TRUE".into() } else { "FALSE".into() },
+                5 | 9 => f64at(8).map(num).unwrap_or_default(),
+                6 | 8 => wstr(d, 8).map(|x| x.0).unwrap_or_default(),
+                7 => le32(d, 8).and_then(|k| self.strings.get(k as usize).cloned()).unwrap_or_default(),
+                _ => String::new(),
+            };
+            if col < MAX_COLS {
+                if cells.len() <= col {
+                    cells.resize(col + 1, String::new());
+                }
+                cells[col] = text;
+            }
+        }
+        flush(&mut csv, &mut cells, &mut max_cols, &mut next_row, &mut written, &mut open);
+        while csv.ends_with(b"\n\n") {
+            csv.pop();
+        }
+        Ok(Sheet { name, rows: written, cols: max_cols, csv })
+    }
 }
 
 impl Book {
     pub fn open(path: &Path) -> Result<Book> {
         let mut zip = Zip::open(path)?;
+        if !zip.has("xl/workbook.xml") && zip.has("xl/workbook.bin") {
+            return Book::open_bin(zip);
+        }
         if !zip.has("xl/workbook.xml") {
             if zip.has("EncryptedPackage") || zip.has("EncryptionInfo") {
                 bail!("this workbook is password-protected; remove the password in Excel first");
@@ -414,10 +618,13 @@ impl Book {
         let strings = if zip.has("xl/sharedStrings.xml") { shared_strings(&String::from_utf8_lossy(&zip.read("xl/sharedStrings.xml")?)) } else { Vec::new() };
         let dates = if zip.has("xl/styles.xml") { date_styles(&String::from_utf8_lossy(&zip.read("xl/styles.xml")?)) } else { Vec::new() };
         let date1904 = next_tag(&wb, "workbookPr", 0).is_some_and(|(a, e, _)| attr(&wb[a..e], "date1904").is_some_and(|v| v == "1" || v == "true"));
-        Ok(Book { zip, names, strings, dates, date1904 })
+        Ok(Book { zip, names, strings, dates, date1904, bin: false })
     }
 
     pub fn sheet(&mut self, i: usize) -> Result<Sheet> {
+        if self.bin {
+            return self.sheet_bin(i);
+        }
         let (name, part) = self.names[i].clone();
         let xml_b = self.zip.read(&part)?;
         let xml = String::from_utf8_lossy(&xml_b);

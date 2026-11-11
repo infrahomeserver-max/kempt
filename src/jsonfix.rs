@@ -14,6 +14,9 @@ use std::io::{Read, Write};
 
 pub type Report = BTreeMap<&'static str, u64>;
 
+/// longest string value held back to test whether it is embedded JSON (longer ones are copied through)
+const EMBED_MAX: usize = 32 << 20;
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum St {
     Value,
@@ -53,6 +56,9 @@ struct Fix<W: Write> {
     bare: Vec<u8>,
     top_values: u64,
     report: Report,
+    /// levels of embedded JSON text (a string value that holds a JSON document) still allowed to expand; 0 = off
+    expand: u8,
+    sbuf: Option<Vec<u8>>,
 }
 
 fn bump(r: &mut Report, k: &'static str) {
@@ -74,7 +80,22 @@ impl<W: Write> Fix<W> {
             bare: Vec::new(),
             top_values: 0,
             report: Report::new(),
+            expand: 0,
+            sbuf: None,
         }
+    }
+
+    /// string bytes: held back while a value string might turn out to be embedded JSON
+    fn semit(&mut self, b: &[u8]) -> Result<()> {
+        if let Some(sb) = self.sbuf.as_mut() {
+            sb.extend_from_slice(b);
+            if sb.len() > EMBED_MAX {
+                let sb = self.sbuf.take().unwrap();
+                self.emit(&sb)?;
+            }
+            return Ok(());
+        }
+        self.emit(b)
     }
 
     fn emit(&mut self, b: &[u8]) -> Result<()> {
@@ -224,13 +245,28 @@ impl<W: Write> Fix<W> {
         if quote == b'\'' {
             bump(&mut self.report, "single-quoted strings converted");
         }
-        self.emit(b"\"")?;
+        if self.expand > 0 && self.role == Role::Value {
+            self.sbuf = Some(vec![b'"']);
+        } else {
+            self.emit(b"\"")?;
+        }
         self.lex = Lex::Str { quote, esc: false };
         Ok(())
     }
 
     fn str_end(&mut self) -> Result<()> {
-        self.emit(b"\"")?;
+        if let Some(mut sb) = self.sbuf.take() {
+            sb.push(b'"');
+            match self.embedded(&sb) {
+                Some(json) => {
+                    bump(&mut self.report, "embedded JSON text expanded");
+                    self.emit(&json)?;
+                }
+                None => self.emit(&sb)?,
+            }
+        } else {
+            self.emit(b"\"")?;
+        }
         self.lex = Lex::Normal;
         if self.role == Role::Key {
             self.after_key();
@@ -240,16 +276,39 @@ impl<W: Write> Fix<W> {
         Ok(())
     }
 
+    /// `sb` is a complete JSON string literal. When its text is itself a JSON object or array, return that text, compact
+    /// (with any JSON inside it expanded the same way), so the formatter lays it out as real structure.
+    fn embedded(&self, sb: &[u8]) -> Option<Vec<u8>> {
+        if sb.len() < 5 {
+            return None;
+        }
+        let text: String = serde_json::from_slice(sb).ok()?;
+        let t = text.trim();
+        if !((t.starts_with('{') && t.ends_with('}')) || (t.starts_with('[') && t.ends_with(']'))) {
+            return None;
+        }
+        if serde_json::from_str::<serde_json::Value>(t).is_err() {
+            return None;
+        }
+        let mut out = Vec::with_capacity(t.len());
+        let mut sub = Fix::new(&mut out, None);
+        sub.expand = self.expand - 1;
+        sub.feed(t.as_bytes(), 0).ok()?;
+        sub.finish(t.len() as u64).ok()?;
+        drop(sub);
+        Some(out)
+    }
+
     fn str_byte(&mut self, quote: u8, esc: bool, b: u8) -> Result<()> {
         if esc {
             self.lex = Lex::Str { quote, esc: false };
             match b {
-                b'"' | b'\\' | b'/' | b'b' | b'f' | b'n' | b'r' | b't' | b'u' => self.emit(&[b'\\', b])?,
-                b'\'' => self.emit(b"'")?,
+                b'"' | b'\\' | b'/' | b'b' | b'f' | b'n' | b'r' | b't' | b'u' => self.semit(&[b'\\', b])?,
+                b'\'' => self.semit(b"'")?,
                 b'\n' => {} // line continuation
                 _ => {
                     bump(&mut self.report, "invalid escapes fixed");
-                    self.emit(&[b'\\', b'\\', b])?;
+                    self.semit(&[b'\\', b'\\', b])?;
                 }
             }
             return Ok(());
@@ -257,24 +316,24 @@ impl<W: Write> Fix<W> {
         match b {
             b'\\' => self.lex = Lex::Str { quote, esc: true },
             q if q == quote => self.str_end()?,
-            b'"' => self.emit(b"\\\"")?, // inside a single-quoted string
+            b'"' => self.semit(b"\\\"")?, // inside a single-quoted string
             b'\n' => {
                 bump(&mut self.report, "raw control characters escaped");
-                self.emit(b"\\n")?;
+                self.semit(b"\\n")?;
             }
             b'\r' => {
                 bump(&mut self.report, "raw control characters escaped");
-                self.emit(b"\\r")?;
+                self.semit(b"\\r")?;
             }
             b'\t' => {
                 bump(&mut self.report, "raw control characters escaped");
-                self.emit(b"\\t")?;
+                self.semit(b"\\t")?;
             }
             c if c < 0x20 => {
                 bump(&mut self.report, "raw control characters escaped");
-                self.emit(format!("\\u{:04x}", c).as_bytes())?;
+                self.semit(format!("\\u{:04x}", c).as_bytes())?;
             }
-            c => self.emit(&[c])?,
+            c => self.semit(&[c])?,
         }
         Ok(())
     }
@@ -502,8 +561,100 @@ impl<W: Write> Fix<W> {
 }
 
 /// Repair + format. `indent = None` gives compact output.
-pub fn fix<R: Read, W: Write>(mut r: R, w: W, indent: Option<usize>) -> Result<Report> {
+#[allow(dead_code)]
+pub fn fix<R: Read, W: Write>(r: R, w: W, indent: Option<usize>) -> Result<Report> {
+    fix_with(r, w, indent, 0)
+}
+
+/// Like `fix`, and also: a document that is itself escaped JSON text (`{\"a\":1}` or `"{\"a\":1}"`) is unescaped first, and a
+/// string value that holds a JSON object or array (up to 3 levels deep) becomes real nested structure.
+pub fn fix_deep(bytes: &[u8], w: impl Write, indent: Option<usize>) -> Result<Report> {
+    let mut rep = Report::new();
+    let mut cur: std::borrow::Cow<[u8]> = std::borrow::Cow::Borrowed(bytes);
+    for _ in 0..2 {
+        match unescape_document(&cur) {
+            Some(u) => {
+                bump(&mut rep, "escaped JSON text unescaped");
+                cur = std::borrow::Cow::Owned(u);
+            }
+            None => break,
+        }
+    }
+    let more = fix_with(&cur[..], w, indent, 3)?;
+    for (k, v) in more {
+        *rep.entry(k).or_insert(0) += v;
+    }
+    Ok(rep)
+}
+
+/// Text that is the *inside* of a JSON string (backslash before every quote), or a whole quoted JSON string whose text is a
+/// JSON object or array, is turned into the JSON it contains. None when the document is not like that.
+fn unescape_document(b: &[u8]) -> Option<Vec<u8>> {
+    if b.len() > (1 << 29) {
+        return None;
+    }
+    let start = b.iter().position(|c| !c.is_ascii_whitespace())?;
+    let mut body = &b[start..];
+    while let Some((l, rest)) = body.split_last() {
+        if l.is_ascii_whitespace() {
+            body = rest;
+        } else {
+            break;
+        }
+    }
+    let quoted = body.len() >= 2 && body[0] == b'"' && body[body.len() - 1] == b'"';
+    let inner = if quoted { &body[1..body.len() - 1] } else { body };
+    let first = *inner.iter().find(|c| !c.is_ascii_whitespace())?;
+    if first != b'{' && first != b'[' {
+        return None;
+    }
+    // escaped means: the first quote that appears is preceded by a backslash
+    let q = inner.iter().position(|&c| c == b'"')?;
+    if q == 0 || inner[q - 1] != b'\\' {
+        return None;
+    }
+    let mut out = Vec::with_capacity(inner.len());
+    let mut i = 0;
+    while i < inner.len() {
+        let c = inner[i];
+        if c == b'\\' && i + 1 < inner.len() {
+            i += 1;
+            match inner[i] {
+                b'"' => out.push(b'"'),
+                b'\\' => out.push(b'\\'),
+                b'/' => out.push(b'/'),
+                b'n' => out.push(b'\n'),
+                b'r' => out.push(b'\r'),
+                b't' => out.push(b'\t'),
+                b'b' => out.push(8),
+                b'f' => out.push(12),
+                b'u' if i + 4 < inner.len() => {
+                    let hex = std::str::from_utf8(&inner[i + 1..i + 5]).ok().and_then(|h| u32::from_str_radix(h, 16).ok());
+                    match hex.and_then(char::from_u32) {
+                        Some(ch) => {
+                            let mut tmp = [0u8; 4];
+                            out.extend_from_slice(ch.encode_utf8(&mut tmp).as_bytes());
+                            i += 4;
+                        }
+                        None => out.extend_from_slice(b"\\u"),
+                    }
+                }
+                o => {
+                    out.push(b'\\');
+                    out.push(o);
+                }
+            }
+        } else {
+            out.push(c);
+        }
+        i += 1;
+    }
+    Some(out)
+}
+
+fn fix_with<R: Read, W: Write>(mut r: R, w: W, indent: Option<usize>, expand: u8) -> Result<Report> {
     let mut f = Fix::new(w, indent);
+    f.expand = expand;
     let mut buf = vec![0u8; 1 << 20];
     let mut base = 0u64;
     let mut first = true;
@@ -665,5 +816,27 @@ mod tests {
     fn unrepairable_key_position_container() {
         let mut out = Vec::new();
         assert!(fix("{ {1}: 2 }".as_bytes(), &mut out, None).is_err());
+    }
+
+    #[test]
+    fn escaped_and_embedded_json() {
+        let mut o = Vec::new();
+        let r = fix_deep(br#"{\"a\":1,\"b\":\"x\\ny\"}"#, &mut o, Some(0)).unwrap();
+        assert_eq!(String::from_utf8(o).unwrap().replace(['\n', ' '], ""), r#"{"a":1,"b":"x\ny"}"#);
+        assert!(r.contains_key("escaped JSON text unescaped"));
+        let mut o = Vec::new();
+        let r = fix_deep(br#"{"r":"{\"s\":\"ok\",\"n\":[1,2]}","t":"{not json}","k":"[1]"}"#, &mut o, Some(0)).unwrap();
+        let v: serde_json::Value = serde_json::from_slice(&o).unwrap();
+        assert_eq!(v["r"]["s"], "ok");
+        assert_eq!(v["t"], "{not json}");
+        assert_eq!(v["k"][0], 1);
+        assert_eq!(r["embedded JSON text expanded"], 2);
+        let mut o = Vec::new();
+        fix_deep(br#""{\"a\":{\"b\":2}}""#, &mut o, Some(0)).unwrap();
+        let v: serde_json::Value = serde_json::from_slice(&o).unwrap();
+        assert_eq!(v["a"]["b"], 2);
+        // plain JSON text in a normal string is untouched by fix()
+        let (out, _) = fx(r#"{"r":"{\"s\":1}"}"#);
+        assert!(out.contains(r#""{\"s\":1}""#));
     }
 }

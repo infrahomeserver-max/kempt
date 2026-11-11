@@ -308,6 +308,29 @@ s.api("diff/apply", {"sid": e["sid"], "row": ins["i"], "dir": "left"})
 lid2 = e["state"]["left"]["id"]
 check("append after an unterminated last line", "".join(x["t"] + "\n" for x in s.api("lines", {"id": lid2, "from": 0, "count": 10})["lines"]).splitlines() == ["a", "b", "c", "d"])
 
+print("== new unsaved file, escaped JSON fix, Excel binary (.xlsb)")
+n = s.api("file/new", {"name": "draft.json", "memory": True})
+check("new file in memory has no path and counts as unsaved", n["info"]["path"] is None and n["info"]["dirty"] and n["info"]["kind"] == "json", n)
+nid = n["info"]["id"]
+s.api("doc/set", {"id": nid, "text": '{\\"a\\":1,\\"b\\":\\"x\\"}'})
+fx = s.api("doc/fix", {"id": nid, "indent": 2})
+tx = s.api("doc/text", {"id": nid})["text"]
+check("Fix unescapes {\\\"a\\\":1}", json.loads(tx) == {"a": 1, "b": "x"} and "unescaped" in json.dumps(fx), (tx, fx))
+s.api("doc/set", {"id": nid, "text": json.dumps({"r": json.dumps({"s": "ok", "n": [1, 2]}), "t": "{no}"})})
+s.api("doc/fix", {"id": nid, "indent": 2})
+v = json.loads(s.api("doc/text", {"id": nid})["text"])
+check("Fix expands JSON stored in a string value", v["r"] == {"s": "ok", "n": [1, 2]} and v["t"] == "{no}", v)
+target = P("saved-later.json")
+sv = s.api("doc/save", {"id": nid, "path": target})
+check("first Save writes the file where asked", os.path.exists(target) and not sv["info"]["dirty"] and sv["info"]["path"] == target, sv)
+import subprocess as _sp
+XB = P("t.xlsb")
+_sp.check_call([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "make_xlsb.py"), XB])
+xr = s.api("open", {"path": XB})
+xt = s.api("doc/text", {"id": xr["info"]["id"]})["text"].splitlines()
+check(".xlsb opens one table per visible sheet", xr["book"]["sheets"] == 2 and len(xr.get("also", [])) == 1, xr)
+check(".xlsb cells: text, numbers, dates, bool, error", xt[0] == "Name,Café ☕,total" and xt[1] == '"inline, with comma",42,12.34' and xt[2] == "3.14159,2023-03-15,2021-01-01 12:00:00" and xt[4].startswith("TRUE,#DIV/0!"), xt)
+
 s.stop()
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
