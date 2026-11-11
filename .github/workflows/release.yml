@@ -46,7 +46,12 @@ jobs:
                        packaging/build-deb.sh target/release/kempt . "$arch" ;;
           esac
       - uses: actions/upload-artifact@v4
-        with: { name: "${{ matrix.name }}", path: "kempt-*.*\nkempt_*.deb" }
+        with:
+          name: "${{ matrix.name }}"
+          path: |
+            kempt-*.tar.gz
+            kempt-*.zip
+            kempt_*.deb
 
   publish:
     needs: build
@@ -56,9 +61,16 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with: { path: dist, merge-multiple: true }
-      - run: cd dist && sha256sum * > SHA256SUMS
+      - name: Checksums (files only)
+        run: cd dist && ls -l && sha256sum *.tar.gz *.zip *.deb > SHA256SUMS && cat SHA256SUMS
       - uses: softprops/action-gh-release@v2
-        with: { files: dist/*, generate_release_notes: true }
+        with:
+          generate_release_notes: true
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/*.deb
+            dist/SHA256SUMS
 
   # Optional: publishes the signed apt repository (GitHub Pages branch gh-pages, folder apt/) and updates the Homebrew tap.
   # Each part runs only when its secret exists, so the release works without them. See packaging/PUBLISHING.md. Not yet run.
