@@ -20,9 +20,23 @@ def run(args, inp=None, **kw):
 d = tempfile.mkdtemp()
 P = lambda n: os.path.join(d, n)
 
+# Large fixtures: the 250 MB - 1 GB files in KEMPT_BIG (default /tmp/big) are used when present (full stress run);
+# otherwise smaller files with the same shape are generated, so this suite also runs on a plain checkout / CI runner.
+BIG = os.environ.get("KEMPT_BIG") or ("/tmp/big" if os.path.exists("/tmp/big/huge.json") else None)
+if BIG is None:
+    BIG = os.path.join(d, "big"); os.makedirs(BIG)
+    rec = lambda i: '{"id":%d,"name":"user%d","email":"u%d@example.com","active":true,"score":0.5,"tags":["a","b",{"x":[1,2,3]}],"note":"he said \\"hi\\" {not} [real], ok"}' % (i, i, i)
+    body = ",".join(rec(i) for i in range(120000))
+    open(os.path.join(BIG, "big.json"), "w").write('{"data":[' + body + ']}')
+    open(os.path.join(BIG, "huge.json"), "w").write('{"data":[' + ",".join(rec(i) for i in range(160000)) + ']}')
+    lv = ["INFO"] * 32 + ["ERROR"]
+    def logline(i, mod=False): return "2026-11-03 %02d:%02d:%02d.%03d %s [worker-%d] request %d handled path=/api/v1/items/%d status=200 in %dms%s\n" % (i // 3600 % 24, i // 60 % 60, i % 60, i % 1000, lv[i % 33], i % 8, i, i, i % 90, " changed" if mod else "")
+    open(os.path.join(BIG, "big.log"), "w").write("".join(logline(i) for i in range(300000)))
+    open(os.path.join(BIG, "big_30.log"), "w").write("".join(logline(i, i % 3 == 0) for i in range(300000)))
+
 print("== robustness of in-place formatting")
 # corrupt a large file at the very END: original must stay untouched, no temp litter
-src = "/tmp/big/big.json"
+src = os.path.join(BIG, "big.json")
 bad = P("corrupt.json")
 with open(src, "rb") as a, open(bad, "wb") as b:
     while True:
@@ -84,14 +98,15 @@ r = run(["format", "-", "--lang", "xml"], inp="<r>héllo 世界</r>".encode())
 check("XML UTF-8 preserved", "héllo 世界".encode() in r.stdout)
 
 print("== pipes / process behaviour")
-r = subprocess.run(f"{BIN} diff /tmp/big/big.log /tmp/big/big_30.log | head -2", shell=True, capture_output=True)
+r = subprocess.run(f"{BIN} diff {BIG}/big.log {BIG}/big_30.log | head -2", shell=True, capture_output=True)
 check("diff piped into head exits quietly (no panic/BrokenPipe noise)", b"panicked" not in r.stderr and b"Broken pipe" not in r.stderr and r.stdout.count(b"\n") == 2, r.stderr[-200:])
-r = subprocess.run(f"{BIN} view /tmp/big/big.log | head -3", shell=True, capture_output=True)
+r = subprocess.run(f"{BIN} view {BIG}/big.log | head -3", shell=True, capture_output=True)
 check("view piped prints plain text to head", r.stdout.count(b"\n") == 3 and b"\x1b" not in r.stdout and not r.stderr, r.stderr[-200:])
-r = run(["view", "--plain", "-F", "ERROR", "/tmp/big/big.log"])
+r = run(["view", "--plain", "-F", "ERROR", os.path.join(BIG, "big.log")])
 nerr = r.stdout.count(b"\n")
-check("view --plain -F ERROR filters ~3% of 2.3M lines", 60000 < nerr < 80000, str(nerr))
-r = run(["view", "--plain", "/tmp/big/huge.json"], )
+total = sum(c.count(b"\n") for c in iter(lambda f=open(os.path.join(BIG, "big.log"), "rb"): f.read(1 << 24), b""))
+check("view --plain -F ERROR filters about 3% of the lines", 0.02 * total < nerr < 0.04 * total, f"{nerr} of {total}")
+r = run(["view", "--plain", os.path.join(BIG, "huge.json")])
 check("view of 1 GB minified JSON prints formatted (piped, bounded memory)", r.returncode == 0 and r.stdout.startswith(b"{\n"), r.stdout[:40])
 
 b = P("bin.dat"); open(b, "wb").write(os.urandom(5000) + b"\0" * 10)
