@@ -60,7 +60,11 @@ if ($IsWin) {
   foreach ($p in $paths) {
     $scope, $dir = $p.Split('|', 2)
     $cur = [Environment]::GetEnvironmentVariable('Path', $scope)
-    if ($cur) { [Environment]::SetEnvironmentVariable('Path', (($cur.Split(';') | Where-Object { $_ -and ($_ -ne $dir) }) -join ';'), $scope) }
+    if ($cur) {
+      # drop only our own entry; everything else (including empty entries) is left exactly as it was
+      $new = (@($cur.Split(';') | Where-Object { $_ -ne $dir })) -join ';'
+      [Environment]::SetEnvironmentVariable('Path', $(if ($new) { $new } else { $null }), $scope)
+    }
   }
 }
 Set-Location ([IO.Path]::GetTempPath())

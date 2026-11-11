@@ -1,6 +1,6 @@
 import os, re, subprocess, sys, tempfile, time
 from playwright.sync_api import sync_playwright
-BIN = "/home/claude/kempt/target/release/kempt"
+BIN = os.environ.get("KEMPT_BIN") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "target", "release", "kempt" + (".exe" if os.name == "nt" else ""))
 
 class Gui:
     @staticmethod

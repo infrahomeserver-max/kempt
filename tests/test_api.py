@@ -1,7 +1,7 @@
 """HTTP API tests for `kempt gui` (backend). Starts the real server."""
 import http.client, json, os, re, subprocess, sys, tempfile, time
 
-BIN = "/home/claude/kempt/target/release/kempt"
+BIN = os.environ.get("KEMPT_BIN") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "target", "release", "kempt" + (".exe" if os.name == "nt" else ""))
 PASS = FAIL = 0
 
 

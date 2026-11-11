@@ -104,9 +104,10 @@ if (Test-Path $IcoSrc) { Put $IcoSrc 'kempt.ico' }
 if ($IsWin) {
   if (-not $NoPath) {
     $cur = [Environment]::GetEnvironmentVariable('Path', $Scope)
-    $parts = @(); if ($cur) { $parts = $cur.Split(';') | Where-Object { $_ } }
+    $parts = @(); if ($cur) { $parts = $cur.Split(';') }
     if ($parts -notcontains $Prefix) {
-      if ($DryRun) { Plan "add $Prefix to the $Scope PATH" } else { [Environment]::SetEnvironmentVariable('Path', (($parts + $Prefix) -join ';'), $Scope) }
+      # append only: every existing entry (even empty ones) stays byte for byte, so removal can restore the original exactly
+      if ($DryRun) { Plan "add $Prefix to the $Scope PATH" } else { [Environment]::SetEnvironmentVariable('Path', $(if ($cur) { "$cur;$Prefix" } else { $Prefix }), $Scope) }
       Rec "path:$Scope|$Prefix"
     }
   }

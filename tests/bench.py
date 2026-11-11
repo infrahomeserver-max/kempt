@@ -1,6 +1,6 @@
 import os, subprocess, sys, time
 
-BIN = "/home/claude/kempt/target/release/kempt"
+BIN = os.environ.get("KEMPT_BIN") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "target", "release", "kempt" + (".exe" if os.name == "nt" else ""))
 
 
 def run(args, stdout=subprocess.DEVNULL, label=None):

@@ -1,7 +1,7 @@
 """Backend tests: saved settings (no DB), favicon, table view (sort / duplicates / stats), and large-file timing."""
 import http.client, json, os, re, subprocess, sys, tempfile, time, random
 
-BIN = os.environ.get("KEMPT_BIN", "/home/claude/kempt/target/release/kempt")
+BIN = os.environ.get("KEMPT_BIN") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "target", "release", "kempt" + (".exe" if os.name == "nt" else ""))
 PASS = FAIL = 0
 def check(name, cond, detail=""):
     global PASS, FAIL
