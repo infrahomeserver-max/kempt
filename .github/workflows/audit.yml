@@ -1,0 +1,16 @@
+name: Security audit
+on:
+  push: { branches: [main] }
+  pull_request:
+  schedule: [{ cron: "17 5 * * 1" }]
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    permissions: { contents: read }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo install cargo-audit --locked
+      - run: cargo audit
+      - run: cargo install cargo-deny --locked
+      - run: cargo deny check licenses

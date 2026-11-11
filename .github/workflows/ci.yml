@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: "Ubuntu 22.04 (x86_64)", os: ubuntu-22.04 }
+          - { name: "Ubuntu 24.04 (x86_64)", os: ubuntu-24.04 }
+          - { name: "Ubuntu 24.04 (arm64)",  os: ubuntu-24.04-arm }
+          - { name: "macOS 14 (Apple Silicon)", os: macos-14 }
+          - { name: "macOS (Intel)", os: macos-15-intel }
+          - { name: "Windows Server 2022", os: windows-2022 }
+          - { name: "Windows 11 / Server 2025", os: windows-2025 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        run: cargo build --release
+      - name: Unit tests
+        run: cargo test --release
+      - name: Smoke test (format, check, diff, GUI server)
+        shell: bash
+        run: |
+          set -e
+          BIN=target/release/kempt; [ -f "$BIN.exe" ] && BIN="$BIN.exe"
+          "$BIN" --version
+          printf '{"b":1,"a":[1,2]}' > t.json
+          "$BIN" format t.json
+          "$BIN" format --check t.json
+          "$BIN" format --indent tab t.json
+          printf 'a\nb\n' > a.txt; printf 'a\nc\n' > b.txt
+          "$BIN" diff a.txt b.txt --plain || test $? -eq 1
+          "$BIN" doctor || true
+      - name: Linux/macOS installer lifecycle (clean install and removal)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          mkdir bundle && cp target/release/kempt install.sh uninstall.sh README.md bundle/ && cp -r packaging bundle/
+          export HOME="$RUNNER_TEMP/home"; mkdir -p "$HOME"
+          bash bundle/install.sh --dry-run
+          bash bundle/install.sh
+          "$HOME/.local/bin/kempt" --version
+          "$HOME/.local/bin/kempt-uninstall" -y
+          test -z "$(find "$HOME" -mindepth 1 | grep -v -e mimeinfo.cache -e icon-theme.cache)" || { find "$HOME"; exit 1; }
+      - name: Windows installer lifecycle (clean install and removal)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory bundle | Out-Null
+          Copy-Item target/release/kempt.exe, install.ps1, uninstall.ps1, uninstall.cmd, README.md, packaging/kempt.ico bundle/
+          $pathBefore = [Environment]::GetEnvironmentVariable('Path','User')
+          & bundle/install.ps1 -DryRun
+          & bundle/install.ps1 -ContextMenu
+          $dir = Join-Path $env:LOCALAPPDATA 'Programs\Kempt'
+          if (-not (Test-Path "$dir\kempt.exe")) { throw 'not installed' }
+          if (-not (Test-Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Kempt')) { throw 'no Apps & features entry' }
+          & "$dir\kempt.exe" --version
+          & "$dir\uninstall.ps1" -Yes
+          if (Test-Path $dir) { throw "left behind: $dir" }
+          if (Test-Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Kempt') { throw 'registry entry left behind' }
+          if ([Environment]::GetEnvironmentVariable('Path','User') -ne $pathBefore) { throw 'PATH not restored' }
+
+  gui:
+    name: Browser tests (Linux)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release
+      - run: pip install playwright pyte && playwright install --with-deps chromium
+      - run: |
+          python3 tests/test_api.py
+          python3 tests/test_security.py
+          python3 tests/test_ui.py
+          python3 tests/test_edge.py
+          python3 tests/test_tui.py

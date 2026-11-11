@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # Built on the OLDEST supported Ubuntu so the binary runs on 22.04 and everything newer (glibc 2.35)
+          - { name: linux-x86_64, os: ubuntu-22.04,     ext: tar.gz }
+          - { name: linux-aarch64, os: ubuntu-22.04-arm, ext: tar.gz }
+          - { name: macos-arm64, os: macos-14,          ext: tar.gz }
+          - { name: macos-x86_64, os: macos-15-intel,         ext: tar.gz }
+          - { name: windows-x86_64, os: windows-2022,   ext: zip }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag must match Cargo.toml version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          VER=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          [ "v$VER" = "${GITHUB_REF_NAME}" ] || { echo "tag ${GITHUB_REF_NAME} does not match Cargo.toml version $VER"; exit 1; }
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build
+        shell: bash
+        env:
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
+          KEMPT_REPO: ${{ github.repository }}
+        run: cargo build --release
+      - name: Package
+        shell: bash
+        run: |
+          VER=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          D="kempt-$VER-${{ matrix.name }}"; mkdir -p "$D/packaging"; cp README.md LICENSE THIRD_PARTY_NOTICES.md CHANGELOG.md "$D/"
+          case "${{ matrix.name }}" in
+            windows-*) cp target/release/kempt.exe install.ps1 uninstall.ps1 install.cmd uninstall.cmd packaging/kempt.ico "$D/"; 7z a "$D.zip" "$D" >/dev/null ;;
+            macos-*)   cp target/release/kempt install.sh uninstall.sh "$D/"; cp packaging/kempt.icns "$D/packaging/"; tar czf "$D.tar.gz" "$D" ;;
+            linux-*)   cp target/release/kempt install.sh uninstall.sh "$D/"; cp packaging/kempt.desktop packaging/kempt.svg "$D/packaging/"; tar czf "$D.tar.gz" "$D"
+                       arch=amd64; [ "${{ matrix.name }}" = linux-aarch64 ] && arch=arm64
+                       packaging/build-deb.sh target/release/kempt . "$arch" ;;
+          esac
+      - uses: actions/upload-artifact@v4
+        with: { name: "${{ matrix.name }}", path: "kempt-*.*\nkempt_*.deb" }
+
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist, merge-multiple: true }
+      - run: cd dist && sha256sum * > SHA256SUMS
+      - uses: softprops/action-gh-release@v2
+        with: { files: dist/*, generate_release_notes: true }
+
+  # Optional: publishes the signed apt repository (GitHub Pages branch gh-pages, folder apt/) and updates the Homebrew tap.
+  # Each part runs only when its secret exists, so the release works without them. See packaging/PUBLISHING.md. Not yet run.
+  repos:
+    needs: publish
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    env:
+      APT_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+      TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: dist, merge-multiple: true }
+      - name: apt repository
+        if: env.APT_KEY != ''
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y dpkg-dev >/dev/null
+          echo "$APT_KEY" | base64 -d | gpg --batch --import
+          KEY=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr/ {print $10; exit}')
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null; then git fetch origin gh-pages && git worktree add -B gh-pages site origin/gh-pages; else git worktree add --orphan -b gh-pages site; fi
+          KEMPT_GPG_KEY="$KEY" packaging/apt/make-apt-repo.sh dist site/apt
+          cd site && git add -A && git -c user.name=kempt-ci -c user.email=ci@users.noreply.github.com commit -m "apt: ${GITHUB_REF_NAME}" && git push origin gh-pages
+      - name: Homebrew tap
+        if: env.TAP_TOKEN != ''
+        run: |
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/${{ github.repository_owner }}/homebrew-kempt.git" tap
+          mkdir -p tap/Formula
+          packaging/homebrew/update-formula.sh "${GITHUB_REF_NAME#v}" "${{ github.repository }}" dist > tap/Formula/kempt.rb
+          cd tap && git add -A && git -c user.name=kempt-ci -c user.email=ci@users.noreply.github.com commit -m "kempt ${GITHUB_REF_NAME}" && git push
