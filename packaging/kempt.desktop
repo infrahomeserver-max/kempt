@@ -1,0 +1,21 @@
+[Desktop Entry]
+Type=Application
+Name=Kempt
+GenericName=Big file viewer and formatter
+Comment=View, search, fix and compare big JSON, XML and log files
+Exec=kempt gui %f
+Icon=kempt
+Terminal=false
+MimeType=application/json;application/xml;text/xml;text/x-log;text/plain;application/gzip;
+Categories=Utility;TextEditor;
+Keywords=json;xml;log;format;diff;compare;reminder;checklist;clock;
+StartupWMClass=Kempt
+Actions=Checklist;Clock;
+
+[Desktop Action Checklist]
+Name=Checklist & reminders
+Exec=kempt gui --view notes
+
+[Desktop Action Clock]
+Name=World clock
+Exec=kempt gui --view clock

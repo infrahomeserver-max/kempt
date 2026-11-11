@@ -1,0 +1,36 @@
+[package]
+name = "kempt"
+version = "0.1.0"
+edition = "2024"
+description = "Format, view, search, fix and compare huge JSON, XML and log files; offline browser GUI"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/infrahomeserver-max/kempt"
+keywords = ["json","xml","formatter","log-viewer","diff"]
+categories = ["command-line-utilities","development-tools"]
+
+[dependencies]
+ahash = "0.8.12"
+anyhow = "1.0.104"
+clap = { version = "4.6.7", features = ["derive"] }
+crossterm = "0.29.0"
+flate2 = "1.1.10"
+getrandom = "0.3"
+memchr = "2.8.3"
+memmap2 = "0.9.12"
+rayon = "1.12.0"
+regex = "1.13.1"
+serde_json = "1.0.154"
+similar = "3.2.1"
+tempfile = "3.27.0"
+tiny_http = "0.12.0"
+walkdir = "2.5.0"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ksni = { version = "0.3", default-features = false, features = ["blocking", "async-io"] }
