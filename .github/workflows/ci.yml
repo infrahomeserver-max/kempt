@@ -21,7 +21,7 @@ jobs:
           - { name: "Windows Server 2022", os: windows-2022 }
           - { name: "Windows 11 / Server 2025", os: windows-2025 }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build
@@ -74,7 +74,7 @@ jobs:
     name: Browser tests (Linux)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --release

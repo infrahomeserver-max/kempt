@@ -19,7 +19,7 @@ jobs:
           - { name: macos-x86_64, os: macos-15-intel,         ext: tar.gz }
           - { name: windows-x86_64, os: windows-2022,   ext: zip }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Tag must match Cargo.toml version
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
@@ -71,7 +71,7 @@ jobs:
       APT_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
       TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v4
         with: { path: dist, merge-multiple: true }
       - name: apt repository
