@@ -15,7 +15,7 @@ jobs:
           # Built on the OLDEST supported Ubuntu so the binary runs on 22.04 and everything newer (glibc 2.35)
           - { name: linux-x86_64, os: ubuntu-22.04,     ext: tar.gz }
           - { name: linux-aarch64, os: ubuntu-22.04-arm, ext: tar.gz }
-          - { name: macos-arm64, os: macos-14,          ext: tar.gz }
+          - { name: macos-arm64, os: macos-15,          ext: tar.gz }
           - { name: macos-x86_64, os: macos-15-intel,         ext: tar.gz }
           - { name: windows-x86_64, os: windows-2022,   ext: zip }
     steps:

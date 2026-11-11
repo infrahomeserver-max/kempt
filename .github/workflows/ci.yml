@@ -16,7 +16,7 @@ jobs:
           - { name: "Ubuntu 22.04 (x86_64)", os: ubuntu-22.04 }
           - { name: "Ubuntu 24.04 (x86_64)", os: ubuntu-24.04 }
           - { name: "Ubuntu 24.04 (arm64)",  os: ubuntu-24.04-arm }
-          - { name: "macOS 14 (Apple Silicon)", os: macos-14 }
+          - { name: "macOS 15 (Apple Silicon)", os: macos-15 }
           - { name: "macOS (Intel)", os: macos-15-intel }
           - { name: "Windows Server 2022", os: windows-2022 }
           - { name: "Windows 11 / Server 2025", os: windows-2025 }
