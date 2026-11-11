@@ -45,7 +45,7 @@ jobs:
                        arch=amd64; [ "${{ matrix.name }}" = linux-aarch64 ] && arch=arm64
                        packaging/build-deb.sh target/release/kempt . "$arch" ;;
           esac
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with: { name: "${{ matrix.name }}", path: "kempt-*.*\nkempt_*.deb" }
 
   publish:
