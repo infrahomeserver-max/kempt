@@ -78,7 +78,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --release
-      - run: pip install playwright pyte && playwright install --with-deps chromium
+      - run: pip install playwright pyte && playwright install chromium
       - run: |
           python3 tests/test_api.py
           python3 tests/test_security.py
