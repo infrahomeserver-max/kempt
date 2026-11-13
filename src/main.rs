@@ -1,3 +1,4 @@
+mod calendar;
 mod diff;
 mod diffcmd;
 mod diffview;

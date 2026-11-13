@@ -6,7 +6,7 @@ use crate::docs::{Copy, Doc, DocInfo};
 use crate::render::{Row, RowKind, View};
 use crate::search::{self, Job, Matcher, StepResult, utf16_offset};
 use anyhow::Result;
-use serde_json::{Value, json};
+use serde_json::{Map, Value, json};
 use std::collections::HashMap;
 use std::io::Read;
 use std::path::PathBuf;
@@ -331,6 +331,7 @@ pub struct App {
     tables: Mutex<HashMap<u64, Arc<Mutex<crate::table::Table>>>>,
     store: crate::state::Store,
     notes: crate::state::Store,
+    calendar: crate::state::Store,
     wake: (Mutex<bool>, std::sync::Condvar),
     own_window: bool,
 }
@@ -585,6 +586,23 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
                 }
             }
             let r = app.notes.set(&patch).map_err(|e| ApiError { status: 500, msg: e });
+            app.wake.1.notify_all();
+            r
+        }
+        // ---- calendar events (see calendar.rs): checked and reduced to the known fields before they are stored
+        "calendar/get" => Ok(app.calendar.get()),
+        "calendar/set" => {
+            let mut patch = Map::new();
+            if let Some(ev) = p.get("patch").and_then(|x| x.get("events")) {
+                let clean = crate::calendar::clean_events(ev).map_err(|msg| ApiError { status: 400, msg })?;
+                patch.insert("events".into(), Value::Array(clean));
+            }
+            if let Some(cfg) = p.get("patch").and_then(|x| x.get("cfg")).and_then(Value::as_object) {
+                let view = cfg.get("view").and_then(Value::as_str).filter(|v| matches!(*v, "day" | "week" | "month" | "year" | "schedule")).unwrap_or("month");
+                let ws = cfg.get("ws").and_then(Value::as_u64).filter(|d| *d <= 1 || *d == 6).unwrap_or(1);
+                patch.insert("cfg".into(), json!({"view": view, "ws": ws}));
+            }
+            let r = app.calendar.set(&Value::Object(patch)).map_err(|e| ApiError { status: 500, msg: e });
             app.wake.1.notify_all();
             r
         }
@@ -1096,6 +1114,16 @@ fn handle(app: &Arc<App>, mut req: tiny_http::Request) {
         return;
     }
 
+    if *req.method() == Method::Get && path == "/kempt-calendar.js" {
+        // the calendar module: plain code, nothing private in it
+        let r = Response::from_string(include_str!("../ui/kempt-calendar.js"))
+            .with_header(hdr("Content-Type", "text/javascript; charset=utf-8"))
+            .with_header(hdr("Cache-Control", "no-store"))
+            .with_header(hdr("X-Content-Type-Options", "nosniff"));
+        let _ = req.respond(r);
+        return;
+    }
+
     if *req.method() == Method::Get && path == "/ping" {
         let _ = req.respond(Response::from_string("kempt"));
         return;
@@ -1226,6 +1254,7 @@ pub fn run(o: GuiOpts) -> Result<()> {
         tables: Mutex::new(HashMap::new()),
         store: crate::state::Store::new(),
         notes: crate::state::Store::notes(),
+        calendar: crate::state::Store::calendar(),
         wake: (Mutex::new(false), std::sync::Condvar::new()),
         own_window: o.app_window || crate::state::Store::new().get()["appwin"] == true,
     });

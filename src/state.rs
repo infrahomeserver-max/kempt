@@ -13,6 +13,10 @@ const MAX_BYTES: usize = 64 * 1024;
 const NOTE_KEYS: &[&str] = &["items", "pad"];
 const NOTE_MAX_BYTES: usize = 512 * 1024;
 
+/// The calendar lives in its own file too: events (with sync-ready ids, change times and deletion markers) and view settings.
+const CAL_KEYS: &[&str] = &["events", "cfg"];
+const CAL_MAX_BYTES: usize = 4 * 1024 * 1024;
+
 pub struct Store {
     path: PathBuf,
     lock: Mutex<()>,
@@ -28,6 +32,11 @@ impl Store {
     /// the notes file: checklist, reminders and the scratchpad
     pub fn notes() -> Store {
         Store { path: crate::plat::config_dir().join("notes.json"), lock: Mutex::new(()), keys: NOTE_KEYS, max: NOTE_MAX_BYTES }
+    }
+
+    /// the calendar file
+    pub fn calendar() -> Store {
+        Store { path: crate::plat::config_dir().join("calendar.json"), lock: Mutex::new(()), keys: CAL_KEYS, max: CAL_MAX_BYTES }
     }
 
     fn read(&self) -> Map<String, Value> {

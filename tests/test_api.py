@@ -331,6 +331,20 @@ xt = s.api("doc/text", {"id": xr["info"]["id"]})["text"].splitlines()
 check(".xlsb opens one table per visible sheet", xr["book"]["sheets"] == 2 and len(xr.get("also", [])) == 1, xr)
 check(".xlsb cells: text, numbers, dates, bool, error", xt[0] == "Name,Café ☕,total" and xt[1] == '"inline, with comma",42,12.34' and xt[2] == "3.14159,2023-03-15,2021-01-01 12:00:00" and xt[4].startswith("TRUE,#DIV/0!"), xt)
 
+# ---- calendar storage
+ev = {"id": "e1", "t": "Dentist", "s": 1800000000000, "e": 1800003600000, "r": {"f": "w", "n": 1, "by": [1, 3]}, "rem": [10], "evil": "<script>"}
+s.api("calendar/set", {"patch": {"events": [ev], "cfg": {"view": "week", "ws": 1}}})
+cg = s.api("calendar/get")
+check("calendar saves and reloads", len(cg["events"]) == 1 and cg["cfg"]["view"] == "week" and "evil" not in cg["events"][0], cg)
+st, _ = s.api("calendar/set", {"patch": {"events": [{"id": "../x", "t": "bad", "s": 1}]}}, ok=False)
+check("calendar rejects a bad id", st == 400, st)
+s.api("calendar/set", {"patch": {"events": [{"id": "a", "t": "x", "s": 1, "r": {"f": "q", "n": 1}}]}})
+check("calendar drops an unknown repeat rule", "r" not in s.api("calendar/get")["events"][0])
+st, _ = s.api("calendar/set", {"patch": {"events": [{"id": "a", "t": "x" * 400, "s": 1}]}}, ok=False)
+check("calendar rejects an over-long title", st == 400, st)
+s.api("calendar/set", {"patch": {"cfg": {"view": "<b>", "ws": 9}}})
+check("calendar cfg is validated", s.api("calendar/get")["cfg"] == {"view": "month", "ws": 1})
+
 s.stop()
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

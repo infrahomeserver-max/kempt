@@ -5,6 +5,9 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Built-in calendar (Alt+L): Day, Week, Month, Year and Schedule views, repeating events, per-event reminders, and checklist items shown on their day. Stored locally in `calendar.json`; the view code is a separate reusable file.
+
 - New file can start in memory and is written only on the first Save.
 - Fix unescapes backslash-escaped JSON and expands JSON stored inside string values.
 - Excel binary workbooks (`.xlsb`) open like `.xlsx`, one tab per sheet.

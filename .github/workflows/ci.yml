@@ -85,4 +85,5 @@ jobs:
           python3 tests/test_ui.py
           python3 tests/test_edge.py
           python3 tests/test_ui_new.py
+          python3 tests/test_calendar.py
           python3 tests/test_tui.py

@@ -606,6 +606,7 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
       <button id="btn-compare" title="Compare two files" aria-label="Compare two files"><i data-ic="columns"></i><span class="lbl">Compare</span></button>
       <span class="vsep"></span>
       <button id="btn-clock" class="icon" title="World clock: time in several zones (Alt+K)" aria-label="World clock"><i data-ic="clock"></i></button>
+      <button id="btn-cal" class="icon" title="Calendar (Alt+L)" aria-label="Calendar"><i data-ic="cal"></i></button>
       <button id="btn-notes" class="icon" title="Checklist &amp; notes with reminders (Alt+J)" aria-label="Checklist and notes"><i data-ic="notes"></i><em class="nb" hidden></em></button>
       <span class="vsep"></span>
       <button id="btn-help" class="icon" title="Help &amp; shortcuts" aria-label="Help"><i data-ic="help"></i></button>
@@ -650,6 +651,7 @@ const setStatus = (l, r) => { if (l != null) $('#sb-left').textContent = l; if (
 const IC = {
   folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   grip: '<circle cx="9" cy="6" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="18" r="1.2"/>',
   notes: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 9l1.5 1.5L13.5 7.5M9 15h6"/>',
   bell: '<path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/>',
@@ -2799,6 +2801,7 @@ const actions = {
     if (memory) toast('New file is only in memory. Press Ctrl+S when you want to save it.', 'info'); else { rememberRecent(r.info.path); toast('Created ' + r.path, 'ok'); }
   },
   notes() { const t = Tabs.list.find(x => x.kind === 'notes'); if (t) Tabs.activate(t); else Tabs.add(new NotesTab()); },
+  calendar() { const t = Tabs.list.find(x => x.kind === 'cal'); if (t) Tabs.activate(t); else Tabs.add(new CalendarTab()); },
   clock() { const t = Tabs.list.find(x => x.kind === 'clock'); if (t) Tabs.activate(t); else Tabs.add(new ClockTab()); },
   async compare(prefL, prefR) {
     const cur = Tabs.active && Tabs.active.kind === 'doc' ? Tabs.active.info.path || '' : '';
@@ -2844,11 +2847,13 @@ $('#btn-compare').onclick = guard(() => actions.compare());
 $('#btn-help').onclick = () => actions.help();
 $('#btn-clock').onclick = () => actions.clock();
 $('#btn-notes').onclick = () => actions.notes();
+$('#btn-cal').onclick = () => actions.calendar();
 
 document.addEventListener('keydown', e => {
   if ($('#modals').children.length) return;
   const c = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
   if (e.altKey && !c && k === 'j') { e.preventDefault(); actions.notes(); return; }
+  if (e.altKey && !c && k === 'l') { e.preventDefault(); actions.calendar(); return; }
   if (e.altKey && !c && k === 'k') { e.preventDefault(); actions.clock(); return; }
   if (e.altKey && !c && k === 'n') { e.preventDefault(); guard(() => actions.newFile())(); return; }
   if (c && k === 'o') { e.preventDefault(); guard(() => actions.open())(); return; }
@@ -2861,7 +2866,7 @@ document.addEventListener('keydown', e => {
   else if (c && 'fhgs'.includes(k) && t) e.preventDefault();
 });
 window.addEventListener('beforeunload', e => { if (!window.__quitting && Tabs.list.some(t => t.dirty && t.dirty())) { e.preventDefault(); e.returnValue = ''; } });
-window.addEventListener('pagehide', () => { prefs.beacon(); Notes.beacon(); });
+window.addEventListener('pagehide', () => { prefs.beacon(); Notes.beacon(); if (CAL._t) { try { fetch('/api/calendar/set', { method: 'POST', keepalive: true, headers: { 'X-Token': TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ patch: { events: CAL.events, cfg: CAL.cfg } }) }); } catch (_) { } } });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') Notes.arm(); });
 window.addEventListener('error', e => console.error('UI error:', e.message));
 
@@ -3447,6 +3452,49 @@ class NotesTab {
   dispose() { Notes.flush(); }
 }
 
+/* ───────────── calendar ─────────────
+   The drawing code is the separate file kempt-calendar.js (no dependencies, no storage, reusable elsewhere). This part
+   loads and saves events in calendar.json, shows checklist items that have a time, and turns event reminders into hidden
+   items in the checklist file (k:'cal') so the same alert path (desktop notification, sound) announces them. */
+const CAL = {
+  events: [], cfg: {}, loaded: false, _t: 0, mod: null,
+  async script() { if (this.mod) return this.mod; if (!window.KemptCalendar) await new Promise((ok, no) => { const s = document.createElement('script'); s.src = '/kempt-calendar.js'; s.onload = ok; s.onerror = () => no(new Error('calendar module not found')); document.head.appendChild(s); }); return this.mod = window.KemptCalendar; },
+  async load() { if (this.loaded) return; try { const j = await api('calendar/get'); this.events = Array.isArray(j.events) ? j.events : []; this.cfg = j.cfg && typeof j.cfg === 'object' ? j.cfg : {}; } catch (e) { toast('Calendar not loaded: ' + e.message, 'err', 6000); } this.loaded = true; },
+  save() { clearTimeout(this._t); this._t = setTimeout(() => this.flush(), 400); },
+  async flush() { clearTimeout(this._t); this._t = 0; try { await api('calendar/set', { patch: { events: this.events, cfg: this.cfg } }); } catch (e) { toast('Calendar not saved: ' + e.message, 'err', 6000); } this.sync(); },
+  put(ev) { const i = this.events.findIndex(x => x.id === ev.id); if (i >= 0) this.events[i] = ev; else this.events.push(ev); if (this.events.length > 4000) this.events = this.events.filter(e => !e.x).slice(-4000); this.save(); },
+  /* hidden reminder items for the next 90 days of events that ask for one */
+  sync() {
+    if (!window.KemptCalendar) return; const now = Date.now(), old = new Map(Notes.items.filter(i => i.k === 'cal').map(i => [i.id, i])), out = [];
+    for (const ev of this.events) { if (ev.x || !ev.rem || !ev.rem.length) continue;
+      for (const o of window.KemptCalendar.occurrences(ev, now - 86400000, now + 90 * 86400000)) for (const m of ev.rem) { const due = o.s - m * 60000; if (due < now - 3600000) continue; const id = `cal:${ev.id}:${o.s}:${m}`.slice(0, 64), p = old.get(id); out.push(p && p.due === due && p.t === ev.t ? p : { id, t: ev.t, due, fired: due <= now - 60000, done: false, k: 'cal', c: ev.c === 'p' ? 'p' : 'w' }); } }
+    const other = Notes.items.filter(i => i.k !== 'cal'); if (out.length !== old.size || out.some(i => old.get(i.id) !== i)) { Notes.items = other.concat(out); Notes.save(); Notes.arm(); }
+  },
+};
+class CalendarTab {
+  constructor() {
+    this.kind = 'cal'; this.icon = ic('cal', 14); this.panel = el('div', 'panel'); this.panel.style.padding = '0'; this.ready = false;
+  }
+  title() { return 'Calendar'; }
+  async onShow() {
+    if (this.cal) { this.cal.refresh(); this.cal.focus(); return; }
+    if (this.busy) return; this.busy = true;
+    try {
+      const M = await CAL.script(); await CAL.load(); if (!Notes.loaded) await Notes.load();
+      const c = CAL.cfg, host = el('div'); host.style.cssText = 'height:100%'; this.panel.appendChild(host);
+      this.cal = M.mount(host, {
+        events: CAL.events, view: c.view || 'month', ws: c.ws === 0 ? 0 : 1, h12: !!prefs.get('clock12', false),
+        tasks: () => Notes.items.filter(i => !i.k && i.due).map(i => ({ id: i.id, t: i.t, due: i.due, done: i.done, c: i.c })),
+        onChange: (ev, all) => { CAL.events = all; CAL.put(ev); },
+        onView: v => { CAL.cfg = Object.assign({}, CAL.cfg, { view: v }); CAL.save(); },
+        onTask: (t, how) => { const it = Notes.items.find(i => i.id === t.id); if (!it) return; if (how === 'open') { actions.notes(); return; } if (it.rep && !it.done) { RPT.advance(it); } else { it.done = !it.done; } Notes.save(); RPT.sync(false); Notes.arm(); Notes.badge(); Notes.refresh(); },
+      });
+      this.cal.focus(); CAL.sync();
+    } catch (e) { fail(e); } finally { this.busy = false; }
+  }
+  dispose() { if (this.cal) this.cal.destroy(); CAL.flush(); }
+}
+
 /* ───────────── startup ───────────── */
 (async () => {
   Tabs.updateWelcome();
@@ -3460,10 +3508,10 @@ class NotesTab {
     }
   } catch (e) { fail(e); }
   fillIcons();
-  Notes.load(); setTimeout(() => Update.auto(), 4000);
+  Notes.load().then(async () => { try { await CAL.load(); await CAL.script(); CAL.sync(); } catch (_) { } }); setTimeout(() => Update.auto(), 4000);
   { const qs = new URLSearchParams(location.search);   // opened from the tray menu or by a second `kempt gui file`
     for (const f of qs.getAll('open')) actions.openPath(f);
-    const v = qs.get('view'); if (v === 'notes') actions.notes(); else if (v === 'clock') actions.clock();
+    const v = qs.get('view'); if (v === 'notes') actions.notes(); else if (v === 'clock') actions.clock(); else if (v === 'calendar') actions.calendar();
     if (qs.has('open') || qs.has('view')) history.replaceState(null, '', location.pathname + '?t=' + encodeURIComponent(qs.get('t') || '')); }
 })();
 </script>
