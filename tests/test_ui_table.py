@@ -292,8 +292,8 @@ with sync_playwright() as pw:
         pg.wait_for_timeout(600)   # let the debounced search start so the label is not the previous query's
         for _ in range(60):
             pg.wait_for_timeout(100); t = pg.inner_text(".find .cnt").strip()
-            if re.search(r"\d+ lines?$", t) or t == "No results": break
-        m = re.search(r"(\d+) lines?$", t); return int(m.group(1)) if m else 0
+            if re.search(r"\d+ of \d+$|^\d+ lines?$", t) or t == "No results": break
+        m = re.search(r"(\d+) of (\d+)$|^(\d+) lines?$", t); return int(m.group(2) or m.group(3)) if m else 0
     check("quotes keep a phrase together", count('"connection timeout"') == 1, pg.inner_text(".find .cnt"))
     check("quoted phrase shows as ONE chip", pg.locator(".find .chips .chip").count() == 0 or pg.eval_on_selector_all(".find .chips .chip", "e => e.map(x => x.textContent)") == ["connection timeout"], pg.eval_on_selector_all(".find .chips .chip", "e => e.map(x => x.textContent)"))
     check("without quotes it splits into two items", count("connection timeout") == 2 and pg.locator(".find .chips .chip").count() == 2)

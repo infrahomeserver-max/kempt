@@ -154,12 +154,13 @@ mark.wh { background:var(--wh); }
 .find[hidden] { display:none; }
 .find .chev { border:none; background:transparent; padding:2px 4px; align-self:stretch; color:var(--fg-dim); }
 .find .col { display:flex; flex-direction:column; gap:4px; min-width:0; }
-.find select.mode { width:150px; }
+.find select.mode { width:54px; font-size:12px; }
 .find .r { display:flex; align-items:center; gap:3px; }
-.find input.q, .find input.rep { width:300px; }
+.find input.q, .find input.rep { width:150px; font-size:12.5px; padding:2px 6px; }
 .find input.bad { border-color:var(--danger); }
-.find .tg { padding:2px 6px; font-family:var(--mono); font-variant-ligatures:none; min-width:26px; }
-.find .cnt { width:120px; flex:none; overflow:hidden; text-overflow:ellipsis; text-align:right; color:var(--fg-dim); font-size:12px; padding:0 4px; white-space:nowrap; }
+.find .tg { padding:1px 4px; font-size:12px; font-family:var(--mono); font-variant-ligatures:none; min-width:22px; }
+.find .flat { padding:1px 5px; min-width:0; }
+.find .cnt { width:74px; font-size:11.5px; flex:none; overflow:hidden; text-overflow:ellipsis; text-align:right; color:var(--fg-dim); font-size:12px; padding:0 4px; white-space:nowrap; }
 .find .cnt.err { color:var(--danger); }
 .find .chips { display:flex; flex-wrap:wrap; gap:3px; }
 .find .chips { position:absolute; left:30px; top:100%; margin-top:4px; z-index:21; background:var(--bg2); border:1px solid var(--border); border-radius:6px; box-shadow:var(--shadow); padding:4px 6px; width:max-content; max-width:min(560px, 80vw); }
@@ -283,8 +284,16 @@ button.primary kbd { background:rgba(255,255,255,.18); border-color:rgba(255,255
 .line.cur { background:var(--curline); }
 
 /* find widget */
-.find { border-radius:10px; padding:7px 8px; box-shadow:var(--shadow), 0 0 0 1px var(--border); border:none; }
+.find { border-radius:8px; padding:4px 5px; box-shadow:var(--shadow), 0 0 0 1px var(--border); border:none; }
 .find .cnt { font-variant-numeric:tabular-nums; }
+.find button, .find select, .find input { height:22px; min-height:0; font-size:12px; }
+.find button { padding:0 6px; border-radius:5px; font-weight:400; gap:3px; }
+.find .tg { min-width:24px; padding:0 4px; }
+.find .flat { min-width:20px; padding:0 3px; }
+.find .chev { height:auto; padding:0 3px; }
+.find .col { gap:3px; }
+.find input.q, .find input.rep { padding:0 6px; }
+.find select.mode { padding:0 2px; }
 .chip { border-radius:10px; font-weight:500; }
 
 /* status bar: quiet, neutral */
@@ -1115,7 +1124,7 @@ class FindWidget {
           <button class="tg word" title="Whole word (Alt+W)">ab</button>
           <button class="tg re" title="Regular expression (Alt+R)">.*</button>
           <button class="tg ph" title="One phrase (Alt+P): search for exactly what is typed, spaces, quotes and dashes included, without splitting it into several words">“ ”</button>
-          <select class="mode" title="How several keywords combine on a line"><option value="or">Any keyword (OR)</option><option value="and">All keywords (AND)</option></select>
+          <select class="mode" title="Several words: OR = a line with any of them, AND = a line with all of them"><option value="or" title="A line matching any of the words counts">OR</option><option value="and" title="A line must contain all of the words">AND</option></select>
           <span class="cnt"></span>
           <button class="flat prev" title="Previous match (Shift+Enter)">↑</button>
           <button class="flat next" title="Next match (Enter)">↓</button>
@@ -1152,7 +1161,9 @@ class FindWidget {
   spec() { const q = this.q.value; if (!q.trim() || this.root.hidden) return null; return { q, case: this.st.case, word: this.st.word, regex: this.st.regex, phrase: this.st.phrase, mode: this.mode.value }; }
   open(replaceMode, seed) {
     this.root.hidden = false;
-    if (seed) { this.q.value = seed; this.changed(); }
+    if (seed) {   // a selected phrase is searched as one phrase; a single word needs no phrase mode
+      this.q.value = seed; this.st.phrase = /\s/.test(seed); this.root.querySelector('.ph').classList.toggle('on', this.st.phrase); this.changed();
+    }
     if (replaceMode) this.showReplace(true);
     this.q.focus(); this.q.select();
   }
@@ -1855,7 +1866,7 @@ class DocTab {
   async openFind(replace) {
     let sel0 = ''; if (this.mode === 'edit' && this.ce) { const t = this.ce.ta; sel0 = t.value.slice(t.selectionStart, t.selectionEnd); this._back = true; }
     if (this.mode !== 'text') await this.setMode('viewer');   // find / replace work in the read-only view; Esc returns to the editor
-    const sel = sel0 || getSelection().toString(); const seed = sel && !sel.includes('\n') && sel.length < 100 && !this.find.active ? sel : '';
+    const sel = sel0 || getSelection().toString(); const seed = sel && !sel.includes('\n') && sel.length < 100 ? sel : '';
     this.find.open(replace, seed);
   }
   fade() { const r = this.scroller.rows; r.classList.remove('vs-fade'); void r.offsetWidth; r.classList.add('vs-fade'); }
@@ -1901,13 +1912,13 @@ class DocTab {
     const f0 = Math.floor(this.scroller.top);
     if (stay && r.line >= f0 && r.line < f0 + this.scroller.vis()) { this.curLine = r.line; this.scroller.render(); this.updateStatus(); }   // already visible: do not move the view
     else { this.jump(r.line); if (stay) this.fade(); }
-    this.find.setCount(`${fmtNum(r.index + 1)} of ${fmtNum(r.total)}${this._done ? '' : ''} line${r.total === 1 ? '' : 's'}`);
+    this.find.setCount(`${fmtNum(r.index + 1)} of ${fmtNum(r.total)}`);
     if (r.wrapped && !silent) setStatus(null, 'search wrapped around');
   }
   async updateRank() {
     if (!this.job) return;
     const st = await api('search/status', { job: this.job });
-    if (this.curLine >= 0 && st.count) { const r = await api('search/rank', { job: this.job, line: this.curLine }); if (r.rank > 0) this.find.setCount(`${fmtNum(r.rank)} of ${fmtNum(st.count)} lines`); }
+    if (this.curLine >= 0 && st.count) { const r = await api('search/rank', { job: this.job, line: this.curLine }); if (r.rank > 0) this.find.setCount(`${fmtNum(r.rank)} of ${fmtNum(st.count)}`); }
   }
   async paintRuler() {
     const h = this.scroller.bar.clientHeight; if (!h) return;
@@ -2760,7 +2771,7 @@ class DiffTab {
   }
   shortcut(e) {
     const k = e.key.toLowerCase(), c = e.ctrlKey || e.metaKey;
-    if (c && k === 'f') { this.find.open(false, ''); return true; }
+    if (c && k === 'f') { const sel = getSelection().toString().trim(); this.find.open(false, sel && !sel.includes('\n') && sel.length < 100 ? sel : ''); return true; }
     if (e.key === 'F7') { guard(() => this.nav(e.shiftKey ? -1 : 1))(); return true; }
     if (e.altKey && e.key === 'ArrowDown') { guard(() => this.nav(1))(); return true; }
     if (e.altKey && e.key === 'ArrowUp') { guard(() => this.nav(-1))(); return true; }
@@ -2849,6 +2860,7 @@ $('#btn-clock').onclick = () => actions.clock();
 $('#btn-notes').onclick = () => actions.notes();
 $('#btn-cal').onclick = () => actions.calendar();
 
+$('#tabs').addEventListener('wheel', e => { const b = e.currentTarget; if (b.scrollWidth > b.clientWidth) { e.preventDefault(); b.scrollLeft += e.deltaY || e.deltaX; } }, { passive: false });
 document.addEventListener('keydown', e => {
   if ($('#modals').children.length) return;
   const c = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
@@ -2861,6 +2873,8 @@ document.addEventListener('keydown', e => {
   const t = Tabs.active;
   const nav = d => { e.preventDefault(); if (Tabs.list.length > 1) Tabs.activate(Tabs.list[(Tabs.list.indexOf(t) + d + Tabs.list.length) % Tabs.list.length]); };
   if (t && ((c && e.shiftKey && (e.code === 'BracketRight' || e.code === 'BracketLeft')) || (c && (e.code === 'PageDown' || e.code === 'PageUp')))) return nav(e.code === 'BracketLeft' || e.code === 'PageUp' ? -1 : 1);
+  if (t && e.altKey && !c && (e.code === 'PageDown' || e.code === 'PageUp' || e.code === 'Period' || e.code === 'Comma')) return nav(e.code === 'PageUp' || e.code === 'Comma' ? -1 : 1);
+  if (t && e.altKey && !c && /^[1-9]$/.test(e.key) && Tabs.list.length) { e.preventDefault(); Tabs.activate(e.key === '9' ? Tabs.list[Tabs.list.length - 1] : Tabs.list[Math.min(+e.key, Tabs.list.length) - 1]); return; }
   if (t && e.altKey && !c && k === 'w') { e.preventDefault(); guard(() => Tabs.close(t))(); return; }
   if (t && t.shortcut && t.shortcut(e)) { e.preventDefault(); }
   else if (c && 'fhgs'.includes(k) && t) e.preventDefault();

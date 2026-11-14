@@ -370,7 +370,7 @@ add Replace) and `Ctrl+H` opens it with Replace. **Replace** changes the current
 match, and both can be undone. In regex mode, `$1` groups work.
 
 **How the box splits what you type into items**
-- Spaces separate items: `error timeout` finds lines containing **any** of them. Choose **All keywords (AND)** to require all of them on the same line. The chips under the box show exactly how your text was split.
+- Spaces separate items: `error timeout` finds lines containing **any** of them. Choose **AND** (instead of the default **OR**) to require all of them on the same line. The chips under the box show exactly how your text was split.
 - **To keep spaces inside one item, use quotes:** `"connection timeout"`.
 - A leading dash excludes: `-debug` drops lines containing `debug`. To search for text that really starts with a dash, quote it (`"-1"`) or escape it (`\-1`).
 - To search for a literal double quote, escape it: `\"status\":`. Any other backslash is just a backslash, so Windows paths like `C:\temp` need no escaping.
@@ -424,7 +424,9 @@ On macOS use Cmd in place of Ctrl.
 | Alt+V | switch between source and the rendered view (Markdown, HTML, JSON tree) |
 | Alt+T | switch between text and table |
 | Alt+W | close the current tab |
-| Ctrl+Shift+] / Ctrl+Shift+[ | next / previous tab |
+| Alt+PageDown / Alt+PageUp (also Alt+. / Alt+,) | next / previous tab (browsers keep Ctrl+Tab and Ctrl+PageDown for themselves) |
+| Alt+1 … Alt+8, Alt+9 | jump to that tab, last tab |
+| Ctrl+Shift+] / Ctrl+Shift+[ | next / previous tab (also Ctrl+PageDown / Ctrl+PageUp where the browser allows it) |
 | F7 / Shift+F7 | next / previous change (compare) |
 | Arrows, PageUp / PageDown, Ctrl+Home / Ctrl+End | move around |
 | F1 | help and shortcuts |

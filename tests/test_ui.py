@@ -98,7 +98,7 @@ with sync_playwright() as pw:
     pg.keyboard.press("Control+Home"); pg.wait_for_timeout(300)
 
     pg.keyboard.press("Control+f"); pg.wait_for_selector(".find .q", state="visible")
-    pg.fill(".find .q", "ERROR timeout"); wait_label(pg, r"lines")
+    pg.fill(".find .q", "ERROR timeout"); wait_label(pg, r"lines| of ")
     exp = truth(lambda l: "ERROR" in l or "timeout" in l)
     check("OR: count equals ground truth", f"{exp:,} lines" in label(pg) or f"of {exp:,}" in label(pg), (label(pg), exp))
     check("every keyword gets its own colour (chips + marks)", pg.locator(".find .chip.c0").count() == 1 and pg.locator(".find .chip.c1").count() == 1 and pg.locator("mark.hl0").count() >= 1 and pg.locator("mark.hl1").count() >= 1)
@@ -119,11 +119,11 @@ with sync_playwright() as pw:
     pg.keyboard.press("Shift+Enter"); pg.wait_for_timeout(400)
     n3 = int(pg.inner_text(".line.cur .ln").strip())
     check("Enter steps forward, Shift+Enter steps back", n2 > n1 and n3 == n1, (n1, n2, n3))
-    check("label shows 'N of M'", re.search(r"\d[\d,]* of [\d,]+ lines", label(pg)) is not None, label(pg))
+    check("label shows 'N of M'", re.search(r"\d[\d,]* of [\d,]+", label(pg)) is not None, label(pg))
     pg.keyboard.press("F3"); pg.wait_for_timeout(400)
     check("F3 also steps", int(pg.inner_text(".line.cur .ln").strip()) > n1)
 
-    pg.select_option(".find .mode", "and"); wait_label(pg, r"lines")
+    pg.select_option(".find .mode", "and"); wait_label(pg, r"lines| of ")
     expand = truth(lambda l: "ERROR" in l and "timeout" in l)
     pg.wait_for_timeout(300)
     lab = label(pg)
