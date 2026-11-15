@@ -6,6 +6,23 @@ versioning: [SemVer](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- More settings: accent colour, code font, 12/24-hour clock, working hours for meetings, checklist sort and ticked items, wrapped-line pane, hidden files in Open, and **Reset preferences**. About shows the version; Help → Formats shows which formatters are installed.
+- One **Tools** menu in the top bar (Clock, Calendar, Checklist); the second Compare button is gone (use the toolbar's Compare with…).
+- Pictures (PNG, JPG, GIF, WebP, BMP, SVG, ICO, AVIF) and **PDF** open in a viewer tab; Word (.docx), OpenDocument (.odt, .odp, .ods) and PowerPoint (.pptx) open as read-only text.
+- Date format setting (default YYYY/MM/DD) with a new date and time picker used everywhere; a shared time-zone search that shows offsets and understands cst, cdt, cst6cdt, central, -6 and more.
+- Checklist: sort by date, importance, newest or A–Z; Clear done says when there is nothing to clear.
+- Folders and files have different, per-type colours in the file picker.
+- Table and Fix are only enabled for files they apply to (Alt+T still forces the table).
+- Wrap pane for long lines (Alt+Z), selected-lines count in the status bar, a clearer "Changes" button, and a calmer light theme.
+- Help has a Formats tab listing every language Kempt can format.
+- Notes and the checklist are stored encrypted (AES-256-GCM); the key is a separate owner-only file. `kempt notes-export` prints them as JSON.
+- Notes need some text to be kept. The checklist no longer has its own calendar: it lists what is coming up, and Calendar opens from its button.
+- Calendar: choose the first day of the week (Settings), meetings in their own colour, and a **Find a time** tab inside every event that marks free times for all your zones. The meeting finder is gone from the clock.
+- Company holidays: add row above the list; choose the date format in Settings.
+- Find: a pasted phrase is searched as one phrase; **Ctrl+E** adds the selected word to Find.
+- Help is a compact three-tab view, and every main shortcut can be changed there.
+- Panels (clock, calendar, checklist) have their own tab border and their top-bar button lights up while open.
+- More formatter languages: Go, Rust, TOML, Lua, Terraform (tools you install), plus C#, Protobuf, MDX and more.
 - World clock: live seconds, a big clock for your first zone, full-width layout, draggable sections (or Alt+Up/Down), a calendar in the meeting finder, and short zone names (IST, CST, EST, PST, CET and more; `cst6cdt`-style names are understood).
 - Company holidays: add, import, scope to a country, hide built-in ones, and choose your weekend days.
 - Checklist redesign: grouped by Overdue, Today, Tomorrow, This week, Later, No date and Done; quick Today/Tomorrow/Next week chips, important star, search, and a month calendar plus a "Coming up" list that includes calendar events.

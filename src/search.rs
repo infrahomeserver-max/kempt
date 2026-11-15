@@ -127,6 +127,7 @@ impl Matcher {
         Self::new_ex(q, case, word, regex, mode, phrase)
     }
 
+    #[cfg(test)]
     pub fn new(q: &str, case: bool, word: bool, regex: bool, mode: Mode) -> Result<Matcher> {
         Self::new_ex(q, case, word, regex, mode, false)
     }

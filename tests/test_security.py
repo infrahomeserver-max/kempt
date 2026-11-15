@@ -128,6 +128,22 @@ check("no shell invocation with string concatenation (sh -c format!)", not re.se
 # --- no secrets in the repository
 pat = re.compile(r"(-----BEGIN [A-Z ]*PRIVATE KEY-----|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}|sk-[A-Za-z0-9]{32,})")
 bad = []
+
+# ── /media (pictures and PDFs) ──
+import tempfile as _tf, base64 as _b64
+_d = _tf.mkdtemp(); _png = os.path.join(_d, "p.png"); open(_png, "wb").write(_b64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="))
+open(os.path.join(_d, "s.txt"), "w").write("secret")
+import urllib.parse as _up
+_S = T.Server([]); 
+def _m(path, tok=True, host=None):
+    return _S.req("GET", f"/media?{'t=' + _S.token + '&' if tok else ''}path={_up.quote(path)}", host=host)
+_r = _m(_png); check("media serves a picture with the token", _r[0] == 200, _r[0])
+_r = _m(_png, tok=False); check("media without the token is refused", _r[0] == 403, _r[0])
+_r = _m(_png, host="evil.example"); check("media refuses a foreign Host header", _r[0] == 403, _r[0])
+_r = _m(os.path.join(_d, "s.txt")); check("media refuses other file types", _r[0] == 415, _r[0])
+_r = _S.req("GET", f"/media?t={_S.token}&path=%C3%A9%zz%"); check("odd percent-encoding does not crash the server", _r[0] in (404, 415), _r[0])
+_r = _S.req("GET", "/ping"); check("server still alive after that", _r[0] == 200, _r[0])
+_S.stop()
 for dp, dn, fn in os.walk(ROOT):
     dn[:] = [x for x in dn if x not in ("target", "dist", ".git", "__pycache__")]
     for n in fn:

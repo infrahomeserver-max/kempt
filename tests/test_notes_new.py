@@ -1,5 +1,5 @@
 """Checklist: grouped by day, stars, search, calendar side panel; several notes with titles."""
-import os, sys
+import os, sys, json, tempfile
 sys.path.insert(0, os.path.dirname(__file__))
 from ui_common import *
 
@@ -10,6 +10,7 @@ def check(name, cond, detail=""):
     else: FAIL += 1; print(f"  FAIL  {name}  {str(detail)[:300]}")
 
 os.environ["UI_EDITABLE"] = "1"
+CFG = tempfile.mkdtemp(); os.environ["KEMPT_CONFIG_DIR"] = CFG
 with sync_playwright() as pw:
     br = pw.chromium.launch(); g = Gui([]); errs = []
     pg = br.new_page(viewport={"width": 1700, "height": 950}); pg.set_default_timeout(20000)
@@ -24,8 +25,9 @@ with sync_playwright() as pw:
     pg.fill(".nt .fq", "dent"); pg.wait_for_timeout(200)
     check("search filters", pg.locator(".nt .it").count() == 1)
     pg.fill(".nt .fq", "")
-    pg.click(".nt .mg button.today"); pg.wait_for_timeout(200)
-    check("clicking a day filters the list", not pg.locator(".nt .dayf").is_hidden() and pg.locator(".nt .it").count() <= 2)
+    check("no month grid in the checklist", pg.locator(".nt .mini, .nt .mg").count() == 0)
+    pg.click(".nt .ae.task >> nth=0"); pg.wait_for_timeout(200)
+    check("clicking an upcoming task filters the list", not pg.locator(".nt .dayf").is_hidden())
     pg.click(".nt .dayf button"); pg.wait_for_timeout(200)
     check("show all days", pg.locator(".nt .dayf").is_hidden())
     check("agenda lists upcoming tasks", pg.locator(".nt .ae.task").count() >= 1)
@@ -35,11 +37,17 @@ with sync_playwright() as pw:
     pg.click(".nt .nn"); pg.fill(".nt .ntt", "First"); pg.fill(".nt .pad", "alpha body")
     pg.click(".nt .nn"); pg.fill(".nt .ntt", "Second"); pg.fill(".nt .pad", "beta body"); pg.wait_for_timeout(300)
     check("two notes listed", pg.locator(".nt .ni").count() == 2)
+    pg.click(".nt .nn"); pg.fill(".nt .ntt", "Only a title"); pg.wait_for_timeout(200)
+    pg.click(".nt .ni:has-text('First')"); pg.wait_for_timeout(300)
+    check("a note without text is not kept", pg.locator(".nt .ni").count() == 2 and pg.locator(".nt .ni:has-text('Only a title')").count() == 0)
     pg.click(".nt .ni:has-text('First')"); check("switching shows its text", pg.input_value(".nt .pad") == "alpha body")
     pg.fill(".nt .nsq", "beta"); check("note search", pg.locator(".nt .ni").count() == 1); pg.fill(".nt .nsq", "")
     pg.evaluate("Notes.flush()"); pg.wait_for_timeout(500)
     pg.reload(); pg.wait_for_timeout(800); pg.click("#btn-notes"); pg.wait_for_selector(".nt .ni")
     check("notes persist", pg.locator(".nt .ni").count() == 2)
+    raw = open(os.path.join(CFG, "notes.json"), "rb").read()
+    check("notes.json is encrypted", raw.startswith(b"KEMPTENC1") and b"alpha body" not in raw and b"Pay rent" not in raw, raw[:30])
+    check("notes-export gives the plain data", "alpha body" in json.dumps(read_notes(CFG)))
     pg.once("dialog", lambda d: d.accept()); pg.click(".nt .nd"); pg.wait_for_timeout(300)
     check("note deleted", pg.locator(".nt .ni").count() == 1)
     check("no page errors", not errs, errs)

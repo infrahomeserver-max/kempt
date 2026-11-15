@@ -14,6 +14,9 @@ OFL 1.1 text: https://openfontlicense.org/open-font-license-official-text/
 | Crate | Version | Licence |
 |---|---|---|
 | adler2 | 2.0.1 | 0BSD OR MIT OR Apache-2.0 |
+| aead | 0.5.2 | MIT OR Apache-2.0 |
+| aes | 0.8.4 | MIT OR Apache-2.0 |
+| aes-gcm | 0.10.3 | Apache-2.0 OR MIT |
 | ahash | 0.8.12 | MIT OR Apache-2.0 |
 | aho-corasick | 1.1.5 | Unlicense OR MIT |
 | anstream | 1.0.0 | MIT OR Apache-2.0 |
@@ -42,6 +45,7 @@ OFL 1.1 text: https://openfontlicense.org/open-font-license-official-text/
 | bumpalo | 3.20.3 | MIT OR Apache-2.0 |
 | cfg-if | 1.0.5 | MIT OR Apache-2.0 |
 | chunked_transfer | 1.5.0 | MIT OR Apache-2.0 |
+| cipher | 0.4.4 | MIT OR Apache-2.0 |
 | clap | 4.6.7 | MIT OR Apache-2.0 |
 | clap_builder | 4.6.7 | MIT OR Apache-2.0 |
 | clap_derive | 4.6.7 | MIT OR Apache-2.0 |
@@ -49,6 +53,7 @@ OFL 1.1 text: https://openfontlicense.org/open-font-license-official-text/
 | colorchoice | 1.0.5 | MIT OR Apache-2.0 |
 | concurrent-queue | 2.5.0 | Apache-2.0 OR MIT |
 | convert_case | 0.10.0 | MIT |
+| cpufeatures | 0.2.17 | MIT OR Apache-2.0 |
 | crc32fast | 1.5.4 | MIT OR Apache-2.0 |
 | crossbeam-deque | 0.8.8 | MIT OR Apache-2.0 |
 | crossbeam-epoch | 0.9.21 | MIT OR Apache-2.0 |
@@ -56,6 +61,8 @@ OFL 1.1 text: https://openfontlicense.org/open-font-license-official-text/
 | crossbeam-utils | 0.8.23 | MIT OR Apache-2.0 |
 | crossterm | 0.29.0 | MIT |
 | crossterm_winapi | 0.9.1 | MIT |
+| crypto-common | 0.1.7 | MIT OR Apache-2.0 |
+| ctr | 0.9.2 | MIT OR Apache-2.0 |
 | derive_more | 2.1.1 | MIT |
 | derive_more-impl | 2.1.1 | MIT |
 | document-features | 0.2.12 | MIT OR Apache-2.0 |
@@ -76,14 +83,17 @@ OFL 1.1 text: https://openfontlicense.org/open-font-license-official-text/
 | futures-macro | 0.3.34 | MIT OR Apache-2.0 |
 | futures-task | 0.3.34 | MIT OR Apache-2.0 |
 | futures-util | 0.3.34 | MIT OR Apache-2.0 |
+| generic-array | 0.14.7 | MIT |
 | getrandom | 0.3.4 | MIT OR Apache-2.0 |
 | getrandom | 0.4.3 | MIT OR Apache-2.0 |
+| ghash | 0.5.1 | Apache-2.0 OR MIT |
 | hashbrown | 0.17.1 | MIT OR Apache-2.0 |
 | heck | 0.5.0 | MIT OR Apache-2.0 |
 | hermit-abi | 0.5.3 | MIT OR Apache-2.0 |
 | hex | 0.4.3 | MIT OR Apache-2.0 |
 | httpdate | 1.0.3 | MIT OR Apache-2.0 |
 | indexmap | 2.14.2 | Apache-2.0 OR MIT |
+| inout | 0.1.4 | MIT OR Apache-2.0 |
 | is_terminal_polyfill | 1.70.2 | MIT OR Apache-2.0 |
 | itoa | 1.0.18 | MIT OR Apache-2.0 |
 | js-sys | 0.3.107 | MIT OR Apache-2.0 |
@@ -100,6 +110,7 @@ OFL 1.1 text: https://openfontlicense.org/open-font-license-official-text/
 | mio | 1.2.4 | MIT |
 | once_cell | 1.21.4 | MIT OR Apache-2.0 |
 | once_cell_polyfill | 1.70.2 | MIT OR Apache-2.0 |
+| opaque-debug | 0.3.1 | MIT OR Apache-2.0 |
 | ordered-stream | 0.2.0 | MIT OR Apache-2.0 |
 | parking | 2.2.1 | Apache-2.0 OR MIT |
 | parking_lot | 0.12.5 | MIT OR Apache-2.0 |
@@ -108,6 +119,7 @@ OFL 1.1 text: https://openfontlicense.org/open-font-license-official-text/
 | pin-project-lite | 0.2.17 | Apache-2.0 OR MIT |
 | piper | 0.2.5 | MIT OR Apache-2.0 |
 | polling | 3.11.0 | Apache-2.0 OR MIT |
+| polyval | 0.6.2 | Apache-2.0 OR MIT |
 | proc-macro-crate | 3.5.0 | MIT OR Apache-2.0 |
 | proc-macro2 | 1.0.107 | MIT OR Apache-2.0 |
 | quote | 1.0.47 | MIT OR Apache-2.0 |
@@ -138,6 +150,7 @@ OFL 1.1 text: https://openfontlicense.org/open-font-license-official-text/
 | slab | 0.4.12 | MIT |
 | smallvec | 1.16.4 | MIT OR Apache-2.0 |
 | strsim | 0.11.1 | MIT |
+| subtle | 2.6.1 | BSD-3-Clause |
 | syn | 2.0.119 | MIT OR Apache-2.0 |
 | syn | 3.0.9 | MIT OR Apache-2.0 |
 | task-local | 0.1.1 | MIT OR Apache-2.0 |
@@ -149,9 +162,11 @@ OFL 1.1 text: https://openfontlicense.org/open-font-license-official-text/
 | tracing | 0.1.44 | MIT |
 | tracing-attributes | 0.1.31 | MIT |
 | tracing-core | 0.1.36 | MIT |
+| typenum | 1.20.1 | MIT OR Apache-2.0 |
 | uds_windows | 1.2.1 | MIT |
 | unicode-ident | 1.0.27 | (MIT OR Apache-2.0) AND Unicode-3.0 |
 | unicode-segmentation | 1.13.3 | MIT OR Apache-2.0 |
+| universal-hash | 0.5.1 | MIT OR Apache-2.0 |
 | utf8parse | 0.2.2 | Apache-2.0 OR MIT |
 | uuid | 1.29.1 | Apache-2.0 OR MIT |
 | version_check | 0.9.5 | MIT/Apache-2.0 |

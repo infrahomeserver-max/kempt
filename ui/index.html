@@ -28,8 +28,8 @@
   --sy-k:#569cd6; --sy-s:#ce9178; --sy-n:#b5cea8; --sy-cm:#6a9955; --sy-f:#dcdcaa; --sy-t:#4ec9b0; --sy-v:#9cdcfe; --sy-c:#c586c0; --sy-p:#d4d4d4; --sy-at:#9cdcfe; --sy-tg:#569cd6; --sy-es:#d7ba7d; --sy-lk:#3794ff; --sy-ts:#9cdcfe; --sy-le:#f48771; --sy-lw:#cca700; --sy-li:#4ec9b0; --sy-ld:#808080;
 }
 [data-theme="light"] {
-  --bg:#ffffff; --bg2:#f6f6f6; --bg3:#ebebeb; --bg-hover:#dedede; --fg:#1f2328; --fg-dim:#656d76; --border:#d0d7de;
-  --accent:#0969da; --accent-fg:#ffffff; --link:#0969da; --sel:#cfe4fb; --curline:#f3f6fa; --curmatch:#d6e6fa;
+  --bg:#fbfcfe; --bg2:#f0f3f8; --bg3:#e4e9f1; --bg-hover:#d9e0ec; --fg:#1b2430; --fg-dim:#5a6678; --border:#cbd3df;
+  --accent:#1b6fd8; --accent-fg:#ffffff; --link:#1b6fd8; --sel:#c9defa; --curline:#eef3fb; --curmatch:#d2e3fa;
   --gutter:#8c959f; --danger:#cf222e; --ok:#1a7f37; --warn:#9a6700;
   --t0:rgba(250,204,21,.60); --t1:rgba(14,165,233,.30); --t2:rgba(34,197,94,.32); --t3:rgba(217,70,239,.28); --t4:rgba(249,115,22,.34); --t5:rgba(100,116,139,.32);
   --add-bg:rgba(46,160,67,.15); --add-strong:rgba(46,160,67,.38); --del-bg:rgba(248,81,73,.13); --del-strong:rgba(248,81,73,.34);
@@ -306,7 +306,7 @@ button.primary kbd { background:rgba(255,255,255,.18); border-color:rgba(255,255
 .modal h3 { padding:16px 20px 6px; font-size:15px; font-weight:650; }
 .modal .body { padding:8px 20px 12px; }
 .modal .foot { padding:12px 20px; background:var(--bg); border-radius:0 0 12px 12px; }
-.pick-list { border-radius:8px; } .pick-item { padding:5px 10px; } .pick-item .pi { display:flex; color:var(--fg-dim); }
+.fic { display:inline-flex; } .pick-item .pi .fic .ic, .recent .fic .ic { color:inherit !important; fill:none; } .pick-item .pi .fic.dir .ic { fill:currentColor !important; fill-opacity:.3; } .pick-list { border-radius:8px; } .pick-item { padding:5px 10px; } .pick-item .pi { display:flex; color:var(--fg-dim); }
 .pick-item .pi:first-child .ic { color:var(--fg-dim); } .pick-item.dir .pi:first-child .ic { color:#e0a93b; fill:rgba(224,169,59,.22); } .pick-item.dir > span:nth-child(2) { font-weight:600; }
 .toast { border-radius:8px; border:none; box-shadow:var(--shadow), 0 0 0 1px var(--border); padding:9px 14px; }
 
@@ -514,7 +514,7 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
 .wc .bar button { height:var(--h,28px); }
 .wc .sug, .wc .dsug { position:absolute; left:0; top:34px; width:min(420px,100%); background:var(--bg2); border:1px solid var(--border); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:6; overflow:hidden; }
 .wc .sug div, .wc .dsug div { padding:6px 10px; cursor:pointer; display:flex; justify-content:space-between; gap:12px; }
-.wc .sug div.on, .wc .sug div:hover, .wc .dsug div:hover { background:var(--bg-hover); } .wc .sug small, .wc .dsug small { color:var(--fg-dim); }
+.wc .sug div.on, .wc .sug div:hover, .wc .dsug div:hover { background:var(--bg-hover); } .wc .sug small, .wc .dsug small, .kc-find .fsg small { color:var(--fg-dim); } .wc .sug small i, .wc .dsug small i, .kc-find .fsg small i { font-style:normal; margin-left:10px; opacity:.6; }
 .wc .grid { position:relative; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:var(--bg); }
 .wc .zrow { display:grid; grid-template-columns:18px 150px 236px 1fr 26px; align-items:center; column-gap:10px; padding:0 6px 0 4px; min-height:54px; border-top:1px solid var(--border); }
 .wc .zrow:first-child { border-top:0; }
@@ -621,7 +621,6 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
 .wc .secs { display:flex; flex-direction:column; } .wc .secs > section { position:relative; margin-top:16px; border-top:0; padding-top:0; } .wc .secs > section.sdrag { opacity:.45; }
 .wc .sgrip { position:absolute; right:10px; top:9px; z-index:2; color:var(--fg-dim); cursor:grab; display:flex; border-radius:4px; padding:1px; } .wc .sgrip:hover, .wc .sgrip:focus-visible { color:var(--fg); background:var(--bg-hover); outline:none; } .wc .sgrip:active { cursor:grabbing; }
 .wc .mlay { display:grid; grid-template-columns:minmax(230px,270px) minmax(0,1fr); gap:22px; align-items:start; } @media (max-width:900px) { .wc .mlay { grid-template-columns:1fr; } }
-.wc .mcal { border:1px solid var(--border); border-radius:10px; padding:10px; background:var(--bg); }
 .wc .mch { display:flex; align-items:center; gap:4px; margin-bottom:8px; } .wc .mch .mct { flex:1; text-align:center; font-size:13px; } .wc .mch button { height:24px; min-width:24px; padding:0 6px; font-size:13px; }
 .wc .mcg { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; text-align:center; } .wc .mcg i { font-style:normal; font-size:10.5px; color:var(--fg-dim); padding:2px 0; }
 .wc .mcg button { height:30px; min-width:0; padding:0; border:0; border-radius:6px; background:transparent; color:var(--fg); font-size:12px; font-variant-numeric:tabular-nums; }
@@ -637,8 +636,8 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
 .wc .hadd .hs { height:var(--h,28px); } .wc .hadd button { height:var(--h,28px); } .wc .hpaste textarea { width:100%; margin-top:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--fg); padding:8px 10px; font:12.5px/1.45 var(--mono); resize:vertical; }
 
 /* checklist: three calm columns, grouped by day */
-.nt .wrap { max-width:none; grid-template-columns:minmax(380px,1.5fr) minmax(290px,.9fr) minmax(300px,1fr); gap:24px; }
-@media (max-width:1300px) { .nt .wrap { grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); } .nt .ntn { grid-column:1 / -1; } } @media (max-width:820px) { .nt .wrap { grid-template-columns:1fr; } }
+.nt .wrap { max-width:none; grid-template-columns:minmax(440px,1.8fr) minmax(230px,.8fr) minmax(280px,1fr); gap:24px; }
+@media (max-width:1060px) { .nt .wrap { grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); } .nt .ntn { grid-column:1 / -1; } } @media (max-width:820px) { .nt .wrap { grid-template-columns:1fr; } }
 .nt { padding:20px 28px 36px; } .nt h2 .sp { flex:1; } .nt h2 button { display:inline-flex; align-items:center; gap:5px; }
 .nt .addcard { border:1px solid var(--border); border-radius:12px; padding:10px; background:var(--bg2); margin-bottom:12px; }
 .nt .addcard .t { width:100%; height:34px; font-size:14px; margin-bottom:8px; } .nt .addcard .addrow { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:0; }
@@ -647,7 +646,7 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
 .nt .star { width:24px; min-width:24px; height:24px; padding:0; border:0; background:transparent; color:var(--fg-dim); font-size:15px; line-height:1; border-radius:6px; opacity:.55; } .nt .star:hover { opacity:1; background:var(--bg-hover); } .nt .star.on { color:#e0a526; opacity:1; }
 .nt .tools { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px; } .nt .tools .seg { margin:0; } .nt .tools .fq { flex:1 1 120px; min-width:0; height:26px; font-size:12px; } .nt .tools .sd { height:26px; font-size:12px; padding:0 10px; }
 .nt .dayf { display:flex; align-items:center; gap:8px; padding:6px 10px; margin-bottom:8px; border-radius:8px; background:color-mix(in srgb, var(--accent) 14%, transparent); font-size:12.5px; } .nt .dayf button { height:22px; font-size:11.5px; padding:0 8px; }
-.nt .it { grid-template-columns:22px minmax(0,1fr) auto 24px 24px; } .nt .it .meta { grid-column:2 / 3; grid-row:2; justify-self:start; } .nt .it.hd .meta { grid-row:2; grid-column:2 / 4; }
+.nt .it { grid-template-columns:22px minmax(0,1fr) auto 24px 24px; } .nt .it .meta, .nt .it.hd .meta { grid-column:auto; grid-row:auto; justify-self:end; }
 .nt .gh { display:flex; align-items:center; gap:8px; padding:7px 10px 5px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--fg-dim); background:var(--bg2); border-top:1px solid var(--border); font-weight:600; } .nt .gh:first-child { border-top:0; } .nt .gh small { font-weight:400; opacity:.8; } .nt .gh.g0 { color:var(--danger); }
 .nt .ntc, .nt .ntn { min-width:0; }
 .nt .mini { border:1px solid var(--border); border-radius:12px; padding:10px; background:var(--bg2); margin-bottom:12px; }
@@ -657,15 +656,70 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
 .nt .mg button em { position:absolute; left:0; right:0; bottom:1px; font-style:normal; font-size:8px; line-height:6px; color:var(--accent); letter-spacing:1px; } .nt .mg button.today { box-shadow:inset 0 0 0 1.5px var(--accent); } .nt .mg button.sel { background:var(--accent); color:var(--accent-fg,#fff); } .nt .mg button.sel em { color:var(--accent-fg,#fff); }
 .nt .ah { margin-top:4px; } .nt .agenda { display:flex; flex-direction:column; gap:3px; } .nt .agenda .ad { margin:8px 0 2px; font-size:11.5px; color:var(--fg-dim); font-weight:600; }
 .nt .ae { display:grid; grid-template-columns:62px minmax(0,1fr) auto; gap:8px; align-items:center; width:100%; height:auto; min-height:30px; padding:4px 8px; border:0; border-left:3px solid var(--accent); border-radius:6px; background:var(--bg2); text-align:left; font-weight:400; } .nt .ae:hover { background:var(--bg-hover); }
-.nt .ae.w { border-left-color:var(--cat-w); } .nt .ae.p { border-left-color:var(--cat-p); } .nt .ae.task { border-left-style:dashed; } .nt .ae .tm { color:var(--fg-dim); font-size:11.5px; font-variant-numeric:tabular-nums; } .nt .ae .tt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .nt .ae small { color:var(--fg-dim); font-size:10.5px; }
+.nt .ae.w { border-left-color:var(--cat-w); } .nt .ae.p { border-left-color:var(--cat-p); } .nt .ae.task { border-left-style:dashed; } .nt .ae.mt { border-left-color:var(--kc-meet,#9b6bff); } .nt .ae .tm { color:var(--fg-dim); font-size:11.5px; font-variant-numeric:tabular-nums; } .nt .ae .tt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .nt .ae small { color:var(--fg-dim); font-size:10.5px; }
 .nt .nsq { width:100%; height:28px; margin-bottom:8px; font-size:12.5px; } .nt .nlist { display:flex; flex-direction:column; gap:3px; max-height:210px; overflow:auto; margin-bottom:10px; }
 .nt .ni { display:flex; flex-direction:column; align-items:flex-start; gap:1px; height:auto; padding:6px 10px; border:1px solid transparent; border-radius:8px; background:var(--bg2); text-align:left; font-weight:400; } .nt .ni b { font-weight:600; font-size:13px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .nt .ni small { color:var(--fg-dim); font-size:11px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .nt .ni.on { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, var(--bg2)); } .nt .ni:hover { background:var(--bg-hover); }
 .nt .ntt { width:100%; height:32px; font-size:14px; font-weight:600; margin-bottom:6px; } .nt .ned textarea.pad { min-height:240px; height:36vh; } .nt .nfoot { display:flex; align-items:center; gap:8px; margin-top:6px; color:var(--fg-dim); font-size:11.5px; } .nt .nfoot .sp { flex:1; } .nt .nfoot button { height:24px; display:inline-flex; align-items:center; gap:5px; font-size:11.5px; } .nt .nfoot .nd:hover { color:var(--danger); }
 .nt .empty { padding:16px; color:var(--fg-dim); text-align:center; }
 
-.nt .mg span { height:34px; } .nt .addcard .addrow { flex-wrap:nowrap; } .nt .addcard .addrow .w { flex:1 1 150px; min-width:0; width:auto; } .nt .addcard .go { margin-left:0; }
-@media (max-width:1500px) { .nt .addcard .addrow { flex-wrap:wrap; } }
+.nt .mg span { height:34px; } .nt .addcard .addrow { flex-wrap:nowrap; } .nt .addcard .addrow .w { flex:1 1 150px; min-width:0; width:auto; } .nt .addcard .go { margin-left:0; } .nt .addcard .pk { flex:1 1 150px; min-width:0; height:26px; font-size:12px; } .nt .it .when .pk { width:150px; height:22px; font-size:11.5px; } .nt .tools .so { height:26px; font-size:12px; }
+@media (max-width:1250px) { .nt .addcard .addrow { flex-wrap:wrap; } }
 .nt input[type=search] { background:var(--bg); color:var(--fg); border:1px solid var(--border); border-radius:6px; padding:0 8px; }
+
+/* find a time */
+.kc-find .ff { position:relative; display:flex; flex-wrap:wrap; gap:4px; align-items:center; margin-bottom:8px; } .kc-find .fz { display:flex; flex-wrap:wrap; gap:4px; } .kc-find .zc { display:inline-flex; align-items:center; gap:5px; height:24px; padding:0 9px; border:1px solid var(--kc-line); border-radius:12px; background:var(--kc-bg2); font-size:12px; cursor:pointer; } .kc-find .zc small { color:var(--kc-dim); font-size:10.5px; } .kc-find .zc.off { opacity:.45; text-decoration:line-through; } .kc-find .zx { border:0; background:transparent; color:var(--kc-dim); padding:0 2px; cursor:pointer; height:24px; margin-left:-6px; }
+.kc-find .fa { position:relative; flex:1 1 130px; } .kc-find .fa input { width:100%; height:24px; padding:0 8px; border:1px solid var(--kc-line); border-radius:12px; background:var(--kc-bg); color:var(--kc-fg); font-size:12px; } .kc-find .fsg { position:absolute; z-index:5; left:0; right:0; top:26px; background:var(--kc-bg); border:1px solid var(--kc-line); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.35); } .kc-find .fsg div { display:flex; justify-content:space-between; gap:8px; padding:5px 10px; cursor:pointer; font-size:12px; } .kc-find .fsg div:hover { background:var(--kc-bg3); } .kc-find .fsg small { color:var(--kc-dim); }
+.kc-find .fo { display:flex; align-items:center; gap:6px; margin-bottom:6px; font-size:12px; color:var(--kc-dim); } .kc-find .fo .sp { flex:1; } .kc-find .fo select { height:22px; font-size:12px; padding:0 4px; border:1px solid var(--kc-line); border-radius:6px; background:var(--kc-bg); color:var(--kc-fg); } .kc-find .fo button { height:22px; min-width:22px; border:1px solid var(--kc-line); border-radius:6px; background:var(--kc-bg2); color:var(--kc-fg); cursor:pointer; padding:0; } .kc-find .fo .fr { color:var(--kc-fg); font-weight:500; min-width:92px; text-align:center; }
+.kc-find .fh { display:grid; grid-template-columns:52px 1fr; } .kc-find .fhh { position:relative; height:14px; } .kc-find .fhh i { position:absolute; font-style:normal; font-size:9.5px; color:var(--kc-dim); transform:translateX(-30%); }
+.kc-find .fr1 { display:grid; grid-template-columns:52px 1fr; align-items:center; height:26px; } .kc-find .fl { font-size:11.5px; color:var(--kc-dim); } .kc-find .fl.today { color:var(--kc-accent); font-weight:600; }
+.kc-find .fs { position:relative; overflow:hidden; height:16px; border-radius:4px; background:repeating-linear-gradient(90deg, var(--kc-bg3) 0 calc(100%/24 - 1px), var(--kc-bg) calc(100%/24 - 1px) calc(100%/24)); } .kc-find .fs .ok { position:absolute; top:0; height:100%; min-width:4px; border:0; padding:0; border-radius:3px; background:#2ea36b; opacity:.85; cursor:pointer; } .kc-find .fs .ok:hover { opacity:1; } .kc-find .fs .part { background:#d9a23b; opacity:.7; } .kc-find .fs .sel { position:absolute; top:-2px; height:20px; border:2px solid var(--kc-meet,#9b6bff); border-radius:3px; pointer-events:none; box-sizing:border-box; min-width:5px; }
+.kc-find .fn, .kc-find .none { margin-top:8px; font-size:11px; color:var(--kc-dim); }
+
+/* help */
+.modal.help2 { width:min(860px,94vw); max-height:88vh; } .modal.help2 .body { overflow:auto; }
+.hp-tabs { display:flex; gap:2px; border-bottom:1px solid var(--border); margin-bottom:10px; } .hp-tabs button { border:0; background:transparent; height:30px; padding:0 14px; color:var(--fg-dim); border-bottom:2px solid transparent; border-radius:0; margin-bottom:-1px; } .hp-tabs button[aria-selected=true] { color:var(--fg); border-bottom-color:var(--accent); font-weight:600; }
+.hp-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; color:var(--fg-dim); } .hp-top button { height:24px; font-size:12px; }
+.hp-cols { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:4px 22px; } .hp-g h4 { margin:10px 0 4px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--fg-dim); }
+.hp-r { display:flex; align-items:center; gap:6px; min-height:28px; border-bottom:1px solid var(--border); } .hp-r > span { flex:1; font-size:12.5px; } .hp-k { height:24px; padding:0 8px; background:var(--bg2); border:1px solid var(--border); border-radius:6px; font-size:11.5px; } .hp-k kbd { background:transparent; border:0; box-shadow:none; padding:0 1px; } .hp-k.chg { border-color:var(--accent); } .hp-k.rec { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 18%,transparent); } .hp-x { height:24px; width:24px; padding:0; border:0; background:transparent; color:var(--fg-dim); }
+.hp-fixed { display:grid; grid-template-columns:1fr auto 1fr auto; gap:3px 14px; font-size:12px; } .hp-fixed > span:nth-child(2n) { text-align:right; color:var(--fg-dim); }
+.hp-feat { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px; } .hp-feat div { border:1px solid var(--border); border-radius:10px; padding:8px 12px; background:var(--bg2); } .hp-feat b { font-size:12.5px; } .hp-feat p { margin:3px 0 0; font-size:12px; color:var(--fg-dim); line-height:1.45; }
+.hp-cli { display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:12.5px; } .hp-cli span { color:var(--fg-dim); }
+
+/* panel tabs (clock, calendar, checklist) look different from files, and their top-bar button lights up */
+.tab.tool { border:1px dashed color-mix(in srgb, var(--accent) 65%, transparent) !important; border-bottom-color:transparent !important; } .tab.tool.active { border-style:solid !important; border-color:var(--accent) !important; border-bottom-color:transparent !important; }
+#topbar .topright button.on { background:color-mix(in srgb, var(--accent) 22%, transparent) !important; color:var(--fg) !important; box-shadow:inset 0 -2px 0 var(--accent); } #topbar .topright button.open { box-shadow:inset 0 -2px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+
+.s-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; } .s-grid label { display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--fg-dim); } .s-grid select { height:28px; color:var(--fg); }
+
+/* pickers and selects */
+.pkp { position:fixed; z-index:99999; display:flex; gap:0; background:var(--bg2); color:var(--fg); border:1px solid var(--border); border-radius:10px; box-shadow:0 12px 32px rgba(0,0,0,.4); font-size:12.5px; overflow:hidden; }
+.pkc { padding:8px; width:224px; } .pkh { display:flex; align-items:center; gap:4px; margin-bottom:4px; } .pkh b { flex:1; text-align:center; font-weight:600; } .pkh button { height:24px; width:24px; padding:0; border:0; background:transparent; border-radius:6px; color:var(--fg); } .pkh button:hover, .pkg button:hover, .pkt button:hover { background:var(--bg-hover); } .pkh .p svg { transform:rotate(180deg); }
+.pkg { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; text-align:center; } .pkg i { font-style:normal; color:var(--fg-dim); font-size:10.5px; padding:2px 0; } .pkg button { height:28px; padding:0; border:0; border-radius:6px; background:transparent; color:var(--fg); font-size:12px; } .pkg button.today { box-shadow:inset 0 0 0 1px var(--accent); } .pkg button.sel, .pkt button.sel { background:var(--accent); color:var(--accent-fg,#fff); }
+.pkf { display:flex; justify-content:space-between; margin-top:6px; } .pkf button { border:0; background:transparent; color:var(--accent); height:22px; padding:0 6px; font-size:12px; }
+.pkt { width:92px; max-height:262px; overflow:auto; border-left:1px solid var(--border); padding:4px; display:flex; flex-direction:column; gap:1px; position:relative; } .pkt:first-child { border-left:0; width:104px; } .pkt button { height:26px; border:0; border-radius:6px; background:transparent; color:var(--fg); text-align:left; padding:0 8px; font-size:12px; flex:none; }
+select { appearance:none; -webkit-appearance:none; padding-right:24px !important; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238a8f98' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important; background-repeat:no-repeat !important; background-position:right 8px center !important; cursor:pointer; }
+select option, select optgroup { background:var(--bg2); color:var(--fg); } select:hover { border-color:color-mix(in srgb, var(--accent) 55%, var(--border)); }
+:root[data-theme=dark] { color-scheme:dark; } :root[data-theme=light] { color-scheme:light; }
+input.pk { min-width:0; } input[type=text].pk { width:var(--pkw, 150px); }
+
+/* tools menu */
+.wc .dsnone { padding:10px 2px; color:var(--fg-dim); font-size:12px; } .tools { position:relative; } #btn-tools { position:relative; display:inline-flex; align-items:center; gap:5px; } #btn-tools::after { content:'▾'; font-size:10px; opacity:.7; margin-left:1px; } #btn-tools .nb { position:absolute; top:-5px; right:-3px; min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:var(--danger,#d94b4b); color:#fff; font:600 10px/16px system-ui; text-align:center; font-style:normal; }
+.tmenu { position:absolute; right:0; top:calc(100% + 6px); z-index:1000; min-width:230px; background:var(--bg2); border:1px solid var(--border); border-radius:10px; box-shadow:0 12px 32px rgba(0,0,0,.4); padding:4px; } .tmenu[hidden] { display:none; }
+.tmenu button { display:flex !important; align-items:center; gap:10px; width:100%; height:32px; padding:0 10px !important; border:0 !important; border-radius:6px !important; background:transparent; color:var(--fg); text-align:left; box-shadow:none !important; } .tmenu button:hover { background:var(--bg-hover) !important; } .tmenu .tl { flex:1; } .tmenu .tk { font:11px ui-monospace,monospace; color:var(--fg-dim); background:transparent; border:0; box-shadow:none; } .tmenu button.on { background:color-mix(in srgb, var(--accent) 22%, transparent) !important; } .tmenu button.open::after { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); } .tmenu .nb { position:static !important; margin-left:2px; }
+
+.wrapp { border-top:1px solid var(--border); background:var(--bg2); max-height:36%; min-height:54px; overflow:auto; flex:none; } .wph { display:flex; align-items:center; gap:8px; padding:4px 12px; font-size:11.5px; color:var(--fg-dim); position:sticky; top:0; background:var(--bg2); } .wph .sp { flex:1; } .wph button { height:22px; font-size:11.5px; padding:0 8px; } .wph .wpx { width:22px; padding:0; }
+.wpb { padding:2px 12px 10px; white-space:pre-wrap; overflow-wrap:anywhere; font-size:12.5px; line-height:1.5; user-select:text; }
+
+.hp-note { margin:0 0 8px; color:var(--fg-dim); font-size:12px; } .hp-fmt { display:grid; grid-template-columns:1.4fr 1fr 1.6fr; gap:0; font-size:12.5px; } .hp-fmt > * { padding:5px 8px; border-bottom:1px solid var(--border); } .hp-fmt b { font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--fg-dim); font-weight:600; } .hp-fmt code { font-size:11.5px; color:var(--fg-dim); }
+
+.media { position:absolute; inset:0; display:flex; flex-direction:column; background:var(--bg2); }
+.media .mpdf { flex:1; border:0; width:100%; background:var(--bg2); }
+.media .mbar { display:flex; align-items:center; gap:6px; padding:6px 10px; border-bottom:1px solid var(--border); background:var(--bg); }
+.media .mbar .mi { margin-left:auto; color:var(--fg-dim); font-size:12px; }
+.media .mimg { flex:1; overflow:auto; display:flex; align-items:safe center; justify-content:safe center; padding:12px; }
+.media .mimg img { image-rendering:auto; background:repeating-conic-gradient(var(--bg3) 0 25%, var(--bg) 0 50%) 0 0/16px 16px; box-shadow:var(--shadow); }
+.s-row.swr { display:flex; gap:8px; flex-wrap:wrap; } .sw1 { width:28px; height:28px; border-radius:50%; border:2px solid transparent; padding:0; color:#fff; font-weight:600; font-size:12px; cursor:pointer; } .sw1.on { box-shadow:0 0 0 2px var(--bg), 0 0 0 4px var(--fg-dim); } .wh2 { display:inline-flex; gap:6px; align-items:center; }
+input[type=checkbox], input[type=radio], input[type=range] { accent-color:var(--accent); }
 </style>
 </head>
 <body>
@@ -676,18 +730,19 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
     <div class="topright">
       <button id="btn-new" title="New file: choose a name and extension (Alt+N)" aria-label="New file"><i data-ic="filenew"></i><span class="lbl">New</span></button>
       <button id="btn-open" title="Open a file (Ctrl+O)" aria-label="Open a file"><i data-ic="folder"></i><span class="lbl">Open</span></button>
-      <button id="btn-compare" title="Compare two files" aria-label="Compare two files"><i data-ic="columns"></i><span class="lbl">Compare</span></button>
       <span class="vsep"></span>
-      <button id="btn-clock" class="icon" title="World clock: time in several zones (Alt+K)" aria-label="World clock"><i data-ic="clock"></i><span class="lbl">Clock</span></button>
-      <button id="btn-cal" class="icon" title="Calendar (Alt+L)" aria-label="Calendar"><i data-ic="cal"></i><span class="lbl">Calendar</span></button>
-      <button id="btn-notes" class="icon" title="Checklist &amp; notes with reminders (Alt+J)" aria-label="Checklist and notes"><i data-ic="notes"></i><span class="lbl">Checklist</span><em class="nb" hidden></em></button>
+      <div class="tools"><button id="btn-tools" class="icon" title="World clock, calendar, checklist" aria-label="Tools" aria-haspopup="menu" aria-expanded="false"><i data-ic="apps"></i><span class="lbl">Tools</span><em class="nb" hidden></em></button><div class="tmenu" role="menu" hidden>
+      <button id="btn-clock" role="menuitem" title="World clock: time in several zones (Alt+K)" aria-label="World clock"><i data-ic="clock"></i><span class="tl">World clock</span><kbd class="tk" data-k="clock"></kbd></button>
+      <button id="btn-cal" role="menuitem" title="Calendar (Alt+L)" aria-label="Calendar"><i data-ic="cal"></i><span class="tl">Calendar</span><kbd class="tk" data-k="cal"></kbd></button>
+      <button id="btn-notes" role="menuitem" title="Checklist &amp; notes with reminders (Alt+J)" aria-label="Checklist and notes"><i data-ic="notes"></i><span class="tl">Checklist &amp; notes</span><kbd class="tk" data-k="notes"></kbd><em class="nb" hidden></em></button>
+      </div></div>
       <span class="vsep"></span>
       <button id="btn-help" class="icon" title="Help &amp; shortcuts" aria-label="Help"><i data-ic="help"></i><span class="lbl">Help</span></button>
       <button id="btn-settings" class="icon" title="Settings" aria-label="Settings"><i data-ic="gear"></i><span class="lbl">Settings</span></button>
     </div>
   </div>
   <div id="main"></div>
-  <div id="statusbar"><span id="sb-left">Ready</span><span class="sp"></span><span id="sb-right"></span></div>
+  <div id="statusbar"><span id="sb-left">Ready</span><span class="sp"></span><span id="sb-sel" hidden></span><span id="sb-right"></span></div>
 </div>
 <div id="toasts"></div>
 <div id="modals"></div>
@@ -695,6 +750,7 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
 <script>
 'use strict';
 const TOKEN = new URLSearchParams(location.search).get('t') || '';
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const $ = (s, r = document) => r.querySelector(s);
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -739,7 +795,9 @@ const IC = {
   redo: '<path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>',
   save: '<path d="M5 3h11l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/>',
   saveas: '<path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
-  diskdiff: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+  apps: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>',
+  wrap: '<path d="M4 6h16M4 12h11a3.5 3.5 0 0 1 0 7h-3m0 0 2-2m-2 2 2 2M4 18h4"/>',
+  diskdiff: '<path d="M12 4v9M7.5 8.5h9M7.5 19h9"/>',
   swap: '<path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
   file: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>',
   x: '<path d="M6 6l12 12M18 6 6 18"/>',
@@ -799,9 +857,46 @@ function applyFont() {
   document.documentElement.style.setProperty('--code-fs', prefs.fontSize + 'px');
   for (const t of Tabs.list) { t._cw = null; t.scroller && t.scroller.render && t.scroller.render(); }
 }
+function applyAccent() { const a = prefs.get('accent', ''), r = document.documentElement.style; if (/^#[0-9a-f]{6}$/i.test(a)) { r.setProperty('--accent', a); r.setProperty('--link', a); } else { r.removeProperty('--accent'); r.removeProperty('--link'); } }
+function applyMono() { const r = document.documentElement.style; if (prefs.get('mono', '') === 'sys') r.setProperty('--mono', 'ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace'); else r.removeProperty('--mono'); applyFont(); }
 mq.addEventListener?.('change', applyTheme);
-applyTheme();
+applyTheme(); applyAccent(); if (prefs.get('mono', '') === 'sys') applyMono();
 document.documentElement.style.setProperty('--code-fs', prefs.fontSize + 'px');
+
+
+/* ───────────── configurable shortcuts ───────────── */
+const KEYS = {
+  ACT: [
+    ['find', 'Find', 'Find', 'Ctrl+F'], ['replace', 'Find', 'Replace', 'Ctrl+H'], ['addsel', 'Find', 'Add selected word to Find', 'Ctrl+E'], ['next', 'Find', 'Next match', 'F3'], ['goto', 'Find', 'Go to line', 'Ctrl+G'],
+    ['open', 'File', 'Open', 'Ctrl+O'], ['new', 'File', 'New file', 'Alt+N'], ['save', 'File', 'Save', 'Ctrl+S'], ['saveas', 'File', 'Save as', 'Ctrl+Shift+S'], ['format', 'File', 'Format', 'Ctrl+Shift+F'],
+    ['view', 'View', 'Rendered view', 'Alt+V'], ['table', 'View', 'Table view', 'Alt+T'],
+    ['notes', 'Panels', 'Checklist', 'Alt+J'], ['cal', 'Panels', 'Calendar', 'Alt+L'], ['clock', 'Panels', 'World clock', 'Alt+K'], ['help', 'Panels', 'Help', 'F1'],
+    ['wrap', 'View', 'Wrap current line', 'Alt+Z'], ['tabn', 'Tabs', 'Next tab', 'Ctrl+PageDown'], ['tabp', 'Tabs', 'Previous tab', 'Ctrl+PageUp'], ['tabx', 'Tabs', 'Close tab', 'Alt+W'],
+  ],
+  def: id => (KEYS.ACT.find(a => a[0] === id) || [])[3],
+  map() { const m = prefs.get('keys', {}); return m && typeof m === 'object' ? m : {}; },
+  eff(id) { return this.map()[id] || this.def(id); },
+  combo(e) {
+    const k = e.key; if (['Control', 'Shift', 'Alt', 'Meta', 'AltGraph'].includes(k)) return '';
+    const n = k === ' ' ? 'Space' : k.length === 1 ? k.toUpperCase() : k;
+    return [(e.ctrlKey || e.metaKey) ? 'Ctrl' : '', e.altKey ? 'Alt' : '', e.shiftKey ? 'Shift' : '', n].filter(Boolean).join('+');
+  },
+  synth(c, target) {
+    const p = c.split('+'), key = p.pop(), init = { ctrlKey: p.includes('Ctrl'), altKey: p.includes('Alt'), shiftKey: p.includes('Shift'), key: key.length === 1 ? (p.includes('Shift') ? key : key.toLowerCase()) : key, code: key.length === 1 ? (/[A-Z]/.test(key) ? 'Key' + key : 'Digit' + key) : key, bubbles: true, cancelable: true };
+    const ev = new KeyboardEvent('keydown', init); ev._k = 1; (target || document.body).dispatchEvent(ev);
+  },
+  install() {
+    window.addEventListener('keydown', e => {
+      if (e._k || this.rec) return; const m = this.map(); if (!Object.keys(m).length) return;
+      const c = this.combo(e); if (!c) return;
+      const mine = this.ACT.find(a => this.eff(a[0]) === c);
+      if (mine && mine[3] !== c) { e.preventDefault(); e.stopPropagation(); this.synth(mine[3], e.target); return; }   // remapped: behave as the original key
+      if (!mine && this.ACT.some(a => a[3] === c && m[a[0]] && m[a[0]] !== c)) { e.preventDefault(); e.stopPropagation(); }   // the old key of a remapped action does nothing
+    }, true);
+  },
+  pretty(c) { return c.split('+').map(x => `<kbd>${esc(x)}</kbd>`).join('+'); },
+};
+KEYS.install();
 
 function openSettings() {
   if ($('#settings')) return;
@@ -826,6 +921,15 @@ function openSettings() {
           <h4>Code font size</h4>
           <div class="s-row"><input type="range" id="set-fs" min="11" max="16" step="0.5" value="${prefs.fontSize}" aria-label="Code font size"><output id="set-fs-out">${prefs.fontSize} px</output><button id="set-fs-reset" class="flat">Reset</button></div>
           <p class="s-note">Applies to the file view and Compare.</p>
+          <h4>Code font</h4>
+          <div class="s-row"><select id="set-mono" aria-label="Code font"><option value="">JetBrains Mono (built in)</option><option value="sys">Your system's monospace font</option></select></div>
+          <h4>Accent colour</h4>
+          <div class="s-row swr" id="set-acc" role="radiogroup" aria-label="Accent colour"></div>
+          <h4>Calendar &amp; clock</h4>
+          <div class="s-grid"><label>First day of the week <select id="set-ws" aria-label="First day of the week">${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((d, i) => `<option value="${i}">${d}</option>`).join('')}</select></label>
+          <label>Clock <select id="set-c12" aria-label="Clock format"><option value="0">24-hour</option><option value="1">12-hour (AM/PM)</option></select></label>
+          <label>Working hours <span class="wh2"><select id="set-hf" aria-label="Working day starts"></select> to <select id="set-ht" aria-label="Working day ends"></select></span></label>
+          <label>Date format <select id="set-dfmt" aria-label="Date format">${DF.OPTS.map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select></label></div>
           <h4>World clock colours</h4>
           <div class="s-row"><select id="set-season" aria-label="World clock season colours"><option value="auto">Auto (follows the date)</option>${Object.entries(WC.SEASONS).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join('')}</select></div>
           <p class="s-note">Day and night colours of the clock strips. Auto follows the season of the date shown (northern hemisphere).</p>
@@ -839,13 +943,19 @@ function openSettings() {
           <p class="s-note">Browse without accidental typing. Find, Format, Fix and Replace still work.</p>
           <label class="s-row" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="set-astext"> Open delimited text as plain text</label>
           <p class="s-note">Off: .txt/.csv files split by tabs, pipes, semicolons or commas open as a table. You can also switch one file with the table icon.</p>
+          <label class="s-row" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="set-wrap"> Show the wrapped-line pane for long lines</label>
+          <p class="s-note">Shows the current line wrapped under the editor (also the Wrap button, Alt+Z).</p>
+          <label class="s-row" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="set-showhid"> Show hidden files in the Open dialog</label>
           <h4 style="margin-top:18px">Formatting JSON</h4>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:0"><input type="checkbox" id="set-expand"> Expand JSON stored inside strings</label>
-          <p class="s-note">Shows escaped JSON such as <code>"{\"a\":1}"</code> as indented JSON in Format and Compare. It changes the data's shape, so it is off by default; Ctrl+Z undoes it.</p>
+          <p class="s-note">Shows escaped JSON inside strings as real JSON in Format and Compare. Changes the data's shape; Ctrl+Z undoes it.</p>
         </section>
         <section data-p="startup" hidden>
           <h4>Reminders</h4>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:0"><input type="checkbox" id="set-sound"> Play a sound for reminders <button id="set-snd-test" type="button" style="margin-left:6px;height:24px;padding:0 8px">Test</button></label>
+          <h4 style="margin-top:18px">Checklist</h4>
+          <div class="s-grid"><label>Sort by <select id="set-nsort" aria-label="Checklist sort"><option value="date">Date</option><option value="imp">Important first</option><option value="new">Newest first</option><option value="az">A to Z</option></select></label></div>
+          <label class="s-row" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="set-ndone"> Show ticked items</label>
           <h4 style="margin-top:18px">Startup</h4>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="set-autostart"> Start in the background at login</label><p class="s-note">Keeps reminders and the tray icon working after you log in.</p>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px">Browser <select id="set-browser" aria-label="Browser"><option value="">System default</option><option value="chrome">Google Chrome</option><option value="firefox">Firefox</option><option value="edge">Microsoft Edge</option><option value="brave">Brave</option><option value="chromium">Chromium</option><option value="vivaldi">Vivaldi</option><option value="safari">Safari (macOS)</option></select></label><p class="s-note">Used when Kempt opens itself (<code>kempt gui</code>, the tray icon, login). If it is not installed, the system default is used.</p>
@@ -853,18 +963,19 @@ function openSettings() {
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="set-appwin"> Open in its own window</label><p class="s-note">Gives Kempt its own taskbar icon. Needs Chrome, Edge, Brave or Chromium.</p>
           <h4 style="margin-top:18px">Updates</h4>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:0"><input type="checkbox" id="set-upd"> Check for updates</label>
-          <p class="s-note">Off by default. When on, Kempt asks GitHub once a day whether a newer release exists (one request, nothing about you is sent) and tells you; it never downloads or installs anything. This is the only time Kempt goes online.</p>
+          <p class="s-note">Off by default. Asks GitHub once a day for a newer release; nothing is sent about you and nothing is installed. The only time Kempt goes online.</p>
           <div class="s-row upd-row" style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="text" id="set-updrepo" placeholder="GitHub repository, e.g. yourname/kempt" spellcheck="false" aria-label="GitHub repository" style="flex:1;min-width:0"><button id="set-updnow" type="button">Check now</button></div>
           <p class="s-note" id="set-updmsg" style="min-height:18px"></p>
           <h4 style="margin-top:18px">Backup</h4>
           <div class="s-row" style="display:flex;gap:8px;align-items:center"><button id="set-export" type="button">Export…</button><button id="set-import" type="button">Import…</button><input type="file" id="set-impfile" accept=".json,application/json" hidden></div>
-          <p class="s-note">One file with your settings, clock zones, alerts, checklist and notes. Import replaces what is here. Recent files and folders are not included.</p>
+          <p class="s-note">Settings, clock zones, alerts, checklist and notes in one file. Import replaces what is here.</p>
+          <div class="s-row" style="margin-top:8px"><button id="set-reset" type="button" class="danger" title="Theme, fonts, formats, shortcuts and the like go back to their defaults. Your files, notes, checklist, calendar, zones and holidays are kept.">Reset preferences…</button></div>
         </section>
         <section data-p="about" hidden>
           <div class="about"><svg viewBox="0 0 128 128" width="44" height="44"><rect x="6" y="6" width="116" height="116" rx="24" fill="var(--accent)"/><g fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M52 38 L30 64 L52 90"/><path d="M76 38 L98 64 L76 90"/></g></svg>
-            <div><b>Kempt</b><br><span class="s-note">Open, search, fix, format and compare big JSON, XML and log files.</span></div></div>
-          <p class="s-note">Runs entirely on this computer: the page talks only to the local server that started it, and nothing is uploaded. Preferences are stored in this browser.</p>
-          <p class="s-actions"><button id="set-help">Keyboard shortcuts &amp; help</button><button id="set-quit" class="danger" title="Stop the Kempt server on this computer">Quit Kempt</button></p>
+            <div><b>Kempt</b> <span class="s-note" id="s-ver">version @VERSION@</span><br><span class="s-note">Open, search, fix, format and compare big JSON, XML and log files.</span></div></div>
+          <p class="s-note">Runs on this computer only; nothing is uploaded. Notes and checklist are stored encrypted.</p>
+          <p class="s-actions"><button id="set-help">Help &amp; shortcuts</button><button id="set-quit" class="danger" title="Stop the Kempt server on this computer">Quit Kempt</button></p>
           <p class="s-note">Fonts: Inter and JetBrains Mono (SIL Open Font License 1.1).</p>
         </section>
       </div></div></div>`;
@@ -885,6 +996,26 @@ function openSettings() {
   const show = p => { tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.p === p))); back.querySelectorAll('.s-body section').forEach(x => x.hidden = x.dataset.p !== p); };
   tabs.forEach(t => t.onclick = () => show(t.dataset.p));
   back.querySelectorAll('.theme-card').forEach(c => c.onclick = () => { prefs.set('theme', c.dataset.v); applyTheme(); });
+  const wsel = q('#set-ws'); wsel.value = String(prefs.get('ws', 1)); wsel.onchange = () => { prefs.set('ws', +wsel.value); const t = Tabs.list.find(x => x.kind === 'cal'); if (t && t.cal) t.cal.setOptions({ ws: +wsel.value }); };
+  const dfs = q('#set-dfmt'); dfs.value = DF.cur(); dfs.onchange = () => { prefs.set('dfmt', dfs.value); for (const t of Tabs.list) { if (t.kind === 'clock') t.holidays(); if (t.kind === 'notes') t.render(); } };
+  const mo = q('#set-mono'); mo.value = prefs.get('mono', ''); mo.onchange = () => { prefs.set('mono', mo.value); applyMono(); };
+  const accHost = q('#set-acc'), cur = prefs.get('accent', '');
+  for (const [c, n] of [['', 'Default'], ['#0f9d8a', 'Teal'], ['#2e9e5b', 'Green'], ['#8b5cf6', 'Purple'], ['#d6409f', 'Pink'], ['#e8710a', 'Orange'], ['#d83b3b', 'Red'], ['#5b6676', 'Graphite']]) {
+    const b = el('button'); b.type = 'button'; b.className = 'sw1' + (c === cur ? ' on' : ''); b.title = n; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(c === cur)); b.setAttribute('aria-label', n); b.style.background = c || 'var(--accent)'; if (!c) b.textContent = 'A';
+    b.onclick = () => { prefs.set('accent', c); applyAccent(); accHost.querySelectorAll('.sw1').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-checked', String(x === b)); }); }; accHost.appendChild(b);
+  }
+  const c12 = q('#set-c12'); c12.value = prefs.get('clock12', false) ? '1' : '0'; c12.onchange = () => { prefs.set('clock12', c12.value === '1'); for (const t of Tabs.list) { if (t.kind === 'clock') { t.h12 = c12.value === '1'; t.update(); } if (t.kind === 'cal' && t.cal) t.cal.setOptions({ h12: c12.value === '1' }); } };
+  const hf = q('#set-hf'), ht = q('#set-ht'), fc = FIND.cfg(); for (let h = 0; h <= 24; h++) { const lab = String(h).padStart(2, '0') + ':00'; if (h < 24) hf.add(new Option(lab, h)); if (h > 0) ht.add(new Option(lab, h)); } hf.value = fc.from; ht.value = fc.to;
+  const hrs = () => { let a = +hf.value, b = +ht.value; if (b <= a) { b = Math.min(24, a + 1); ht.value = b; } FIND.save({ hf: a, ht: b }); }; hf.onchange = hrs; ht.onchange = hrs;
+  const ns = q('#set-nsort'); ns.value = prefs.get('nsort', 'date'); ns.onchange = () => { prefs.set('nsort', ns.value); for (const t of Tabs.list) if (t.kind === 'notes') t.render(); };
+  const nd = q('#set-ndone'); nd.checked = prefs.get('ndone', true) !== false; nd.onchange = () => { prefs.set('ndone', nd.checked); for (const t of Tabs.list) if (t.kind === 'notes') { t.showDone = nd.checked; t.render(); } };
+  const wr = q('#set-wrap'); wr.checked = !!prefs.get('wrap', false); wr.onchange = () => { Tabs.list.find(t => t.toggleWrap) ? Tabs.list.find(t => t.toggleWrap).toggleWrap(wr.checked) : prefs.set('wrap', wr.checked); };
+  const sh = q('#set-showhid'); sh.checked = !!prefs.get('showhid', false); sh.onchange = () => prefs.set('showhid', sh.checked);
+  q('#set-reset').onclick = guard(async () => {
+    const ok = await confirmBox('Reset preferences', 'Theme, fonts, accent, formats, shortcuts, sorting and similar choices go back to their defaults.\nYour files, notes, checklist, calendar, clock zones and holidays are kept.', 'Reset'); if (!ok) return;
+    const patch = {}; for (const k of ['theme', 'fs', 'indent', 'ws', 'dfmt', 'season', 'sound', 'expand', 'readonly', 'astext', 'wrap', 'accent', 'mono', 'clock12', 'nsort', 'ndone', 'keys', 'meet', 'showhid', 'updchk', 'updrepo', 'browser', 'appwin']) patch[k] = null;
+    await api('state/set', { patch }); location.reload();
+  });
   const se = q('#set-season'); se.value = prefs.get('season', 'auto'); se.onchange = () => { prefs.set('season', se.value); const t = Tabs.list.find(x => x.kind === 'clock'); if (t) t.paint(); };
   const fs = q('#set-fs');
   fs.oninput = () => { prefs.set('fs', fs.value); q('#set-fs-out').textContent = fs.value + ' px'; applyFont(); };
@@ -1209,6 +1340,8 @@ class FindWidget {
     this.q = q('.q'); this.rep = q('.rep'); this.cnt = q('.cnt'); this.chips = q('.chips'); this.r2 = q('.r2'); this.mode = q('.mode');
     this.st = { case: false, word: false, regex: false, phrase: false };
     const fire = debounce(() => this.changed(), 180);
+    // pasting a phrase (words with spaces, one line) into an empty box, or over everything in it, searches it as one phrase
+    this.q.addEventListener('paste', e => { const t = (e.clipboardData && e.clipboardData.getData('text') || '').trim(); const whole = !this.q.value || (this.q.selectionStart === 0 && this.q.selectionEnd === this.q.value.length); if (!whole || !/\s/.test(t) || /[\r\n"]/.test(t) || t.length > 100 || this.st.regex) return; e.preventDefault(); this.q.value = t; this.st.phrase = true; this.root.querySelector('.ph').classList.add('on'); this.changed(); });
     this.q.addEventListener('input', fire);
     this.mode.addEventListener('change', () => this.changed());
     for (const k of ['case', 'word', 're', 'ph']) q('.' + k).addEventListener('click', e => { const key = k === 're' ? 'regex' : k === 'ph' ? 'phrase' : k; this.st[key] = !this.st[key]; e.currentTarget.classList.toggle('on', this.st[key]); this.changed(); this.q.focus(); });
@@ -1234,6 +1367,8 @@ class FindWidget {
     if (replaceMode) this.showReplace(true);
     this.q.focus(); this.q.select();
   }
+  /** Ctrl+E: add another word to what is already being searched */
+  addWord(w) { w = (w || '').trim(); if (!w || /\n/.test(w) || w.length > 100) return false; this.root.hidden = false; let cur = this.q.value.trim(); if (this.st.phrase && /\s/.test(cur) && !/^"/.test(cur)) cur = '"' + cur + '"'; this.q.value = cur && !this.st.regex ? cur + ' ' + (/\s/.test(w) ? '"' + w + '"' : w) : w; this.st.phrase = false; this.root.querySelector('.ph').classList.remove('on'); this.changed(); this.q.focus(); return true; }
   showReplace(on) { if (!this.hasReplace) return; this.r2.hidden = !on; this.root.querySelector('.chev').textContent = on ? '▾' : '▸'; if (on) this.rep.focus(); }
   close() { this.root.hidden = true; this.cb.onChange(null); this.cb.onClose && this.cb.onClose(); }
   changed() {
@@ -1290,7 +1425,7 @@ function pickFile(startPath, title = 'Open file', withText = false, folder = fal
       <div class="pick-list" tabindex="0"></div></div>
       <div class="foot"><span style="margin-right:auto;color:var(--fg-dim)" class="hint">${folder ? 'Open a folder with a double-click, then press “Use this folder”.' : 'Double-click a file to open it. You can also paste a full path above and press Enter.'}</span>${withText ? `<label class="astx" style="display:flex;align-items:center;gap:6px;margin:0" title="Choose how the file is shown. Automatic uses the file type and its content."><span style="white-space:nowrap">Open as</span><select class="as">${OPEN_AS.map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}</select></label>` : ''}<button class="cancel">Cancel</button><button class="primary ok">${folder ? 'Use this folder' : 'Open'}</button></div>`;
     back.appendChild(m); $('#modals').appendChild(back);
-    const list = $('.pick-list', m), pp = $('.pp', m), flt = $('.flt', m), hid = $('.hid', m);
+    const list = $('.pick-list', m), pp = $('.pp', m), flt = $('.flt', m), hid = $('.hid', m); hid.checked = !!prefs.get('showhid', false);
     let cur = null, entries = [], sel = null, parent = null, home = '/';
     const prevFocus = document.activeElement;
     const done = v => { pickFile.openAs = withText && $('.as', m) ? $('.as', m).value : 'auto'; back.remove(); restoreFocus(prevFocus); resolve(v); };
@@ -1304,7 +1439,7 @@ function pickFile(startPath, title = 'Open file', withText = false, folder = fal
       const f = flt.value.toLowerCase(); list.innerHTML = '';
       for (const e of entries) {
         if (folder && !e.d) continue; if (!hid.checked && e.n.startsWith('.')) continue; if (f && !e.n.toLowerCase().includes(f)) continue;
-        const it = el('div', 'pick-item' + (e.d ? ' dir' : '') + (sel === e.n ? ' sel' : '')); it.innerHTML = `<span class="pi">${e.d ? ic('folder') : ic('file')}</span><span>${esc(e.n)}</span><span class="sz">${e.d ? '' : fmtSize(e.s)}</span>`;
+        const it = el('div', 'pick-item' + (e.d ? ' dir' : '') + (sel === e.n ? ' sel' : '')); it.innerHTML = `<span class="pi">${FI.ic(e.n, 16, e.d)}</span><span>${esc(e.n)}</span><span class="sz">${e.d ? '' : fmtSize(e.s)}</span>`;
         it.onclick = () => { sel = e.n; draw(); if (!e.d) pp.value = join(cur, e.n); };
         it.ondblclick = () => e.d ? go(join(cur, e.n)) : done(join(cur, e.n));
         list.appendChild(it);
@@ -1343,12 +1478,14 @@ const Tabs = {
   renderBar() {
     const bar = $('#tabs'); bar.innerHTML = '';
     for (const t of this.list) {
-      const d = el('div', 'tab' + (t === this.active ? ' active' : '')); d.title = t.tooltip ? t.tooltip() : t.title();
+      const d = el('div', 'tab' + (t === this.active ? ' active' : '') + (['notes', 'cal', 'clock'].includes(t.kind) ? ' tool' : '')); d.title = t.tooltip ? t.tooltip() : t.title();
       d.innerHTML = `<span class="ico">${t.icon}</span><span class="tt">${esc(t.title())}</span>${t.dirty && t.dirty() ? '<span class="dot" title="Unsaved changes">●</span>' : ''}<button class="x" title="Close tab" aria-label="Close tab">${ic('x', 12)}</button>`;
       d.onclick = e => { if (e.target.closest('.x')) this.close(t); else this.activate(t); };
       d.onauxclick = e => { if (e.button === 1) this.close(t); };
       bar.appendChild(d);
     }
+    for (const [id, kind] of [['#btn-clock', 'clock'], ['#btn-cal', 'cal'], ['#btn-notes', 'notes']]) { const b = $(id), t = this.list.find(x => x.kind === kind); if (b) { b.classList.toggle('on', !!t && t === this.active); b.classList.toggle('open', !!t && t !== this.active); b.setAttribute('aria-pressed', String(!!t && t === this.active)); } }
+    const tb = $('#btn-tools'); if (tb) { tb.classList.toggle('on', !!this.active && ['clock', 'cal', 'notes'].includes(this.active.kind)); tb.classList.toggle('open', this.list.some(x => ['clock', 'cal', 'notes'].includes(x.kind)) && !tb.classList.contains('on')); }
   },
   updateWelcome() {
     let w = $('#welcome');
@@ -1360,7 +1497,7 @@ const Tabs = {
       <h1>Kempt</h1>
       <p class="tag">Open huge JSON, XML and log files instantly. Find with several keywords, replace, fix broken JSON/XML, and compare two files side by side.</p>
       <p class="cta"><button class="primary lg" id="w-open">${ic('folder', 18)}Open a file<kbd>Ctrl+O</kbd></button> <button class="lg" id="w-cmp">${ic('columns', 18)}Compare two files</button></p>
-      <div class="recent">${recent.length ? '<div class="rh">Recent files</div>' : ''}${recent.map(p => `<a data-p="${esc(p)}" title="${esc(p)}">${ic('file', 14)}<span>${esc(p)}</span></a>`).join('')}</div></div>`;
+      <div class="recent">${recent.length ? '<div class="rh">Recent files</div>' : ''}${recent.map(p => `<a data-p="${esc(p)}" title="${esc(p)}">${FI.ic(p, 14)}<span>${esc(p)}</span></a>`).join('')}</div></div>`;
     $('#main').appendChild(w);
     $('#w-open', w).onclick = () => actions.open(); $('#w-cmp', w).onclick = () => actions.compare();
     w.querySelectorAll('.recent a').forEach(a => a.onclick = () => actions.openPath(a.dataset.p));
@@ -1376,6 +1513,14 @@ function rememberRecent(path, setDir = true) {
 
 /* ═════════════════════════ DOCUMENT TAB ═════════════════════════ */
 /* ═════════════════════════ RENDERED VIEWERS: Markdown, HTML, JSON tree ═════════════════════════ */
+
+/* file icons: folders amber, files tinted by type */
+const FI = {
+  FOLDER: '#e3a53c',
+  MAP: { json: '#e5b94a', jsonl: '#e5b94a', ndjson: '#e5b94a', json5: '#e5b94a', xml: '#ef7d4a', html: '#e8613f', htm: '#e8613f', svg: '#ef7d4a', xsd: '#ef7d4a', xsl: '#ef7d4a', csv: '#4fb26f', tsv: '#4fb26f', xlsx: '#3f9d5d', xls: '#3f9d5d', xlsm: '#3f9d5d', xlsb: '#3f9d5d', ods: '#3f9d5d', log: '#8fa3b8', txt: '#a3adb9', md: '#5aa9ea', markdown: '#5aa9ea', yaml: '#b27ddb', yml: '#b27ddb', toml: '#b27ddb', ini: '#b27ddb', conf: '#b27ddb', cfg: '#b27ddb', env: '#b27ddb', py: '#4f8fc5', js: '#ecd04a', mjs: '#ecd04a', ts: '#4a86d6', tsx: '#4a86d6', jsx: '#ecd04a', css: '#7a6ae0', scss: '#d6679f', less: '#7a6ae0', sh: '#78c078', bash: '#78c078', sql: '#d9689a', c: '#6f8fd8', h: '#6f8fd8', cpp: '#6f8fd8', hpp: '#6f8fd8', cs: '#8a68d6', java: '#e0705f', go: '#4cc0d8', rs: '#d98a5a', rb: '#e0505f', php: '#8a8fd6', lua: '#5a7fd0', tf: '#8a68d6', pdf: '#e24e4e', png: '#37b6c6', jpg: '#37b6c6', jpeg: '#37b6c6', gif: '#37b6c6', webp: '#37b6c6', bmp: '#37b6c6', ico: '#37b6c6', docx: '#4a7fd6', doc: '#4a7fd6', odt: '#4a7fd6', rtf: '#4a7fd6', pptx: '#e8803a', ppt: '#e8803a', odp: '#e8803a', zip: '#a98a5a', gz: '#a98a5a', tar: '#a98a5a' },
+  col(name) { const e = String(name || '').split('.').pop().toLowerCase(); return this.MAP[e] || '#8e96a1'; },
+  ic(name, size = 14, dir) { return `<span class="fic${dir ? ' dir' : ''}" style="color:${dir ? this.FOLDER : this.col(name)}">${ic(dir ? 'folder' : 'file', size)}</span>`; },
+};
 const EMOJI = { smile: '😄', grin: '😁', joy: '😂', laughing: '😆', wink: '😉', blush: '😊', heart_eyes: '😍', sunglasses: '😎', thinking: '🤔', neutral_face: '😐', cry: '😢', sob: '😭', angry: '😠', scream: '😱', sweat_smile: '😅', rofl: '🤣', slightly_smiling_face: '🙂', upside_down_face: '🙃', innocent: '😇', wave: '👋', thumbsup: '👍', '+1': '👍', thumbsdown: '👎', '-1': '👎', clap: '👏', pray: '🙏', muscle: '💪', ok_hand: '👌', raised_hands: '🙌', eyes: '👀', heart: '❤️', broken_heart: '💔', sparkles: '✨', star: '⭐', fire: '🔥', rocket: '🚀', tada: '🎉', zap: '⚡', bug: '🐛', warning: '⚠️', x: '❌', white_check_mark: '✅', heavy_check_mark: '✔️', check: '✔️', question: '❓', exclamation: '❗', bulb: '💡', memo: '📝', book: '📖', books: '📚', link: '🔗', lock: '🔒', key: '🔑', wrench: '🔧', hammer: '🔨', gear: '⚙️', package: '📦', folder: '📁', file_folder: '📁', computer: '💻', phone: '☎️', email: '📧', calendar: '📅', clock: '🕐', hourglass: '⌛', mag: '🔍', chart_with_upwards_trend: '📈', trophy: '🏆', gift: '🎁', coffee: '☕', pizza: '🍕', beer: '🍺', sun: '☀️', cloud: '☁️', rainbow: '🌈', snowflake: '❄️', earth_africa: '🌍', globe_with_meridians: '🌐', construction: '🚧', rotating_light: '🚨', bell: '🔔', 100: '💯', poop: '💩', ghost: '👻', robot: '🤖', cat: '🐱', dog: '🐶', penguin: '🐧', turtle: '🐢', arrow_right: '➡️', arrow_left: '⬅️', arrow_up: '⬆️', arrow_down: '⬇️', point_right: '👉', point_left: '👈', recycle: '♻️', speech_balloon: '💬', information_source: 'ℹ️', beginner: '🔰', pushpin: '📌', paperclip: '📎', scissors: '✂️', trash: '🗑️' };
 const mdSlug = t => t.toLowerCase().replace(/<[^>]*>/g, '').replace(/[^\p{L}\p{N}\s_-]/gu, '').trim().replace(/\s+/g, '-');
 const mdLinkOk = u => /^(https?:|mailto:|#)/i.test(u);
@@ -1676,7 +1821,7 @@ class CodeEditor {
 
 class DocTab {
   constructor(info, minified, opt) {
-    this.opt = opt || {}; this.info = info; this.kind = 'doc'; this.icon = ic('file', 14); this.spec = null; this.job = null; this.curLine = -1; this.word = ''; this.hoff = 0; this.maxLen = 0; this.matchTotal = 0;
+    this.opt = opt || {}; this.info = info; this.kind = 'doc'; this.icon = FI.ic(info && (info.name || info.path) || '', 14); this.spec = null; this.job = null; this.curLine = -1; this.word = ''; this.hoff = 0; this.maxLen = 0; this.matchTotal = 0;
     this.panel = el('div', 'panel');
     this.panel.innerHTML = `
       <div class="toolbar">
@@ -1689,9 +1834,10 @@ class DocTab {
         <button class="b-fmt" title="Format: pretty-print JSON / XML (and code via prettier, ruff, …). Indentation: Settings ▸ Editor">${ic('format')}<span class="lbl">Format</span></button>
         <button class="b-fix" title="Fix: repair broken JSON / XML: trailing or missing commas, quotes, comments, brackets, True/None, …">${ic('wrench')}<span class="lbl">Fix</span></button>
         <span class="sep"></span>
-        <button class="b-cmp-disk" title="Changes vs saved: see exactly what changed compared with the file on disk">${ic('diskdiff')}<span class="lbl">Changes vs saved</span></button>
+        <button class="b-cmp-disk" title="Changes since the last save: see exactly what you edited">${ic('diskdiff')}<span class="lbl">Changes</span></button>
         <button class="b-cmp" title="Compare with another file…">${ic('columns')}<span class="lbl">Compare with…</span></button>
         <span class="sep"></span>
+        <button class="b-wrap tgl" title="Wrap: show the whole current line, wrapped, below the file (Alt+Z)">${ic('wrap')}<span class="lbl">Wrap</span></button>
         <button class="b-view tgl" title="Rendered view: Markdown, HTML preview, or a collapsible JSON tree (Alt+V)">${ic('eye')}<span class="lbl">View</span></button>
         <button class="b-tbl tgl" title="Table view: columns, filter, sort, duplicates, counts">${ic('table')}<span class="lbl">Table</span></button>
         <span class="sp"></span><span class="info"></span>
@@ -1699,6 +1845,7 @@ class DocTab {
       <div class="banner info b-banner" hidden></div>
       <div class="editor"><div class="vsroot"></div></div>
       <div class="ce-pane" hidden></div>
+      <div class="wrapp" hidden><div class="wph"><b></b><span class="sp"></span><button type="button" class="wpc">Copy line</button><button type="button" class="wpx" aria-label="Close">×</button></div><div class="wpb mono"></div></div>
       <div class="rv" hidden></div>
       <div class="tv-slot"></div>
       <div class="hbar"><span>←→ scroll</span><input type="range" min="0" max="0" value="0" class="hr" aria-label="Horizontal scroll"><span class="hpos"></span><span style="margin-left:auto" class="selinfo"></span></div>`;
@@ -1720,6 +1867,7 @@ class DocTab {
     this.scroller.root.addEventListener('click', e => { if (e.detail === 1) setTimeout(() => this.plainClick(), 0); });
     this.banner = q('.b-banner');
     this.mode = 'text'; this.tv = new TableView(this); q('.tv-slot').replaceWith(this.tv.root);
+    q('.b-wrap').onclick = () => this.toggleWrap(); q('.wpx').onclick = () => this.toggleWrap(false); q('.wpc').onclick = () => { navigator.clipboard.writeText(q('.wpb').textContent).then(() => toast('Line copied', 'ok')).catch(() => { }); }; this.wrapPane();
     q('.b-tbl').onclick = guard(() => this.setMode(this.mode === 'table' ? 'text' : 'table'));
     q('.b-tbl').hidden = info.kind === 'json' || info.kind === 'xml';
     const ext = (info.name.match(/\.([^.]+)$/) || [, ''])[1].toLowerCase();
@@ -1839,12 +1987,32 @@ class DocTab {
     if (this.mode === 'edit' && this.ce && !noSync && !this.ce.dirty) { this._vt = null; this.docText().then(t => this.ce.setValue(t, true)).catch(() => { }); }
     if (this.spec) this.startSearch(false); else this.paintRuler();
   }
+  toggleWrap(on) { prefs.set('wrap', on === undefined ? !prefs.get('wrap', false) : on); for (const t of Tabs.list) if (t.wrapPane) t.wrapPane(); }
+  wrapPane() {
+    const q = s => $(s, this.panel), on = !!prefs.get('wrap', false); q('.wrapp').hidden = !on; q('.b-wrap').classList.toggle('on', on); if (!on) return;
+    const ln = this.curLine; clearTimeout(this._wt); this._wt = setTimeout(async () => {
+      if (ln < 0) { q('.wph b').textContent = ''; q('.wpb').textContent = 'Click a line to see all of it here, wrapped.'; return; }
+      let t = ''; try { if (this.mode === 'edit' && this.ce) t = this.ce.lines[ln] || ''; else { const r = await api('lines', { id: this.info.id, from: ln, count: 1, spec: this.spec }); t = r.lines[0] ? r.lines[0].t : ''; } } catch (_) { return; }
+      if (this.curLine !== ln) return; q('.wph b').textContent = 'Line ' + fmtNum(ln + 1) + ' · ' + fmtNum(t.length) + ' chars'; q('.wpb').textContent = t;
+    }, 60);
+  }
+  async probe() {   // look at the first lines once: is this a table? broken JSON/XML?
+    try {
+      const r = await api('lines', { id: this.info.id, from: 0, count: 40 }), L = r.lines.map(l => l.t).filter(t => t.trim()); let tab = false, fix = false;
+      if (L.length >= 2) for (const d of ['\t', ',', ';', '|']) { const n = L.map(t => t.split(d).length - 1); if (n[0] >= 1 && n.filter(x => x === n[0]).length >= Math.ceil(L.length * 0.8)) { tab = true; break; } }
+      const f = (L[0] || '').trim()[0]; fix = f === '{' || f === '[' || f === '<';
+      this.hint = { table: tab, fix }; this.refreshInfo();
+    } catch (_) { this.hint = { table: true, fix: true }; }
+  }
   refreshInfo() {
     const i = this.info, q = s => $(s, this.panel);
     q('.info').innerHTML = `${esc(i.kind === 'table' ? 'DELIMITED' : this.vkind === 'md' ? 'MARKDOWN' : this.vkind === 'html' ? 'HTML' : i.kind.toUpperCase())} · ${fmtNum(i.lines)} lines · ${fmtSize(i.size)}${i.dirty ? ' · <span class="dirty">unsaved changes</span>' : ''}`;
     const ed = this.mode === 'edit'; q('.b-undo').disabled = !ed && !i.can_undo; q('.b-redo').disabled = !ed && !i.can_redo;
     q('.b-save').disabled = !i.dirty && !!i.path && !(this.ce && this.ce.dirty); q('.b-cmp-disk').disabled = !i.path || !i.dirty;
-    q('.b-fix').disabled = !(i.kind === 'json' || i.kind === 'xml' || i.kind === 'text');
+    if (this._pv !== i.version) { this._pv = i.version; this.probe(); }
+    const h = this.hint || {}; q('.b-fix').disabled = !(i.kind === 'json' || i.kind === 'xml' || (i.kind === 'text' && h.fix));
+    q('.b-fix').title = q('.b-fix').disabled ? 'Fix repairs broken JSON or XML. This file does not look like either.' : 'Fix: repair broken JSON / XML: trailing or missing commas, quotes, comments, brackets, True/None, …';
+    q('.b-tbl').disabled = !(i.kind === 'table' || h.table); q('.b-tbl').title = q('.b-tbl').disabled ? 'Table view needs columns: a CSV, TSV or Excel file, or text separated by tabs, commas, semicolons or |. Alt+T forces it.' : 'Table view: columns, filter, sort, duplicates, counts';
     q('.b-fmt').disabled = i.kind === 'text' || i.kind === 'table';
     q('.b-fmt').title = i.kind === 'text' || i.kind === 'table' ? 'No formatter for this file type' : 'Pretty-print this file. Indentation: Settings ▸ Editor';
   }
@@ -1853,6 +2021,7 @@ class DocTab {
     if (this.mode === 'table') return setStatus(`${this.info.path || this.info.name}`, this.tv.statusText());
     if (this.mode === 'view') return setStatus(`${this.info.path || this.info.name}`, { md: 'Markdown preview', html: 'HTML preview', json: 'JSON tree' }[this.vkind]);
     if (this.mode === 'edit' && this.ce) return setStatus(`${this.info.path || this.info.name}`, `Ln ${fmtNum(this.ce.ln + 1)}, Col ${fmtNum(this.ce.col + 1)} · ${fmtNum(this.ce.lines.length)} lines · editing`);
+    if (!$('.wrapp', this.panel).hidden) this.wrapPane();
     setStatus(`${this.info.path || this.info.name}`, `Ln ${this.curLine >= 0 ? fmtNum(this.curLine + 1) : '–'} / ${fmtNum(this.info.lines)}`);
   }
 
@@ -1930,10 +2099,11 @@ class DocTab {
   jump(line) { this.curLine = line; this.scroller.scrollToRow(line, true); this.scroller.render(); this.updateStatus(); }
 
   // ---- find
-  async openFind(replace) {
+  async openFind(replace, add) {
     let sel0 = ''; if (this.mode === 'edit' && this.ce) { const t = this.ce.ta; sel0 = t.value.slice(t.selectionStart, t.selectionEnd); this._back = true; }
     if (this.mode !== 'text') await this.setMode('viewer');   // find / replace work in the read-only view; Esc returns to the editor
     const sel = sel0 || getSelection().toString(); const seed = sel && !sel.includes('\n') && sel.length < 100 ? sel : '';
+    if (add) { if (!this.find.addWord(seed)) toast('Select a word first, then press ' + KEYS.eff('addsel') + ' to add it to Find.', 'info'); return; }
     this.find.open(replace, seed);
   }
   fade() { const r = this.scroller.rows; r.classList.remove('vs-fade'); void r.offsetWidth; r.classList.add('vs-fade'); }
@@ -2070,11 +2240,13 @@ class DocTab {
     if (c && e.shiftKey && k === 'f') { if (!$('.b-fmt', this.panel).disabled) guard(() => this.doFormat())(); return true; }
     if (c && e.shiftKey && k === 'c' && this.mode !== 'table') { guard(() => this.copyText())(); return true; }
     if (e.altKey && !c && k === 'v' && this.vkind) { guard(() => this.setMode(this.mode === 'view' ? 'text' : 'view'))(); return true; }
+    if (e.altKey && !c && k === 'z') { this.toggleWrap(); return true; }
     if (e.altKey && !c && k === 't' && !$('.b-tbl', this.panel).hidden) { guard(() => this.setMode(this.mode === 'table' ? 'text' : 'table'))(); return true; }
     if (this.mode === 'text' && !inText0 && c && !e.shiftKey && k === 'a') { this.allSel = true; this.scroller.root.classList.add('allsel'); setStatus(null, `all ${fmtNum(this.info.lines)} lines selected · Ctrl+C copies them`); return true; }
     if (this.mode === 'text' && !inText0 && c && !e.shiftKey && k === 'c' && this.allSel) { guard(() => this.copyAll())(); return true; }
     if (c && k === 'f') { this.openFind(false).catch(fail); return true; }
     if (c && k === 'h') { this.openFind(true).catch(fail); return true; }
+    if (c && !e.shiftKey && k === 'e') { this.openFind(false, true).catch(fail); return true; }
     if (c && k === 'g') { if (this.mode === 'table') this.tv.goto(); else if (this.mode === 'view') this.setMode('text').then(() => this.goto()); else this.goto(); return true; }
     if (c && k === 's') { guard(() => this.save())(); return true; }
     if (e.key === 'F3') { this.step(e.shiftKey ? -1 : 1).catch(fail); return true; }
@@ -2838,6 +3010,7 @@ class DiffTab {
   }
   shortcut(e) {
     const k = e.key.toLowerCase(), c = e.ctrlKey || e.metaKey;
+    if (c && !e.shiftKey && k === 'e') { if (!this.find.addWord(getSelection().toString())) toast('Select a word first.', 'info'); return true; }
     if (c && k === 'f') { const sel = getSelection().toString().trim(); this.find.open(false, sel && !sel.includes('\n') && sel.length < 100 ? sel : ''); return true; }
     if (e.key === 'F7') { guard(() => this.nav(e.shiftKey ? -1 : 1))(); return true; }
     if (e.altKey && e.key === 'ArrowDown') { guard(() => this.nav(1))(); return true; }
@@ -2855,8 +3028,10 @@ const actions = {
   async open() { const p = await pickFile(null, 'Open file', true); if (p) await this.openPath(p, pickFile.openAs); },
   async openPath(path, how) {
     const ex = Tabs.list.find(t => t.kind === 'doc' && t.info.path === path); if (ex) { Tabs.activate(ex); return; }
+    if (/\.(png|jpe?g|gif|webp|bmp|ico|svg|avif|pdf)$/i.test(path)) { Tabs.add(new MediaTab(path)); rememberRecent(path); return; }
     const r = await api('open', { path, as: how && how !== 'auto' ? (how.startsWith('table') ? 'table' : how) : (prefs.get('astext', false) ? 'text' : 'auto') }).catch(e => { fail(e); return null; }); if (!r) return;
     const t = new DocTab(r.info, r.minified, how && how.startsWith('table') && how.length > 5 ? { delim: how.slice(5) } : null); Tabs.add(t); if (r.info.path) rememberRecent(r.info.path);
+    if (r.office) toast(`${r.office.what}: showing its text only (no formatting, pictures or charts). Read-only; Save As keeps a copy.`);
     if (r.book) {
       for (const i of r.also || []) Tabs.add(new DocTab(i, false));
       Tabs.activate(t);
@@ -2900,29 +3075,66 @@ const actions = {
   async compareDisk(doc) { await doc.ready(); await this.newDiff({ disk: doc.info.id }, { id: doc.info.id }); },
   async compareWith(doc) { await doc.ready(); const p = await pickFile(null, 'Compare with…'); if (p) await this.newDiff({ id: doc.info.id }, { path: p }); },
   help() {
-    modal('Help & shortcuts', `<div class="help-grid">
-      <b>Find &amp; Replace</b><span><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> — spaces separate items: <code>error timeout</code> finds either (OR) or both on one line (AND, pick in the box). Keep spaces inside one item with quotes: <code>"connection timeout"</code>. <code>-debug</code> excludes. A literal quote is <code>\"</code> and a literal leading dash <code>\-</code>. The <b>“ ”</b> button (Alt+P) searches for everything typed as one phrase, untouched. Toggles: Aa case · ab whole word · .* regex. All matches are highlighted in colour and marked on the right-edge ruler. <kbd>Enter</kbd>/<kbd>Shift+Enter</kbd> or <kbd>F3</kbd> step through.</span>
-      <b>Fix</b><span>Repairs broken JSON/XML in one click: trailing/missing commas, single quotes → double quotes, unquoted keys, comments, True/None/NaN, unclosed brackets or tags, stray &amp;… It also unescapes JSON that is full of <code>\"</code> (escaped text) and opens JSON stored inside a string value as real structure, and tells you what it fixed.</span>
-      <b>Icons</b><span>Buttons show icons; hover for the name. Left to right: <b>Save · Undo/Redo · Find &amp; Replace · Format/Fix · Changes/Compare · Table</b>. Options appear in a slim bar under the icons.</span>
-      <b>Table</b><span>CSV/TSV files open as a table (the <b>Table</b> icon shows any text file that way). Strip icons: <b>separator</b> (comma, tab, ; | space or any one character), <b>header row</b>, <b>funnel = filter</b>, <b>sort</b>, <b>duplicates</b>, ✕ reset. The funnel on a column header lists its values to tick, like Excel; <b>Text filters…</b> adds contains / begins with / &gt; / between… Duplicates can use one column, several together (name + city) or the whole row. Click ⇅ in a header to sort (Shift+click adds levels). Selecting cells shows counts and Sum/Avg on the bottom bar; Ctrl+C copies them.</span>
-      <b>Edit &amp; New</b><span>Every file up to 2 MB opens ready to type in. <b>New</b> (Alt+N) makes a file with the extension you choose: “Start without saving” keeps it in memory until you press <kbd>Ctrl</kbd>+<kbd>S</kbd> and pick a place. <kbd>Tab</kbd>/<kbd>Shift+Tab</kbd> indent, <kbd>Ctrl+/</kbd> comments, <kbd>Ctrl+D</kbd> duplicates a line, Enter keeps the indentation. In a comparison, click any line to retype it. <b>Copy</b> (Ctrl+Shift+C) copies the file or the selection. Bigger files open read-only; Find &amp; Replace, Format and Fix still work.</span>
-      <b>Excel &amp; text tables</b><span><b>.xlsx</b>, <b>.xlsm</b> and <b>.xlsb</b> workbooks open with one tab per sheet (values and dates as Excel shows them; formulas show their last result; saving writes CSV). Tab, pipe, semicolon and comma delimited .txt files open as a table; use “Open as” in the Open dialog to pick text, a table with a chosen separator, JSON or XML.</span>
-      <b>Terminal</b><span>The same engine runs without the browser: <code>kempt gui [file…]</code> this app (two files = compare, <code>--no-open</code> only prints the address) · <code>kempt view FILE</code> viewer in the terminal · <code>kempt format FILE…</code> format in place · <code>kempt diff A B</code> compare · <code>kempt autostart on|off|status</code> · <code>kempt stop</code> · <code>kempt doctor</code> · <code>kempt --help</code> lists everything.</span>
-      <b>Compare</b><span>Side-by-side with inline highlights. <b>›</b>/<b>‹</b> copy one line, <b>»</b>/<b>«</b> a whole block, ✕ removes a line from that side. <kbd>F7</kbd>/<kbd>Shift+F7</kbd> next/previous change. Save each side when done.</span>
-      <b>Viewers</b><span>The <b>eye</b> icon (Alt+V) switches between source and a rendered view: <b>Markdown</b> and <b>HTML</b> files open rendered (HTML runs in a sandbox: no scripts, no outside resources), <b>JSON</b> gets a collapsible tree with search (click a key to copy its path, double-click a value to copy it). Emoji and other Unicode text are shown as they are, and <code>:smile:</code>-style shortcodes work in Markdown.</span>
-      <b>Shortcuts</b><span><kbd>Ctrl</kbd>+<kbd>O</kbd> open · <kbd>Ctrl</kbd>+<kbd>S</kbd> save · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> save as · <kbd>Ctrl</kbd>+<kbd>Z</kbd>/<kbd>Y</kbd> undo/redo · <kbd>Ctrl</kbd>+<kbd>F</kbd>/<kbd>H</kbd> find/replace · <kbd>F3</kbd> next match · <kbd>Ctrl</kbd>+<kbd>G</kbd> go to line · <kbd>Ctrl</kbd>+<kbd>A</kbd> select all, <kbd>Ctrl</kbd>+<kbd>C</kbd> copy · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> format · <kbd>Alt</kbd>+<kbd>V</kbd> rendered view · <kbd>Alt</kbd>+<kbd>T</kbd> table · <kbd>Alt</kbd>+<kbd>W</kbd> close tab · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>]</kbd>/<kbd>[</kbd> next/previous tab · <kbd>F7</kbd>/<kbd>Shift</kbd>+<kbd>F7</kbd> next/previous change · <kbd>F1</kbd> this help. Your browser keeps <kbd>Ctrl</kbd>+<kbd>W</kbd>, <kbd>Ctrl</kbd>+<kbd>T</kbd> and <kbd>Ctrl</kbd>+<kbd>Tab</kbd> for itself.</span>
-      <b>World clock</b><span><kbd>Alt</kbd>+<kbd>K</kbd> — drag the strips to move time, add any city, ⋮⋮ reorders. <b>DST</b> badge and a yearly chart per zone; <b>Clock-change alerts</b> notify before a zone shifts; <b>Meeting finder</b> lists times that suit everyone; 9–17 is hatched on weekends and holidays.</span>
-      <b>Checklist</b><span><kbd>Alt</kbd>+<kbd>J</kbd> — items with an optional reminder (desktop notification and sound) that can repeat daily, weekdays, weekly or monthly, plus a scratchpad.</span>
-      <b>Settings</b><span><b>Appearance</b> theme and clock colours · <b>Editor</b> indentation and file opening · <b>General</b> sound, start at login, browser, updates (off by default) and backup/restore.</span>
-      <b>Other</b><span>Double-click a word to highlight every occurrence · <kbd>Esc</kbd> closes find or clears a selection.</span>
-      </div>`, [{ label: 'Close', primary: true, value: true }]);
+    const feat = [
+      ['Find & Replace', 'Spaces separate words: <code>error timeout</code> finds either (OR) or both on a line (AND, pick in the box). Quote a phrase: <code>"connection timeout"</code>. <code>-debug</code> excludes. A pasted phrase is searched as one phrase.'],
+      ['Fix & Format', 'Fix repairs broken JSON/XML in one click. Format re-indents JSON, XML and many other languages (Settings sets the indent).'],
+      ['Compare', 'Side by side. <b>›</b> <b>‹</b> copy a line, <b>»</b> <b>«</b> a block, <kbd>F7</kbd> next change.'],
+      ['Tables', 'CSV, TSV, Excel and delimited text open as tables: filter, sort, duplicates, column stats.'],
+      ['Viewers', 'Markdown and HTML open rendered; JSON has a collapsible tree.'],
+      ['Clock', 'Add any city, drag strips to set a time, daylight-saving chart and clock-change alerts, company holidays.'],
+      ['Calendar', 'Day, Week, Month, Year and Schedule. Events and meetings have their own colours; in an event use <b>Find a time</b> to pick a slot that suits every zone.'],
+      ['Checklist', 'Tasks with reminders and repeats, grouped by day, plus many notes. Notes are stored encrypted.'],
+    ];
+    const body_fmt = null;
+    const langs = [['JSON, JSONL, XML', 'Built in', 'no install, any size'], ['Python', 'ruff', 'pipx install ruff'], ['JS, TS, JSX, TSX, Vue', 'prettier', 'npm i -g prettier'], ['HTML, CSS, SCSS, Less', 'prettier', 'npm i -g prettier'], ['YAML, Markdown, MDX, JSON5', 'prettier', 'npm i -g prettier'], ['GraphQL, Handlebars', 'prettier', 'npm i -g prettier'], ['Shell (sh, bash, ksh)', 'shfmt', 'apt install shfmt'], ['SQL', 'sqlformat', 'pipx install sqlparse'], ['C, C++, C#, Java', 'clang-format', 'apt install clang-format'], ['Objective-C, Protobuf, CUDA', 'clang-format', 'apt install clang-format'], ['Go', 'gofmt', 'apt install golang-go'], ['Rust', 'rustfmt', 'rustup component add rustfmt'], ['TOML', 'taplo', 'cargo install taplo-cli'], ['Lua', 'stylua', 'cargo install stylua'], ['Terraform (.tf)', 'terraform', 'terraform fmt']];
+    const cmds = [['kempt gui [file…]', 'This app. Two files open as a compare.'], ['kempt view FILE', 'Viewer in the terminal.'], ['kempt format FILE…', 'Format in place.'], ['kempt diff A B', 'Compare two files.'], ['kempt doctor', 'Show which formatters are installed.'], ['kempt notes-export', 'Print your notes as JSON.'], ['kempt stop', 'Stop the background Kempt.']];
+    const fixed = [['Tab / Shift+Tab', 'Indent / outdent'], ['Ctrl+/', 'Comment lines'], ['Ctrl+D', 'Duplicate line'], ['Ctrl+Z / Ctrl+Y', 'Undo / redo'], ['Ctrl+A', 'Select all'], ['Esc', 'Close find, clear selection'], ['Double-click', 'Highlight a word everywhere'], ['Alt+1…9', 'Go to tab']];
+    const body = `<div class="hp-tabs" role="tablist"><button role="tab" data-p="keys" aria-selected="true">Shortcuts</button><button role="tab" data-p="feat" aria-selected="false">Features</button><button role="tab" data-p="fmt" aria-selected="false">Formats</button><button role="tab" data-p="cli" aria-selected="false">Terminal</button></div>
+      <section data-p="keys"><div class="hp-top"><small>Click a key to change it. Esc cancels.</small><button type="button" class="hp-reset">Reset all</button></div><div class="hp-cols"></div>
+        <h4>Fixed</h4><div class="hp-fixed">${fixed.map(([k, d]) => `<span>${esc(d)}</span><span><kbd>${esc(k)}</kbd></span>`).join('')}</div></section>
+      <section data-p="feat" hidden><div class="hp-feat">${feat.map(([t, d]) => `<div><b>${esc(t)}</b><p>${d}</p></div>`).join('')}</div></section>
+      <section data-p="fmt" hidden><p class="hp-note">Format and Fix work on the file you have open. A ✓ marks tools found on this computer; for the others, run the install command. Fix repairs broken JSON and XML.</p><div class="hp-fmt"><b>Language</b><b>Tool</b><b>Install</b>${langs.map(([l, t, i]) => `<span>${esc(l)}</span><span class="tl" data-t="${esc(t)}">${esc(t)}</span><code>${esc(i)}</code>`).join('')}</div></section>
+      <section data-p="cli" hidden><div class="hp-cli">${cmds.map(([c, d]) => `<code>${esc(c)}</code><span>${esc(d)}</span>`).join('')}</div></section>`;
+    modal('Help', body, [{ label: 'Close', primary: true, value: true }]);
+    const m = $('#modals .modal:last-child'); if (!m) return; m.classList.add('help2');
+    api('tools/status').then(r => { const have = new Set(r.tools.filter(t => t.found).map(t => t.name)); m.querySelectorAll('.hp-fmt .tl').forEach(x => { const n = x.dataset.t; if (n === 'Built in' || have.has(n)) { x.textContent = '✓ ' + n; x.style.color = 'var(--ok)'; } else { x.style.color = 'var(--fg-dim)'; x.title = 'Not found on this computer'; const t = r.tools.find(q => q.name === n), c = x.nextElementSibling; if (t && c) c.textContent = t.install; } }); }).catch(() => { });
+    const draw = () => {
+      const host = $('.hp-cols', m), groups = [...new Set(KEYS.ACT.map(a => a[1]))]; host.innerHTML = '';
+      for (const g of groups) {
+        const d = el('div', 'hp-g'); d.innerHTML = `<h4>${esc(g)}</h4>`;
+        for (const [id, , label, def] of KEYS.ACT.filter(a => a[1] === g)) {
+          const r = el('div', 'hp-r'), cur = KEYS.eff(id); r.innerHTML = `<span>${esc(label)}</span><button type="button" class="hp-k${cur !== def ? ' chg' : ''}" title="Click, then press the new keys">${KEYS.pretty(cur)}</button>${cur !== def ? '<button type="button" class="hp-x" title="Back to ' + esc(def) + '" aria-label="Reset">↺</button>' : ''}`;
+          const kb = $('.hp-k', r), rx = $('.hp-x', r);
+          kb.onclick = () => {
+            if (KEYS.rec) return; KEYS.rec = true; kb.textContent = 'Press keys…'; kb.classList.add('rec');
+            const done = () => { KEYS.rec = false; window.removeEventListener('keydown', on, true); draw(); const rb = $('.hp-reset', m); if (rb) rb.focus(); };
+            const on = e => {
+              e.preventDefault(); e.stopPropagation(); if (e.key === 'Escape') return done();
+              const c = KEYS.combo(e); if (!c) return;
+              if (!(e.ctrlKey || e.metaKey || e.altKey || /^F\d+$/.test(e.key))) { toast('Use Ctrl, Alt or a function key.', 'info'); return; }
+              const clash = KEYS.ACT.find(a => a[0] !== id && KEYS.eff(a[0]) === c); if (clash) { toast(c + ' is already used for ' + clash[2], 'info'); return; }
+              const mp = Object.assign({}, KEYS.map()); if (c === def) delete mp[id]; else mp[id] = c; prefs.set('keys', mp); done();
+            };
+            window.addEventListener('keydown', on, true);
+          };
+          if (rx) rx.onclick = () => { const mp = Object.assign({}, KEYS.map()); delete mp[id]; prefs.set('keys', mp); draw(); const rb = $('.hp-reset', m); if (rb) rb.focus(); };
+          d.appendChild(r);
+        }
+        host.appendChild(d);
+      }
+    };
+    draw(); $('.hp-reset', m).onclick = () => { prefs.set('keys', {}); draw(); };
+    const tabs = [...m.querySelectorAll('.hp-tabs button')]; tabs.forEach(t => t.onclick = () => { tabs.forEach(x => x.setAttribute('aria-selected', String(x === t))); m.querySelectorAll('.body > section').forEach(x => x.hidden = x.dataset.p !== t.dataset.p); });
   },
 };
 document.addEventListener('click', async e => { const cb = e.target.closest && e.target.closest('#bl, #br'); if (cb) { const inp = $(cb.id === 'bl' ? '#cl' : '#cr'); const dir = (inp.value.trim().replace(/[\\/][^\\/]*$/, '')) || null; const f = await pickFile(dir, cb.id === 'bl' ? 'Choose the left file' : 'Choose the right file'); if (f) inp.value = f; return; } const bb = e.target.closest && e.target.closest('#nf-browse'); if (bb) { const d = await pickFile($('#nf-dir').value.trim() || null, 'Choose a folder', false, true); if (d) $('#nf-dir').value = d; return; } const b = e.target.closest && e.target.closest('.nf-ext'); if (!b) return; const n = $('#nf-name'); if (!n) return; const v = n.value.trim() || 'untitled'; n.value = v.replace(/\.[^.]*$/, '') + '.' + b.dataset.x; n.focus(); });
 $('#btn-new').onclick = guard(() => actions.newFile());
 $('#btn-open').onclick = guard(() => actions.open());
-$('#btn-compare').onclick = guard(() => actions.compare());
 $('#btn-help').onclick = () => actions.help();
+{ const tb = $('#btn-tools'), tm = $('.tmenu'); const shut = () => { tm.hidden = true; tb.setAttribute('aria-expanded', 'false'); };
+  const fillKeys = () => $$('.tmenu .tk').forEach(k => { k.textContent = KEYS.eff(k.dataset.k); });
+  tb.onclick = e => { e.stopPropagation(); tm.hidden = !tm.hidden; tb.setAttribute('aria-expanded', String(!tm.hidden)); if (!tm.hidden) fillKeys(); };
+  document.addEventListener('mousedown', e => { if (!tm.hidden && !tm.contains(e.target) && e.target !== tb && !tb.contains(e.target)) shut(); }); tm.addEventListener('click', shut); document.addEventListener('keydown', e => { if (e.key === 'Escape' && !tm.hidden) shut(); }); }
 $('#btn-clock').onclick = () => actions.clock();
 $('#btn-notes').onclick = () => actions.notes();
 $('#btn-cal').onclick = () => actions.calendar();
@@ -2949,6 +3161,111 @@ document.addEventListener('keydown', e => {
 window.addEventListener('beforeunload', e => { if (!window.__quitting && Tabs.list.some(t => t.dirty && t.dirty())) { e.preventDefault(); e.returnValue = ''; } });
 window.addEventListener('pagehide', () => { prefs.beacon(); Notes.beacon(); if (CAL._t) { try { fetch('/api/calendar/set', { method: 'POST', keepalive: true, headers: { 'X-Token': TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ patch: { events: CAL.events, cfg: CAL.cfg } }) }); } catch (_) { } } });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') Notes.arm(); });
+
+
+/* ───────────── date format and pickers ───────────── */
+const DF = {
+  OPTS: [['ymd/', '2026/11/15'], ['ymd-', '2026-11-15'], ['ymd.', '2026.11.15'], ['dmy/', '15/11/2026'], ['dmy-', '15-11-2026'], ['dmy.', '15.11.2026'], ['mdy/', '11/15/2026'], ['mdy-', '11-15-2026'], ['dMy', '15 Nov 2026'], ['Mdy', 'Nov 15, 2026'], ['wdMy', 'Sun, 15 Nov 2026'], ['long', 'Sunday, 15 November 2026']],
+  cur() { const f = prefs.get('dfmt', 'ymd/'); return this.OPTS.some(o => o[0] === f) ? f : 'ymd/'; },
+  MON: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  fmt(y, m, d, noYear) {
+    const f = this.cur(), P = n => String(n).padStart(2, '0'), dt = new Date(Date.UTC(y || 2000, m - 1, d, 12));
+    if (f === 'dMy') return d + ' ' + this.MON[m - 1] + (noYear ? '' : ' ' + y); if (f === 'Mdy') return this.MON[m - 1] + ' ' + d + (noYear ? '' : ', ' + y);
+    if (f === 'wdMy') return noYear ? d + ' ' + this.MON[m - 1] : dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).replace(/,/g, ',');
+    if (f === 'long') return dt.toLocaleDateString('en-GB', noYear ? { day: 'numeric', month: 'long', timeZone: 'UTC' } : { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+    const sep = f[3], parts = f.slice(0, 3) === 'ymd' ? [y, P(m), P(d)] : f.slice(0, 3) === 'dmy' ? [P(d), P(m), y] : [P(m), P(d), y];
+    return (noYear ? parts.filter(x => String(x).length < 4) : parts).join(sep);
+  },
+  key(k, noYear) { const [y, m, d] = k.split('-').map(Number); return this.fmt(y, m, d, noYear); },
+  parse(t) {   // accepts the chosen format and the common others; returns 'YYYY-MM-DD' or ''
+    t = t.trim().toLowerCase().replace(/,/g, ' '); if (!t) return '';
+    let mo = this.MON.findIndex(m => new RegExp('\\b' + m.toLowerCase()).test(t)); const n = (t.match(/\d+/g) || []).map(Number);
+    let y, m, d; if (mo >= 0) { m = mo + 1; if (n.length < 2) return ''; if (n[0] > 31) { y = n[0]; d = n[1]; } else { d = n[0]; y = n[1]; } }
+    else { if (n.length !== 3) return ''; const f = this.cur().slice(0, 3); if (n[0] > 31 || String(t.match(/\d+/)[0]).length === 4) [y, m, d] = n; else if (f === 'mdy') [m, d, y] = n; else [d, m, y] = n; }
+    if (y < 100) y += 2000; const dt = new Date(Date.UTC(y, m - 1, d)); if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return '';
+    return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+  },
+};
+const TM = {
+  h12: () => !!prefs.get('clock12', false),
+  fmt(v) { if (!/^\d\d:\d\d$/.test(v || '')) return ''; const [h, m] = v.split(':').map(Number); return this.h12() ? ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM') : v; },
+  parse(t) { t = t.trim().toLowerCase().replace(/\./g, ''); if (!t) return ''; const m = t.match(/^(\d{1,2})(?::?(\d{2}))?\s*(a|p)?m?$/); if (!m) return ''; let h = +m[1], mi = +(m[2] || 0); if (m[3]) { if (h > 12 || h < 1) return ''; h = h % 12 + (m[3] === 'p' ? 12 : 0); } if (h > 23 || mi > 59) return ''; return String(h).padStart(2, '0') + ':' + String(mi).padStart(2, '0'); },
+};
+const Pick = {
+  pop: null,
+  close() { if (this.pop) { this.pop.remove(); this.pop = null; document.removeEventListener('mousedown', this._md, true); } },
+  enhance(orig) {
+    if (orig._pk || orig.dataset.native) return; const type = orig.type, kind = type === 'date' ? 'd' : type === 'time' ? 't' : 'dt'; orig._pk = 1;
+    let val = orig.value || '', dis = false; const vis = document.createElement('input'); vis.type = 'text'; vis.className = (orig.className ? orig.className + ' ' : '') + 'pk'; vis.style.cssText = orig.style.cssText; vis.autocomplete = 'off'; vis.spellcheck = false;
+    for (const a of ['aria-label', 'title', 'placeholder']) if (orig.getAttribute(a)) vis.setAttribute(a, orig.getAttribute(a));
+    if (!vis.placeholder) vis.placeholder = kind === 'd' ? DF.fmt(2026, 12, 31) : kind === 't' ? TM.fmt('13:30') : DF.fmt(2026, 12, 31) + ' ' + TM.fmt('13:30');
+    const lab = orig.id && document.querySelector('label[for="' + orig.id + '"]'); if (lab && !vis.getAttribute('aria-label')) vis.setAttribute('aria-label', lab.textContent.trim());
+    orig.type = 'hidden'; orig.parentNode.insertBefore(vis, orig); vis.dataset.pk = kind; if (orig.id) { vis.id = orig.id + '-pk'; if (lab) lab.htmlFor = vis.id; }
+    const split = v => { const [d, t] = String(v || '').split('T'); return { d: kind === 't' ? '' : (d || ''), t: kind === 't' ? (d || '') : (t || '') }; };
+    const join = (d, t) => kind === 'd' ? d : kind === 't' ? t : (d ? d + 'T' + (t || '09:00') : '');
+    const show = () => { const { d, t } = split(val); vis.value = kind === 'd' ? (d ? DF.key(d) : '') : kind === 't' ? TM.fmt(t) : (d ? DF.key(d) + ' ' + TM.fmt(t || '09:00') : ''); };
+    const fire = () => { for (const n of ['input', 'change']) orig.dispatchEvent(new Event(n, { bubbles: true })); };
+    const set = v => { val = v; show(); fire(); };
+    Object.defineProperty(orig, 'value', { get: () => val, set: v => { val = String(v == null ? '' : v); show(); }, configurable: true });
+    Object.defineProperty(orig, 'disabled', { get: () => dis, set: v => { dis = !!v; vis.disabled = dis; }, configurable: true });
+    Object.defineProperty(orig, 'hidden', { get: () => vis.hidden, set: v => { vis.hidden = !!v; }, configurable: true });
+    Object.defineProperty(orig, 'focus', { value: () => vis.focus(), configurable: true });
+    show();
+    const commit = () => {
+      const txt = vis.value.trim(), cur = split(val); if (!txt) { if (kind === 'd' || kind === 'dt') { if (val) set(''); } show(); return; }
+      let d = cur.d, t = cur.t; if (kind === 'd') d = DF.parse(txt); else if (kind === 't') t = TM.parse(txt); else { const m = txt.match(/^(.*?)(?:\s+(\d{1,2}(?::?\d{2})?\s*[ap]?\.?m?\.?))?$/i); const tp = txt.match(/(\d{1,2}:?\d{2}\s*[ap]?m?|\d{1,2}\s*[ap]m)\s*$/i); const dpart = tp ? txt.slice(0, tp.index).trim() : txt; d = DF.parse(dpart) || cur.d; t = tp ? TM.parse(tp[1]) || cur.t : cur.t || '09:00'; if (!DF.parse(dpart)) { show(); return; } }
+      if ((kind === 'd' && !d) || (kind === 't' && !t)) { show(); toast(kind === 'd' ? 'Use ' + DF.fmt(2026, 12, 31) : 'Use a time like ' + TM.fmt('13:30'), 'info'); return; }
+      const nv = join(d, t); if (nv !== val) set(nv); else show();
+    };
+    vis.addEventListener('change', commit); vis.addEventListener('keydown', e => { if (e.key === 'Enter') { commit(); this.close(); } else if (e.key === 'Escape' && this.pop) { this.close(); e.stopPropagation(); } else if (e.key === 'ArrowDown' && !this.pop) this.open(vis, kind, split, join, set, () => val); });
+    vis.addEventListener('focus', () => this.open(vis, kind, split, join, set, () => val)); vis.addEventListener('click', () => { if (!this.pop) this.open(vis, kind, split, join, set, () => val); });
+  },
+  open(vis, kind, split, join, set, get) {
+    this.close(); const pop = el('div', 'pkp'); this.pop = pop; const cur = () => split(get()), now = new Date();
+    let vy, vm; { const d = cur().d || HOL.ymd0(now); [vy, vm] = d.split('-').map(Number); }
+    const build = () => {
+      pop.innerHTML = ''; const c = cur();
+      if (kind !== 't') {
+        const cal = el('div', 'pkc'), ws = Math.max(0, Math.min(6, +prefs.get('ws', 1) || 0)), first = new Date(Date.UTC(vy, vm - 1, 1)), lead = (first.getUTCDay() - ws + 7) % 7, n = new Date(Date.UTC(vy, vm, 0)).getUTCDate();
+        cal.innerHTML = `<div class="pkh"><button type="button" class="p" aria-label="Previous month">${ic('chev', 12)}</button><b>${DF.MON[vm - 1]} ${vy}</b><button type="button" class="n" aria-label="Next month">${ic('chev', 12)}</button></div><div class="pkg">${[0, 1, 2, 3, 4, 5, 6].map(i => `<i>${'SMTWTFS'[(i + ws) % 7]}</i>`).join('')}${'<span></span>'.repeat(lead)}</div>`;
+        const g = $('.pkg', cal), today = HOL.ymd0(now);
+        for (let d = 1; d <= n; d++) { const k = vy + '-' + String(vm).padStart(2, '0') + '-' + String(d).padStart(2, '0'), b = el('button'); b.type = 'button'; b.textContent = d; if (k === c.d) b.className = 'sel'; else if (k === today) b.className = 'today'; b.onmousedown = e => e.preventDefault(); b.onclick = () => { set(join(k, c.t)); if (kind === 'd') this.close(); else build(); }; g.appendChild(b); }
+        $('.p', cal).onclick = () => { vm--; if (vm < 1) { vm = 12; vy--; } build(); }; $('.n', cal).onclick = () => { vm++; if (vm > 12) { vm = 1; vy++; } build(); };
+        const ft = el('div', 'pkf'); ft.innerHTML = '<button type="button" class="td">Today</button>' + (kind === 'dt' || kind === 'd' ? '<button type="button" class="cl">Clear</button>' : ''); $('.td', ft).onclick = () => { set(join(today, c.t)); if (kind === 'd') this.close(); else { vy = now.getFullYear(); vm = now.getMonth() + 1; build(); } }; const cl = $('.cl', ft); if (cl) cl.onclick = () => { set(''); this.close(); };
+        cal.appendChild(ft); pop.appendChild(cal);
+      }
+      if (kind !== 'd') {
+        const tl = el('div', 'pkt'); for (let m = 0; m < 1440; m += 30) { const v = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'), b = el('button'); b.type = 'button'; b.textContent = TM.fmt(v); if (v === c.t) b.className = 'sel'; b.onmousedown = e => e.preventDefault(); b.onclick = () => { set(join(c.d || HOL.ymd0(now), v)); if (kind === 't') this.close(); else build(); }; tl.appendChild(b); }
+        pop.appendChild(tl); setTimeout(() => { const s2 = $('.sel', tl) || tl.children[18]; if (s2) tl.scrollTop = Math.max(0, s2.offsetTop - 70); }, 0);
+      }
+    };
+    build(); document.body.appendChild(pop);
+    const r = vis.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight; pop.style.left = Math.max(6, Math.min(innerWidth - w - 6, r.left)) + 'px'; pop.style.top = (r.bottom + h + 8 > innerHeight && r.top > h + 8 ? r.top - h - 4 : r.bottom + 4) + 'px';
+    this._md = e => { if (!pop.contains(e.target) && e.target !== vis) this.close(); }; document.addEventListener('mousedown', this._md, true);
+  },
+  start() {
+    const go = root => { if (root.querySelectorAll) root.querySelectorAll('input[type=date],input[type=time],input[type=datetime-local]').forEach(i => this.enhance(i)); };
+    go(document); new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) { if (n.matches && n.matches('input[type=date],input[type=time],input[type=datetime-local]')) this.enhance(n); else go(n); } }).observe(document.body, { childList: true, subtree: true });
+  },
+};
+
+/* one zone search for every box: city, abbreviation (cst, cdt, ist), words (central, india), POSIX names (cst6cdt) and offsets (-6, utc+5:30) */
+const ZP = {
+  KEY: { central: 'America/Chicago', eastern: 'America/New_York', pacific: 'America/Los_Angeles', mountain: 'America/Denver', alaska: 'America/Anchorage', hawaii: 'Pacific/Honolulu', atlantic: 'America/Halifax', newfoundland: 'America/St_Johns', india: 'Asia/Kolkata', uk: 'Europe/London', britain: 'Europe/London', england: 'Europe/London', ireland: 'Europe/Dublin', 'central europe': 'Europe/Paris', 'western europe': 'Europe/Lisbon', 'eastern europe': 'Europe/Athens', china: 'Asia/Shanghai', japan: 'Asia/Tokyo', korea: 'Asia/Seoul', singapore: 'Asia/Singapore', gulf: 'Asia/Dubai', pakistan: 'Asia/Karachi', bangladesh: 'Asia/Dhaka', 'sri lanka': 'Asia/Colombo', nepal: 'Asia/Kathmandu', thailand: 'Asia/Bangkok', vietnam: 'Asia/Ho_Chi_Minh', philippines: 'Asia/Manila', indonesia: 'Asia/Jakarta', 'australia eastern': 'Australia/Sydney', 'australia central': 'Australia/Adelaide', 'australia western': 'Australia/Perth', 'new zealand': 'Pacific/Auckland', brazil: 'America/Sao_Paulo', mexico: 'America/Mexico_City', 'south africa': 'Africa/Johannesburg', nigeria: 'Africa/Lagos', kenya: 'Africa/Nairobi', egypt: 'Africa/Cairo', israel: 'Asia/Jerusalem', turkey: 'Europe/Istanbul', russia: 'Europe/Moscow', cst6cdt: 'America/Chicago', est5edt: 'America/New_York', mst7mdt: 'America/Denver', pst8pdt: 'America/Los_Angeles', gmt: 'Europe/London', utc: 'UTC' },
+  list(q, have, max = 8) {
+    const v = q.trim().toLowerCase().replace(/\s+/g, ' '), out = [], add = z => { if (z && out.length < max && !have.has(z) && !out.includes(z) && WC.ok(z)) out.push(z); };
+    if (!v) return out; const up = v.toUpperCase().replace(/\s+/g, '');
+    add(this.KEY[v]); add(WC.ALIAS[up]); for (const z of WC.byAbbr(up)) add(z);
+    const m = v.match(/^(?:utc|gmt)?\s*([+\-−])\s*(\d{1,2})(?::?(\d\d))?$/);
+    if (m) { const mins = (m[1] === '+' ? 1 : -1) * (+m[2] * 60 + (+m[3] || 0)), now = Date.now(); for (const z of Object.keys(WC.ABBR).concat(WC.zones())) if (WC.offset(z, now) === mins) add(z); }
+    for (const k of Object.keys(this.KEY)) if (k.startsWith(v) && k.length > 3) add(this.KEY[k]);
+    const w = v.replace(/ /g, '_'); for (const z of WC.zones()) if (z.toLowerCase().includes(w)) add(z);
+    return out;
+  },
+  row(z) { const now = Date.now(), ab = WC.abbr(z, now), o = WC.offName(WC.offset(z, now)); return `<span>${esc(WC.city(z))}</span><small>${ab ? esc(ab) + ' · ' : ''}${esc(o)}${WC.isDst(z, now) ? ' · DST' : ''}<i>${esc(z)}</i></small>`; },
+  fill(sg, out, pick) { sg.innerHTML = out.length ? '' : '<div style="cursor:default"><small>No match. Try a city, cst, central or -6</small></div>'; for (const z of out) { const d = el('div'); d.dataset.z = z; d.innerHTML = this.row(z); d.onmousedown = e => { e.preventDefault(); pick(z); }; sg.appendChild(d); } sg.hidden = false; },
+};
+
 window.addEventListener('error', e => console.error('UI error:', e.message));
 
 
@@ -2972,10 +3289,10 @@ const WC = {
   LEGACY: { 'Asia/Calcutta': 'Asia/Kolkata', 'Asia/Saigon': 'Asia/Ho_Chi_Minh', 'Asia/Rangoon': 'Asia/Yangon', 'Asia/Katmandu': 'Asia/Kathmandu', 'Europe/Kiev': 'Europe/Kyiv', 'Asia/Dacca': 'Asia/Dhaka', 'Atlantic/Faeroe': 'Atlantic/Faroe' },
   // day/night colours by season: [night, day, working hours, night text, day text]
   SEASONS: {
-    spring: { name: 'Spring', light: ['#35514a', '#e9f4e1', '#a5d49a', '#cfe3d9', '#31503a'], dark: ['#2f4a43', '#3a5042', '#5d9a63', '#cfe3d9', '#e4f2e0'] },
-    summer: { name: 'Summer', light: ['#1f3a62', '#fdf1c4', '#ffc552', '#c9d8ee', '#5a4a12'], dark: ['#223d66', '#5a5230', '#c99a2e', '#c9d8ee', '#fbf0c8'] },
-    autumn: { name: 'Autumn', light: ['#44283a', '#f6e4c8', '#e29a52', '#e9d2d9', '#5b3a1d'], dark: ['#41293a', '#5a4330', '#b9692d', '#e9d2d9', '#f6e4c8'] },
-    winter: { name: 'Winter', light: ['#25345a', '#e8f0f9', '#97bfe3', '#cdd8ee', '#2f4468'], dark: ['#2a3a60', '#38475f', '#4f7fae', '#cdd8ee', '#e3edf8'] },
+    spring: { name: 'Spring', light: ['#a9c0b6', '#f1f7ea', '#a5d49a', '#2d4a40', '#31503a'], dark: ['#2f4a43', '#3a5042', '#5d9a63', '#cfe3d9', '#e4f2e0'] },
+    summer: { name: 'Summer', light: ['#a9bbd8', '#fff6d6', '#ffc552', '#1f3a62', '#5a4a12'], dark: ['#223d66', '#5a5230', '#c99a2e', '#c9d8ee', '#fbf0c8'] },
+    autumn: { name: 'Autumn', light: ['#c9aab9', '#f9ecd7', '#eaa862', '#4a2a3a', '#5b3a1d'], dark: ['#41293a', '#5a4330', '#b9692d', '#e9d2d9', '#f6e4c8'] },
+    winter: { name: 'Winter', light: ['#aab6d6', '#eef4fb', '#97bfe3', '#25345a', '#2f4468'], dark: ['#2a3a60', '#38475f', '#4f7fae', '#cdd8ee', '#e3edf8'] },
   },
   seasonOf(ms) { const m = new Date(ms).getMonth(); return m >= 2 && m <= 4 ? 'spring' : m >= 5 && m <= 7 ? 'summer' : m >= 8 && m <= 10 ? 'autumn' : 'winter'; },   // northern-hemisphere months
   local: () => { const z = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; return WC.LEGACY[z] || z; },
@@ -3157,6 +3474,7 @@ const HOL = {
   cache: {},
   year(cc, y) { const k = cc + y; return this.cache[k] || (this.cache[k] = this.list(cc, y)); },
   country(z) { if (/^(Asia\/(Kolkata|Calcutta))$/.test(z)) return 'IN'; if (z === 'Europe/London') return 'GB'; if (z === 'Europe/Berlin') return 'DE'; if (z === 'Europe/Paris') return 'FR'; if (/^Australia\//.test(z)) return 'AU'; if (/^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Boise|Indiana\/|Kentucky\/|North_Dakota\/|Juneau|Adak)|^Pacific\/Honolulu$/.test(z)) return 'US'; return null; },
+  fmt(d, y) { return (y ? 'every ' : '') + DF.key(d, y); },
   ymd0: d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'),
   weekend() { const w = prefs.get('wkend', null); return Array.isArray(w) ? w.filter(x => Number.isInteger(x) && x >= 0 && x <= 6) : [0, 6]; },
   hidden() { const a = prefs.get('holx', []); return Array.isArray(a) ? a.filter(x => typeof x === 'string') : []; },
@@ -3175,6 +3493,27 @@ const HOL = {
     return res.sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : 0).slice(0, n);
   },
 };
+class MediaTab {
+  constructor(path) {
+    this.kind = 'media'; this.path = path; this.name = path.split(/[\\/]/).pop(); this.pdf = /\.pdf$/i.test(path); this.icon = FI.ic(path, 14); this.z = 1;
+    this.panel = el('div', 'panel');
+    const url = `/media?t=${encodeURIComponent(TOKEN)}&path=${encodeURIComponent(path)}`;
+    this.panel.innerHTML = this.pdf
+      ? `<div class="media"><iframe class="mpdf" src="${url}" title="${esc(this.name)}"></iframe></div>`
+      : `<div class="media"><div class="mbar"><button class="mz" data-z="out" title="Zoom out">−</button><button class="mz" data-z="fit" title="Fit to window">Fit</button><button class="mz" data-z="one" title="Actual size">100%</button><button class="mz" data-z="in" title="Zoom in">+</button><span class="mi"></span></div><div class="mimg"><img src="${url}" alt="${esc(this.name)}"></div></div>`;
+    if (!this.pdf) {
+      const img = this.panel.querySelector('img'), info = this.panel.querySelector('.mi'), box = this.panel.querySelector('.mimg');
+      const apply = () => { if (this.z === 0) { img.style.maxWidth = '100%'; img.style.maxHeight = '100%'; img.style.width = ''; } else { img.style.maxWidth = 'none'; img.style.maxHeight = 'none'; img.style.width = (img.naturalWidth * this.z) + 'px'; } };
+      this.z = 0;
+      img.onload = () => { info.textContent = `${img.naturalWidth} × ${img.naturalHeight} px`; apply(); };
+      img.onerror = () => { info.textContent = 'This picture could not be shown.'; };
+      this.panel.querySelectorAll('.mz').forEach(b => b.onclick = () => { const k = b.dataset.z; if (k === 'fit') this.z = 0; else if (k === 'one') this.z = 1; else this.z = Math.max(.1, Math.min(8, (this.z || 1) * (k === 'in' ? 1.25 : 0.8))); apply(); });
+    }
+  }
+  title() { return this.name; }
+  tooltip() { return this.path; }
+  onShow() { const sb = document.getElementById('sb-path'); if (sb) sb.textContent = this.path; }
+}
 class ClockTab {
   constructor() {
     this.kind = 'clock'; this.icon = ic('clock', 14); this.ref = null; this.timer = 0;
@@ -3196,29 +3535,14 @@ class ClockTab {
         <div class="wld"><span>Alert me</span><span class="wl"></span><span>before</span><button class="wmine" title="Watch every zone on your clock that uses daylight saving">Watch my clock zones</button></div>
         <div class="wup"></div>
         <p class="hint">Alerts use the same desktop notification and sound as reminders. Kempt schedules the next 12 months each time it is opened; keep it running in the background (Settings → General) so alerts arrive with no browser open.</p></div></section>
-      <section class="meet" data-f="meet"><button class="fold" aria-expanded="true"><span class="car"></span>Meeting finder</button><div class="fb">
-        <div class="mcal"><div class="mch"><button type="button" class="mcp" aria-label="Previous month">‹</button><b class="mct"></b><button type="button" class="mcn" aria-label="Next month">›</button><button type="button" class="mcnow">Today</button></div><div class="mcg" role="grid"></div><div class="mcl"><span><i class="s1"></i>search window</span><span><i class="s2"></i>weekend / holiday</span><span><i class="s3"></i>start day</span></div></div>
-        <div class="mrow"><label>Length <select class="mlen"><option value="30">30 min</option><option value="60">1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option></select></label>
-          <label>Working hours <select class="mfrom"></select> to <select class="mto"></select></label>
-          <label>Look ahead <select class="mdays"><option value="3">3 days</option><option value="7">7 days</option><option value="14">14 days</option></select></label></div>
-        <div class="dsx"><input type="text" class="ma" placeholder="Add someone's zone, e.g. Berlin, Chicago, Singapore…" spellcheck="false" aria-label="Add a zone to the meeting"><div class="dsug msug" hidden></div></div>
-        <div class="mz"></div>
-        <details class="mmore"><summary>More: check one specific time, or show times in another zone</summary>
-        <div class="mrow mpr"><span>Check a time</span><input type="datetime-local" class="mt" aria-label="Proposed meeting time"><span>in</span><select class="mtz" aria-label="Zone the time is in"></select><button class="mtgo" type="button" title="Show this moment on the clock">Show on clock</button></div>
-        <div class="mchk"></div>
-        <div class="mrow"><label>Show suggestions in <select class="mshow" aria-label="Zone for the suggested times"></select></label></div>
-        </details>
-        <div class="mres"></div>
-        <p class="hint">Finds times inside working hours for everyone ticked, skipping weekends and holidays in each zone. Type a time in any zone to see how it lands for everyone. Neighbouring times are joined into one block. Click a block to show its start on the clock.</p></div></section>
       <section class="hol" data-f="hol"><button class="fold" aria-expanded="true"><span class="car"></span>Holidays &amp; working days</button><div class="fb">
         <div class="hsel"><label>Built-in list for <select class="hc"></select></label><span class="hwe"><span>Weekend days</span></span></div>
         <div class="hcols"><div><h4>Built-in <small class="hhid"></small></h4><div class="hl"></div></div>
-        <div><h4>Your company holidays <small class="hcnt"></small></h4><div class="hl hl2"></div>
-        <div class="hadd"><input type="date" class="hd" aria-label="Date"><input type="text" class="hn" placeholder="Name, e.g. Diwali, Founders' day" spellcheck="false" aria-label="Name"><select class="hs" aria-label="Applies to"></select><label><input type="checkbox" class="hy"> every year</label><button class="hgo">Add</button></div>
+        <div><h4>Your company holidays <small class="hcnt"></small></h4>        <div class="hadd"><input type="date" class="hd" aria-label="Date"><input type="text" class="hn" placeholder="Name, e.g. Diwali, Founders' day" spellcheck="false" aria-label="Name"><select class="hs" aria-label="Applies to"></select><label><input type="checkbox" class="hy"> every year</label><button class="hgo">Add</button></div>
         <div class="hadd"><button class="hbulk" type="button">Paste a list…</button><button class="hexp" type="button">Copy list</button><button class="hclr" type="button">Remove all</button></div>
-        <div class="hpaste" hidden><textarea class="hta" rows="5" spellcheck="false" placeholder="One per line, for example:&#10;2027-01-26 Republic Day&#10;15/08/2027, Independence Day&#10;2027-11-01 Company offsite day"></textarea><div class="hadd"><label><input type="checkbox" class="hpy"> these repeat every year</label><button class="hdo" type="button">Import</button></div></div></div></div>
-        <p class="hint">Built-in holidays cover fixed dates, weekday rules and Easter-based days for a few countries; use <b>Hide</b> for any that your company does not observe. Holidays that follow the moon (Diwali, Eid, Holi, Chinese New Year…) change every year and cannot be worked out offline, so add them under <b>Your company holidays</b> (scope them to one country or all zones; tick "every year" for fixed dates). Holidays and weekend days are skipped when finding meeting times.</p></div></section>
-      <p class="hint">Click or drag on any hour strip to move the marker; every zone follows. Arrow keys on a strip move it by 15 minutes. Drag ⋮⋮ to reorder. Times come from this computer's clock; no internet is used.</p></div></div>`;
+        <div class="hpaste" hidden><textarea class="hta" rows="5" spellcheck="false" placeholder="One per line, for example:&#10;2027-01-26 Republic Day&#10;15/08/2027, Independence Day&#10;2027-11-01 Company offsite day"></textarea><div class="hadd"><label><input type="checkbox" class="hpy"> these repeat every year</label><button class="hdo" type="button">Import</button></div></div><div class="hl hl2"></div></div></div>
+        <p class="hint">Hide built-in days you do not observe. Moon-based holidays (Diwali, Eid…) change yearly, so add them as company holidays. Weekends and holidays are skipped when finding meeting times.</p></div></section>
+      <p class="hint">Drag an hour strip to move the time; arrow keys step 15 minutes. Drag ⋮⋮ to reorder sections.</p></div></div>`;
     const q = s => $(s, this.panel); this.rows = q('.rows'); this.sug = q('.sug'); this.add = q('.add'); this.cur = q('.cur'); this.grid = q('.grid');
     q('.now').onclick = () => { this.ref = null; this.dt.value = ''; this.update(); this.schedule(); };
     this.dt = q('.dt'); this.dz = q('.dz'); this.dz.value = '';
@@ -3243,15 +3567,6 @@ class ClockTab {
       const wl = q('.wl'); for (const [n, lb] of DSTA.LEADS) { const l = el('label'); l.innerHTML = `<input type="checkbox" data-l="${n}"> ${lb}`; wl.appendChild(l); }
       wl.onchange = () => { const c = DSTA.cfg(); c.lead = [...wl.querySelectorAll('input:checked')].map(x => +x.dataset.l); DSTA.set(c); this._wk = null; this.alerts(); };
       q('.wmine').onclick = () => { const c = DSTA.cfg(); for (const z of this.zones) if (WC.dst(z, new Date().getUTCFullYear()).uses && !c.zones.includes(z)) c.zones.push(z); DSTA.set(c); this._wk = null; this.alerts(); }; }
-    { const mt = q('.mt'), mtz = q('.mtz'); mt.onchange = mtz.onchange = () => this.mcheck(); q('.mtgo').onclick = () => { if (this._mt != null) { this.ref = this._mt; this.update(); this.schedule(); } };
-      q('.mshow').onchange = () => { const n = this.mcfg(); n.show = q('.mshow').value === WC.local() ? '' : q('.mshow').value; this.mset(n); }; }
-    { const c0 = this.mcfg(), fr = q('.mfrom'), to = q('.mto'), opt = (a, b) => { for (let h = a; h <= b; h++) { const o = el('option'); o.value = h; o.textContent = (h < 10 ? '0' : '') + h + ':00'; (a === 6 ? fr : to).appendChild(o); } };
-      opt(6, 12); opt(13, 22); fr.value = c0.from; to.value = c0.to; q('.mlen').value = c0.len; q('.mdays').value = c0.days;
-      const ch = () => { const n = this.mcfg(); n.len = +q('.mlen').value; n.from = +fr.value; n.to = +to.value; n.days = +q('.mdays').value; if (n.to <= n.from) { n.to = Math.min(22, n.from + 1); to.value = n.to; } this.mset(n); };
-      fr.onchange = to.onchange = q('.mlen').onchange = q('.mdays').onchange = ch;
-      const i = q('.ma'), sg = q('.msug'); const pick = z => { const n = this.mcfg(); n.x.push(z); i.value = ''; sg.hidden = true; this.mset(n); };
-      i.oninput = i.onfocus = () => this.zsug(i, sg, new Set([...this.zones, ...this.mcfg().x]), pick); i.onblur = () => { sg.hidden = true; };
-      i.onkeydown = e => { if (e.key === 'Escape') sg.hidden = true; else if (e.key === 'Enter') { const f = $('div[data-z]', sg); if (f) pick(f.dataset.z); } }; }
     this.hc = q('.hc'); this.hc.innerHTML = '<option value="">None</option>' + Object.entries(HOL.NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
     this.hc.value = prefs.get('holc', null) ?? (HOL.country(WC.local()) || ''); this.hc.onchange = () => { prefs.set('holc', this.hc.value); this.holidays(); this.update(); };
     this.hd = q('.hd'); this.hn = q('.hn'); this.hy = q('.hy'); this.hs = q('.hs');
@@ -3259,9 +3574,9 @@ class ClockTab {
     { const we = q('.hwe'); const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       days.forEach((n, d) => { const l = el('label'); l.innerHTML = `<input type="checkbox" data-d="${d}"> ${n}`; we.appendChild(l); });
       const paint = () => { const w = HOL.weekend(); we.querySelectorAll('input').forEach(c => { c.checked = w.includes(+c.dataset.d); }); }; paint();
-      we.onchange = () => { const w = [...we.querySelectorAll('input:checked')].map(c => +c.dataset.d); prefs.set('wkend', w); this.update(); this.meet(); this.holidays(); }; }
+      we.onchange = () => { const w = [...we.querySelectorAll('input:checked')].map(c => +c.dataset.d); prefs.set('wkend', w); this.update(); this.holidays(); }; }
     const own = () => HOL.custom();
-    q('.hgo').onclick = () => { const n = this.hn.value.trim(); if (!/^\d{4}-\d\d-\d\d$/.test(this.hd.value) || !n) { toast('Pick a date and give it a name.', 'info'); return; } const a = own(); const e = { d: this.hd.value, n: n.slice(0, 80), y: this.hy.checked }; if (this.hs.value) e.c = this.hs.value; a.push(e); prefs.set('hols', a); this.hn.value = ''; this.hy.checked = false; q('.hgo').textContent = 'Add'; this.holidays(); this.update(); this.meet(); };
+    q('.hgo').onclick = () => { const n = this.hn.value.trim(); if (!/^\d{4}-\d\d-\d\d$/.test(this.hd.value) || !n) { toast('Pick a date and give it a name.', 'info'); return; } const a = own(); const e = { d: this.hd.value, n: n.slice(0, 80), y: this.hy.checked }; if (this.hs.value) e.c = this.hs.value; a.push(e); prefs.set('hols', a); this.hn.value = ''; this.hy.checked = false; q('.hgo').textContent = 'Add'; this.holidays(); this.update(); };
     q('.hbulk').onclick = () => { const p = q('.hpaste'); p.hidden = !p.hidden; if (!p.hidden) q('.hta').focus(); };
     q('.hdo').onclick = () => {
       const lines = q('.hta').value.split(/\r?\n/).map(l => l.trim()).filter(Boolean), a = own(), bad = []; let ok = 0;
@@ -3269,14 +3584,9 @@ class ClockTab {
         if (!d) { bad.push(ln); continue; } const e = { d, n: m[2].trim().slice(0, 80), y: q('.hpy').checked }; if (this.hs.value) e.c = this.hs.value; if (!a.some(x => x.d === e.d && x.n === e.n)) { a.push(e); ok++; } }
       if (a.length > 400) { toast('Too many holidays (400 at most).', 'err'); return; }
       prefs.set('hols', a); if (!bad.length) { q('.hta').value = ''; q('.hpaste').hidden = true; } else q('.hta').value = bad.join('\n');
-      toast(`${ok} holiday${ok === 1 ? '' : 's'} added` + (bad.length ? `; ${bad.length} line${bad.length === 1 ? '' : 's'} not understood (left in the box)` : ''), bad.length ? 'info' : 'ok', 5000); this.holidays(); this.update(); this.meet(); };
+      toast(`${ok} holiday${ok === 1 ? '' : 's'} added` + (bad.length ? `; ${bad.length} line${bad.length === 1 ? '' : 's'} not understood (left in the box)` : ''), bad.length ? 'info' : 'ok', 5000); this.holidays(); this.update(); };
     q('.hexp').onclick = async () => { const t = own().sort((a, b) => a.d < b.d ? -1 : 1).map(h => `${h.d}\t${h.n}`).join('\n'); if (!t) { toast('No company holidays to copy yet.', 'info'); return; } try { await navigator.clipboard.writeText(t); toast('List copied: paste it into a file or into another Kempt.', 'ok', 4000); } catch (_) { q('.hpaste').hidden = false; q('.hta').value = t; q('.hta').select(); toast('Copy it from the box.', 'info'); } };
-    q('.hclr').onclick = () => { if (!own().length) return; if (!confirm('Remove all your company holidays?')) return; prefs.set('hols', []); this.holidays(); this.update(); this.meet(); };
-    // meeting finder calendar
-    this.mcm = null;
-    q('.mcp').onclick = () => { this.mcm = new Date(this.mcm.getFullYear(), this.mcm.getMonth() - 1, 1); this.mcal(); };
-    q('.mcn').onclick = () => { this.mcm = new Date(this.mcm.getFullYear(), this.mcm.getMonth() + 1, 1); this.mcal(); };
-    q('.mcnow').onclick = () => { this.mcm = null; const n = this.mcfg(); n.start = ''; this.mset(n); };
+    q('.hclr').onclick = () => { if (!own().length) return; if (!confirm('Remove all your company holidays?')) return; prefs.set('hols', []); this.holidays(); this.update(); };
     // sections can be dragged into any order
     { const wrap = q('.wrap'), secs = [...wrap.querySelectorAll(':scope > section')], box = el('div', 'secs'); secs[0].before(box); secs.forEach(x => box.appendChild(x));
       const saved = prefs.get('wcsec', []); if (Array.isArray(saved)) for (const k of saved) { const x = box.querySelector(`:scope > section[data-f="${k}"]`); if (x) box.appendChild(x); }
@@ -3289,8 +3599,6 @@ class ClockTab {
       }
       box.ondragover = e => { if (!this._dsec) return; e.preventDefault(); const t = [...box.children].filter(x => x !== this._dsec).find(x => { const r = x.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; }); if (t !== this._dsec.nextElementSibling) box.insertBefore(this._dsec, t || null); };
       box.ondrop = e => { if (this._dsec) e.preventDefault(); };
-      // the meeting finder gets its calendar beside the controls
-      const fb = $('.meet .fb', this.panel), cal = $('.mcal', fb), lay = el('div', 'mlay'), rest = el('div', 'mrest'); [...fb.children].forEach(c => { if (c !== cal && !c.classList.contains('hint')) rest.appendChild(c); }); lay.append(cal, rest); fb.prepend(lay);
     }
     this.build();
   }
@@ -3303,65 +3611,15 @@ class ClockTab {
     const p = WC.parts(z, t), hn = HOL.on(`${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`, HOL.country(z)), wd = new Date(Date.UTC(p.year, p.month - 1, p.day)).getUTCDay();
     return hn.length ? 'holiday: ' + hn.join(', ') : HOL.weekend().includes(wd) ? 'weekend' : '';
   }
-  mcfg() { const c = prefs.get('meet', null) || {}, a = (v, d) => Number.isFinite(+v) ? +v : d; return { len: [30, 60, 90, 120].includes(+c.len) ? +c.len : 60, from: a(c.from, 9), to: a(c.to, 17), days: [3, 7, 14].includes(+c.days) ? +c.days : 7, off: Array.isArray(c.off) ? c.off : [], x: (Array.isArray(c.x) ? c.x : []).filter(z => typeof z === 'string' && WC.ok(z)), show: typeof c.show === 'string' && WC.ok(c.show) ? c.show : '', start: /^\d{4}-\d\d-\d\d$/.test(c.start || '') && c.start > HOL.ymd0(new Date()) ? c.start : '' }; }
-  mset(c) { prefs.set('meet', c); this._mk = null; this.meet(); }
-  mcheck() {   // how one proposed time, typed in any zone, lands for everybody ticked
-    const host = $('.mchk', this.panel), v = $('.mt', this.panel).value, tz = $('.mtz', this.panel).value; host.innerHTML = '';
-    const t = v && tz ? WC.fromLocal(tz, v) : null; if (t == null) return; this._mt = t;
-    const c = this.mcfg(), zones = [...this.zones, ...c.x.filter(z => !this.zones.includes(z))].filter(z => !c.off.includes(z)), tf = WC.f, len = c.len; let good = 0;
-    for (const z of zones) {
-      const p = WC.parts(z, t), m = (p.hour % 24) * 60 + p.minute, why = this.off(z, t) || this.off(z, t + len * 60000 - 1) || (m < c.from * 60 ? `before ${c.from}:00` : m + len > c.to * 60 ? (m >= c.to * 60 ? `after ${c.to}:00` : `runs past ${c.to}:00`) : '');
-      if (!why) good++;
-      const r = el('div', 'cr'); r.innerHTML = `<b>${esc(WC.city(z))}</b><span>${esc(WC.f(z, 'd', this.h12).format(t))} · <em style="font-style:normal">${esc(WC.f(z, 't', this.h12).format(t))}</em></span><span class="${why ? 'no' : 'ok'}">${why ? '✗ ' + esc(why) : '✓ working hours'}</span>`; host.appendChild(r);
-    }
-    const sm = el('div', 'sum'); sm.textContent = zones.length ? (good === zones.length ? `Works for all ${good}.` : `Works for ${good} of ${zones.length}.`) : 'Tick some zones above.'; host.appendChild(sm);
-  }
-  meet() {
-    const sec = $('.meet', this.panel); if (sec.classList.contains('shut')) return;
-    const c = this.mcfg(), key = JSON.stringify(c) + '|' + this.zones.join(',') + '|' + Math.floor(Date.now() / 900000) + '|' + this.h12 + '|' + JSON.stringify([prefs.get('hols', null), prefs.get('holc', ''), prefs.get('holx', null), prefs.get('wkend', null)]); if (this._mk === key) return; this._mk = key;
-    const zones = [...this.zones, ...c.x.filter(z => !this.zones.includes(z))], on = zones.filter(z => !c.off.includes(z));
-    this.mcal(); const mz = $('.mz', this.panel); mz.innerHTML = '';
-    for (const z of zones) { const l = el('label'), cb = el('input'); cb.type = 'checkbox'; cb.checked = !c.off.includes(z); cb.onchange = () => { const n = this.mcfg(); n.off = cb.checked ? n.off.filter(a => a !== z) : [...n.off, z]; this.mset(n); }; l.appendChild(cb); l.append(' ' + WC.city(z)); if (!this.zones.includes(z)) { const x = el('button'); x.type = 'button'; x.innerHTML = ic('x', 10); x.title = 'Remove from the meeting'; x.setAttribute('aria-label', 'Remove ' + z); x.onclick = () => { const n = this.mcfg(); n.x = n.x.filter(a => a !== z); this.mset(n); }; l.appendChild(x); } mz.appendChild(l); }
-    const fillSel = (sel, val, withLocal) => { const keep = val || sel.value; sel.innerHTML = ''; for (const z of [WC.local(), ...zones.filter(z => z !== WC.local())]) { const o = el('option'); o.value = z; o.textContent = WC.city(z) + (z === WC.local() ? ' (this computer)' : ''); sel.appendChild(o); } sel.value = zones.includes(keep) || keep === WC.local() ? keep : WC.local(); };
-    fillSel($('.mtz', this.panel), '', true); fillSel($('.mshow', this.panel), c.show, true); this.mcheck();
-    const host = $('.mres', this.panel); host.innerHTML = '';
-    if (on.length < 2) { host.innerHTML = '<div class="none">Tick at least two zones (add more above) to look for a shared time.</div>'; return; }
-    const step = 30 * 60000, now = Date.now(), sd = c.start ? new Date(c.start + 'T00:00:00').getTime() : 0, base = Math.max(now, sd), t0 = Math.ceil(base / step) * step, end = base + c.days * 86400000, found = [];
-    for (let t = t0; t < end && found.length < 60; t += step) {
-      let ok = true;
-      for (const z of on) { const p = WC.parts(z, t), m = (p.hour % 24) * 60 + p.minute; if (m < c.from * 60 || m + c.len > c.to * 60 || this.off(z, t) || this.off(z, t + c.len * 60000 - 1)) { ok = false; break; } }
-      if (ok) found.push(t);
-    }
-    if (!found.length) { host.innerHTML = `<div class="none">No ${c.len} minute slot fits everyone's ${c.from}:00 to ${c.to}:00 in the next ${c.days} days. Try fewer zones, wider hours or a shorter meeting.</div>`; return; }
-    // neighbouring half-hour starts are one block of free time: "11:30 – 13:00" instead of six near-identical rows
-    const wins = []; for (const t of found) { const w = wins[wins.length - 1]; if (w && t - w.last === step) w.last = t; else wins.push({ first: t, last: t }); }
-    const sz = c.show || WC.local(), lf = WC.f(sz, 'd', this.h12), tf = z => WC.f(z, 't', this.h12);
-    for (const w of wins.slice(0, 8)) {
-      const to = w.last + c.len * 60000, r = el('div', 'mr'); r.tabIndex = 0; r.dataset.t = w.first;
-      r.innerHTML = `<b>${esc(lf.format(w.first))}</b>` + on.map(z => `<span>${esc(WC.city(z))} <em>${esc(tf(z).format(w.first))} – ${esc(tf(z).format(to))}</em></span>`).join('') + (w.last > w.first ? `<small class="mnote">any ${c.len} min inside</small>` : '');
-      const go = () => { this.ref = w.first; this.update(); this.schedule(); };
-      r.onclick = go; r.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }; host.appendChild(r);
-    }
-  }
   day0() { const ms = this.at(), p = WC.parts(WC.local(), ms); return ms - (((p.hour % 24) * 60 + p.minute) * 60 + p.second) * 1000 - (ms % 1000 + 1000) % 1000; }   // midnight of the shown day, this computer's zone
   suggest() {
-    const v = this.add.value.trim().toLowerCase().replace(/\s+/g, '_'); if (!v) { this.sug.hidden = true; return; }
-    const out = [], seen = new Set(this.zones), al = WC.ALIAS[v.toUpperCase()];
-    if (al && !seen.has(al)) out.push(al);
-    for (const z of WC.zones()) { if (out.length >= 8) break; if (!seen.has(z) && !out.includes(z) && z.toLowerCase().includes(v)) out.push(z); }
-    this.sug.innerHTML = out.length ? '' : '<div style="cursor:default"><small>No match</small></div>';
-    for (const z of out) { const d = el('div'); d.dataset.z = z; d.innerHTML = `<span>${esc(WC.city(z))}</span><small>${esc(z)}</small>`; d.onmousedown = e => { e.preventDefault(); this.addZone(z); }; this.sug.appendChild(d); }
-    this.sug.hidden = false;
+    if (!this.add.value.trim()) { this.sug.hidden = true; return; }
+    ZP.fill(this.sug, ZP.list(this.add.value, new Set(this.zones)), z => this.addZone(z));
   }
   dsx() { const a = prefs.get('dstx', []); return (Array.isArray(a) ? a : []).filter(z => typeof z === 'string' && WC.ok(z) && !this.zones.includes(z)); }
   zsug(inp, sg, have, pick) {
-    const v = inp.value.trim().toLowerCase().replace(/\s+/g, '_'); if (!v) { sg.hidden = true; return; }
-    const out = [], al = WC.ALIAS[v.toUpperCase()]; if (al && !have.has(al)) out.push(al);
-    for (const z of WC.byAbbr(v)) if (!have.has(z) && !out.includes(z) && out.length < 8) out.push(z);
-    for (const z of WC.zones()) { if (out.length >= 8) break; if (!have.has(z) && !out.includes(z) && z.toLowerCase().includes(v)) out.push(z); }
-    sg.innerHTML = out.length ? '' : '<div style="cursor:default"><small>No match</small></div>';
-    for (const z of out) { const d = el('div'); d.dataset.z = z; d.innerHTML = `<span>${esc(WC.city(z))}</span><small>${esc(WC.abbr(z, Date.now()) ? WC.abbr(z, Date.now()) + ' · ' : '')}${esc(z)}</small>`; d.onmousedown = e => { e.preventDefault(); pick(z); }; sg.appendChild(d); }
-    sg.hidden = false;
+    if (!inp.value.trim()) { sg.hidden = true; return; }
+    ZP.fill(sg, ZP.list(inp.value, have), pick);
   }
   dsSuggest() { this.zsug($('.dsa', this.panel), $('.dsug', this.panel), new Set([...this.zones, ...this.dsx()]), z => this.dsAdd(z)); }
   alerts() {
@@ -3383,14 +3641,14 @@ class ClockTab {
   dsAdd(z) { prefs.set('dstx', [...this.dsx(), z]); $('.dsa', this.panel).value = ''; $('.dsug', this.panel).hidden = true; this._dk = null; this.update(); }
   addZone(z) { if (!this.zones.includes(z)) { this.zones.push(z); this.save(); this.build(); } this.add.value = ''; this.sug.hidden = true; }
   holidays() {
-    const from = new Date(this.at()).toISOString().slice(0, 10), cc = this.hc.value, fmtd = (d, y) => { const t = new Date(d + 'T12:00:00Z'); return y ? 'every ' + t.toLocaleDateString(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' }) : t.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }); };
+    const from = new Date(this.at()).toISOString().slice(0, 10), cc = this.hc.value, fmtd = (d, y) => HOL.fmt(d, y);
     // built-in list for the chosen country, with Hide
     const hl = $('.hl:not(.hl2)', this.panel), up = HOL.upcoming(cc, from, 14, true).filter(h => !h.own), hid = HOL.hidden(); hl.innerHTML = '';
-    const nh = hid.filter(k => k.startsWith(cc + '|')).length, hh = $('.hhid', this.panel); hh.innerHTML = nh ? `· ${nh} hidden <a href="#" class="hrest">restore</a>` : ''; const ra = $('.hrest', hh); if (ra) ra.onclick = e => { e.preventDefault(); prefs.set('holx', hid.filter(k => !k.startsWith(cc + '|'))); this.holidays(); this.update(); this.meet(); };
+    const nh = hid.filter(k => k.startsWith(cc + '|')).length, hh = $('.hhid', this.panel); hh.innerHTML = nh ? `· ${nh} hidden <a href="#" class="hrest">restore</a>` : ''; const ra = $('.hrest', hh); if (ra) ra.onclick = e => { e.preventDefault(); prefs.set('holx', hid.filter(k => !k.startsWith(cc + '|'))); this.holidays(); this.update(); };
     if (!up.length) hl.innerHTML = `<span class="none">${cc ? 'Nothing left to show: all built-in holidays are hidden.' : 'No built-in list chosen. Your own holidays are below.'}</span>`;
     for (const h of up) {
       const r = el('div'); r.innerHTML = `<span class="dd"></span><span class="hnm"></span><button type="button" class="hhide" title="Your company does not observe this one">Hide</button>`;
-      $('.dd', r).textContent = fmtd(h.d); $('.hnm', r).textContent = h.n; $('.hhide', r).onclick = () => { prefs.set('holx', [...hid, cc + '|' + h.n.replace(/ \((observed|substitute day)\)$/, '')]); this.holidays(); this.update(); this.meet(); };
+      $('.dd', r).textContent = fmtd(h.d); $('.hnm', r).textContent = h.n; $('.hhide', r).onclick = () => { prefs.set('holx', [...hid, cc + '|' + h.n.replace(/ \((observed|substitute day)\)$/, '')]); this.holidays(); this.update(); };
       hl.appendChild(r);
     }
     // company list: every date, with edit and remove
@@ -3400,32 +3658,19 @@ class ClockTab {
     for (const h of mine) {
       const r = el('div'); r.innerHTML = `<span class="dd"></span><span class="hnm"></span><span class="own"></span><button type="button" class="hed" title="Edit" aria-label="Edit holiday">${ic('edit', 13)}</button><button type="button" class="hdl" title="Remove" aria-label="Remove holiday">${ic('trash', 13)}</button>`;
       $('.dd', r).textContent = fmtd(h.d, h.y); $('.hnm', r).textContent = h.n; $('.own', r).textContent = h.c ? HOL.NAMES[h.c] || h.c : 'all zones';
-      $('.hdl', r).onclick = () => { const a = HOL.custom(); a.splice(h.i, 1); prefs.set('hols', a); this.holidays(); this.update(); this.meet(); };
-      $('.hed', r).onclick = () => { const a = HOL.custom(); a.splice(h.i, 1); prefs.set('hols', a); this.hd.value = h.d; this.hn.value = h.n; this.hy.checked = !!h.y; this.hs.value = h.c || ''; $('.hgo', this.panel).textContent = 'Save'; this.holidays(); this.update(); this.meet(); this.hn.focus(); };
+      $('.hdl', r).onclick = () => { const a = HOL.custom(); a.splice(h.i, 1); prefs.set('hols', a); this.holidays(); this.update(); };
+      $('.hed', r).onclick = () => { const a = HOL.custom(); a.splice(h.i, 1); prefs.set('hols', a); this.hd.value = h.d; this.hn.value = h.n; this.hy.checked = !!h.y; this.hs.value = h.c || ''; $('.hgo', this.panel).textContent = 'Save'; this.holidays(); this.update(); this.hn.focus(); };
       h2.appendChild(r);
-    }
-  }
-  mcal() {   // month grid for the meeting finder: pick the first day to search from
-    const c = this.mcfg(), host = $('.mcg', this.panel); if (!host) return; const now = new Date(), tk = HOL.ymd0(now), sd = c.start || tk, cc = HOL.country(WC.local());
-    if (!this.mcm) { const b = new Date(sd + 'T12:00:00'); this.mcm = new Date(b.getFullYear(), b.getMonth(), 1); }
-    const m = this.mcm, first = new Date(m.getFullYear(), m.getMonth(), 1), lead = (first.getDay() + 6) % 7, n = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(), end = new Date(new Date(sd + 'T12:00:00').getTime() + (c.days - 1) * 86400000), ek = HOL.ymd0(end);
-    $('.mct', this.panel).textContent = m.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-    host.innerHTML = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<i>${d}</i>`).join('') + '<span></span>'.repeat(lead);
-    for (let d = 1; d <= n; d++) {
-      const dt = new Date(m.getFullYear(), m.getMonth(), d), k = HOL.ymd0(dt), b = el('button'); b.type = 'button'; b.textContent = d; const hn = HOL.on(k, cc), we = HOL.weekend().includes(dt.getDay());
-      b.className = (k === tk ? 'today ' : '') + (k === sd ? 'start ' : '') + (k >= sd && k <= ek ? 'win ' : '') + (hn.length || we ? 'off' : '');
-      b.title = dt.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }) + (hn.length ? ' · ' + hn.join(', ') : we ? ' · weekend' : '') + ' · search from this day';
-      b.onclick = () => { const x = this.mcfg(); x.start = k <= tk ? '' : k; this.mcm = null; this.mset(x); };
-      host.appendChild(b);
     }
   }
   dstChart() {
     const ms = this.at(), y = new Date(ms).getUTCFullYear(), t0 = Date.UTC(y, 0, 1), span = Date.UTC(y + 1, 0, 1) - t0, host = $('.dstb', this.panel), loc = WC.local();
-    const all = [...this.zones, ...this.dsx()], key = all.join(',') + '|' + y + '|' + Math.floor(ms / 86400000) + '|' + this.h12;
+    const all = [...this.zones.filter(z => WC.dst(z, y).uses), ...this.dsx()], key = all.join(',') + '|' + y + '|' + Math.floor(ms / 86400000) + '|' + this.h12;
     if (this._dk === key) return; this._dk = key;
     $('.dsth', this.panel).innerHTML = '<span></span><div class="mo">' + 'JFMAMJJASOND'.split('').map(m => `<span>${m}</span>`).join('') + '</div><span></span>';
     host.innerHTML = '';
     const pct = t => (100 * (t - t0) / span).toFixed(2), fmtD = (t, z) => new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: z }), sign = m => (m > 0 ? '+' : '−') + Math.abs(m / 60) + 'h';
+    if (!all.length) { host.innerHTML = '<div class="dsnone">None of your zones use daylight saving. Add one above to compare.</div>'; return; }
     for (const z of all) {
       const d = WC.dst(z, y), r = el('div', 'dstr'), bar = el('div', 'bar2' + (d.uses ? '' : ' none')), tx = el('div', 'tx2'), nm = el('div', 'nm2');
       nm.textContent = WC.city(z); r.appendChild(nm);
@@ -3481,7 +3726,7 @@ class ClockTab {
     if (rebuild) this.hours = { d0, h, hk };
     if (this.season !== (WC.SEASONS[prefs.get('season', 'auto')] ? prefs.get('season', 'auto') : WC.seasonOf(ms)) + (document.documentElement.dataset.theme === 'light' ? 'L' : 'D')) this.paint();
     if (!$('.dstc', this.panel).classList.contains('shut')) this.dstChart();
-    this.alerts(); this.meet();
+    this.alerts();
     if (this._hd !== d0 && this.hc && !$('.hol', this.panel).classList.contains('shut')) { this._hd = d0; this.holidays(); }
     for (const r of this.rows.querySelectorAll('.zrow')) {
       const z = r.dataset.z, off = WC.offset(z, ms), ab = WC.f(z, 'a', h).formatToParts(ms).find(p => p.type === 'timeZoneName');
@@ -3536,13 +3781,13 @@ class ClockTab {
    tab; anything that came due while it was closed is reported the next time it opens. */
 const Notes = {
   items: [], pad: '', docs: [], caps: {}, loaded: false, timer: 0, _t: 0, _dirty: {},
-  async load() { try { const j = await api('notes/get'); this.caps = j.caps || {}; this.items = Array.isArray(j.items) ? j.items.filter(i => i && typeof i.t === 'string') : []; this.pad = typeof j.pad === 'string' ? j.pad : ''; this.docs = Array.isArray(j.docs) ? j.docs.filter(n => n && typeof n.id === 'string').map(n => ({ id: n.id, t: String(n.t || ''), b: String(n.b || ''), u: +n.u || Date.now() })) : []; if (!this.docs.length && this.pad.trim()) { this.docs = [{ id: this.id(), t: 'Scratchpad', b: this.pad, u: Date.now() }]; this.pad = ''; this._dirty.docs = 1; this._dirty.pad = 1; setTimeout(() => this.flush(), 800); } } catch (e) { console.warn('notes not loaded:', e.message); } this.loaded = true; try { DSTA.sync(); RPT.sync(); } catch (e) { console.warn('clock alerts / repeats:', e.message); } this.badge(); this.arm(true); },
+  async load() { try { const j = await api('notes/get'); this.caps = j.caps || {}; this.items = Array.isArray(j.items) ? j.items.filter(i => i && typeof i.t === 'string') : []; this.pad = typeof j.pad === 'string' ? j.pad : ''; this.docs = Array.isArray(j.docs) ? j.docs.filter(n => n && typeof n.id === 'string').map(n => ({ id: n.id, t: String(n.t || ''), b: String(n.b || ''), u: +n.u || Date.now() })).filter(n => n.b.trim()) : []; if (!this.docs.length && this.pad.trim()) { this.docs = [{ id: this.id(), t: 'Scratchpad', b: this.pad, u: Date.now() }]; this.pad = ''; this._dirty.docs = 1; this._dirty.pad = 1; setTimeout(() => this.flush(), 800); } } catch (e) { console.warn('notes not loaded:', e.message); } this.loaded = true; try { DSTA.sync(); RPT.sync(); } catch (e) { console.warn('clock alerts / repeats:', e.message); } this.badge(); this.arm(true); },
   save(k) { this._dirty[k || 'items'] = 1; clearTimeout(this._t); this._t = setTimeout(() => this.flush(), 500); },
-  async flush() { clearTimeout(this._t); const d = this._dirty; this._dirty = {}; const patch = {}; if (d.items) patch.items = this.items; if (d.pad) patch.pad = this.pad; if (d.docs) patch.docs = this.docs; if (Object.keys(patch).length) { try { await api('notes/set', { patch }); } catch (e) { toast('Notes not saved: ' + e.message, 'err', 6000); } } },
-  beacon() { if (!Object.keys(this._dirty).length) return; const patch = {}; if (this._dirty.items) patch.items = this.items; if (this._dirty.pad) patch.pad = this.pad; if (this._dirty.docs) patch.docs = this.docs; this._dirty = {}; try { fetch('/api/notes/set', { method: 'POST', keepalive: true, headers: { 'X-Token': TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ patch }) }); } catch (_) { } },
+  async flush() { clearTimeout(this._t); const d = this._dirty; this._dirty = {}; const patch = {}; if (d.items) patch.items = this.items; if (d.pad) patch.pad = this.pad; if (d.docs) patch.docs = this.docs.filter(n => n.b.trim()); if (Object.keys(patch).length) { try { await api('notes/set', { patch }); } catch (e) { toast('Notes not saved: ' + e.message, 'err', 6000); } } },
+  beacon() { if (!Object.keys(this._dirty).length) return; const patch = {}; if (this._dirty.items) patch.items = this.items; if (this._dirty.pad) patch.pad = this.pad; if (this._dirty.docs) patch.docs = this.docs.filter(n => n.b.trim()); this._dirty = {}; try { fetch('/api/notes/set', { method: 'POST', keepalive: true, headers: { 'X-Token': TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ patch }) }); } catch (_) { } },
   id: () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
   due() { return this.items.filter(i => !i.done && i.due && i.fired && !i.k); },
-  badge() { const n = this.due().length, b = $('#btn-notes .nb'); if (b) { b.hidden = !n; b.textContent = n; } },
+  badge() { const n = this.due().length, bs = $$('#btn-tools .nb, #btn-notes .nb'); for (const b of bs) { b.hidden = !n; b.textContent = n; } },
   arm(first) {   // one timer, for the soonest unfired reminder
     clearTimeout(this.timer); this.timer = 0; const now = Date.now(); try { RPT.sync(false); } catch (_) { }
     const next = this.items.filter(i => !i.done && i.due && !i.fired).sort((a, b) => a.due - b.due)[0];
@@ -3590,36 +3835,37 @@ class NotesTab {
         <div class="addcard"><input type="text" class="t" placeholder="Add an item, then press Enter" spellcheck="false" aria-label="New item">
           <div class="addrow"><span class="qk" role="group" aria-label="Quick times"><button type="button" data-q="today" title="Reminder this evening, or in an hour">Today</button><button type="button" data-q="tom" title="Reminder tomorrow 9:00">Tomorrow</button><button type="button" data-q="week" title="Reminder next Monday 9:00">Next week</button></span><input type="datetime-local" class="w" title="Optional reminder time" aria-label="Reminder time">
           <select class="cat" title="Work or personal" aria-label="Category">${[['w', 'Work'], ['p', 'Personal']].map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select><select class="rp" title="Repeat" aria-label="Repeat"><option value="">No repeat</option>${RPT.OPTS.filter(o => o[0]).map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select><button type="button" class="star qs" title="Mark as important" aria-pressed="false" aria-label="Important">★</button><button class="go primary">Add</button></div></div>
-        <div class="tools"><div class="seg" role="group" aria-label="Show"></div><input type="search" class="fq" placeholder="Search items" aria-label="Search items" spellcheck="false"><button class="sd" type="button" title="Show or hide ticked items"></button></div>
+        <div class="tools"><div class="seg" role="group" aria-label="Show"></div><input type="search" class="fq" placeholder="Search items" aria-label="Search items" spellcheck="false"><select class="so" title="Sort items" aria-label="Sort items"><option value="due">Sort: date</option><option value="star">Sort: important</option><option value="new">Sort: newest</option><option value="az">Sort: A to Z</option></select><button class="sd" type="button" title="Show or hide ticked items"></button></div>
         <div class="dayf" hidden></div>
         <div class="list"></div>
-        <p class="hint">A time gives you a reminder: a desktop notification and sound while Kempt is running (start it at login in Settings → General to keep it running with no browser open). Anything that came due while it was closed is shown when you next open it.</p></section>
-      <section class="ntc"><h2>Calendar<span class="sp"></span><button class="opc" title="Open the full calendar (Alt+L)">${ic('cal', 12)} Open calendar</button></h2><div class="mini"></div><h2 class="ah"></h2><div class="agenda"></div></section>
+        <p class="hint">A time adds a reminder (notification and sound while Kempt runs; missed ones show when you reopen it).</p></section>
+      <section class="ntc"><h2>Coming up</h2><div class="agenda"></div><div class="agenda"></div></section>
       <section class="ntn"><h2>Notes<span class="sp"></span><button class="nn" title="Start a new note">${ic('plus', 12)} New note</button></h2>
         <input type="search" class="nsq" placeholder="Search notes" aria-label="Search notes" spellcheck="false"><div class="nlist"></div>
-        <div class="ned"><input type="text" class="ntt" placeholder="Title" maxlength="120" spellcheck="false" aria-label="Note title"><textarea class="pad" placeholder="Write here. Saved automatically on this computer." maxlength="100000" spellcheck="false" aria-label="Note text"></textarea>
+        <div class="ned"><input type="text" class="ntt" placeholder="Title" maxlength="120" spellcheck="false" aria-label="Note title"><textarea class="pad" placeholder="Write something to save the note" maxlength="100000" spellcheck="false" aria-label="Note text"></textarea>
         <div class="nfoot"><span class="nmeta"></span><span class="sp"></span><button class="nd" title="Delete this note">${ic('trash', 12)} Delete note</button></div></div></section></div></div>`;
     const q = s => $(s, this.panel); this.list = q('.list'); this.pad = q('.pad'); this.t = q('.t'); this.w = q('.w'); this.rp = q('.rp'); this.cat = q('.cat'); this.cat.value = prefs.get('ncat', 'w') === 'p' ? 'p' : 'w'; this.cat.onchange = () => prefs.set('ncat', this.cat.value); this.seg = q('.seg'); this.filt = ['w', 'p'].includes(prefs.get('nfilt', '')) ? prefs.get('nfilt', '') : '';
     this.imp = false; q('.qs').onclick = () => { this.imp = !this.imp; q('.qs').classList.toggle('on', this.imp); q('.qs').setAttribute('aria-pressed', String(this.imp)); };
     q('.qk').onclick = e => { const b = e.target.closest('button'); if (!b) return; const n = new Date(), d = new Date(n.getFullYear(), n.getMonth(), n.getDate(), 9, 0); if (b.dataset.q === 'today') { d.setHours(n.getHours() < 17 ? 18 : n.getHours() + 1, 0); } else if (b.dataset.q === 'tom') d.setDate(d.getDate() + 1); else d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); this.w.value = toLocalInput(d.getTime()); this.t.focus(); };
     const add = () => { const t = this.t.value.trim(); if (!t) return; const due = this.w.value ? new Date(this.w.value).getTime() : null; const it = { id: Notes.id(), t, c: this.cat.value, done: false, due: due && !isNaN(due) ? due : null, fired: false }; if (it.due && this.rp.value) { it.rep = this.rp.value; it.base = it.due; } Notes.items.push(it); if (this.imp) it.s = 1; this.imp = false; q('.qs').classList.remove('on'); this.t.value = ''; this.w.value = ''; this.rp.value = ''; if (due) this.ask(); Notes.save(); RPT.sync(false); Notes.arm(); Notes.badge(); this.render(); this.t.focus(); };
     q('.go').onclick = add; this.t.onkeydown = e => { if (e.key === 'Enter') add(); };
-    q('.clr').onclick = () => { Notes.items = Notes.items.filter(i => i.k || !i.done || !this.shows(i)); Notes.save(); RPT.sync(false); Notes.arm(); Notes.badge(); this.render(); };
+    q('.clr').onclick = () => { const n = Notes.items.filter(i => !i.k && i.done && this.shows(i)).length; if (!n) { toast('Nothing to clear: no ticked items.', 'info'); return; } Notes.items = Notes.items.filter(i => i.k || !i.done || !this.shows(i)); Notes.save(); RPT.sync(false); Notes.arm(); Notes.badge(); this.render(); };
+    this.so = q('.so'); this.so.value = prefs.get('nsort', 'due'); this.so.onchange = () => { prefs.set('nsort', this.so.value); this.render(); };
     q('.fq').oninput = e => { this.q = e.target.value.trim().toLowerCase(); this.render(); };
     q('.sd').onclick = () => { this.showDone = !this.showDone; prefs.set('ndone', this.showDone); this.render(); };
-    q('.opc').onclick = () => actions.calendar();
     // notes: many, each with a title
-    q('.nn').onclick = () => { const n = { id: Notes.id(), t: '', b: '', u: Date.now() }; Notes.docs.unshift(n); this.nid = n.id; Notes.save('docs'); this.renderNotes(); q('.ntt').focus(); };
+    q('.nn').onclick = () => { this.prune(); const n = { id: Notes.id(), t: '', b: '', u: Date.now() }; Notes.docs.unshift(n); this.nid = n.id; Notes.save('docs'); this.renderNotes(); q('.ntt').focus(); };
     q('.nsq').oninput = e => { this.nq = e.target.value.trim().toLowerCase(); this.renderNotes(); };
     q('.ntt').oninput = () => { const n = this.cur(); if (n) { n.t = q('.ntt').value; n.u = Date.now(); Notes.save('docs'); this.renderNotes(true); } };
     this.pad.oninput = () => { const n = this.cur(); if (n) { n.b = this.pad.value; n.u = Date.now(); Notes.save('docs'); this.renderNotes(true); } };
-    q('.nd').onclick = () => { const n = this.cur(); if (!n) return; if ((n.t || n.b) && !confirm('Delete this note?')) return; Notes.docs = Notes.docs.filter(x => x !== n); this.nid = ''; Notes.save('docs'); this.renderNotes(); };
+    q('.nd').onclick = () => { const n = this.cur(); if (!n) return; if (n.b.trim() && !confirm('Delete this note?')) return; Notes.docs = Notes.docs.filter(x => x !== n); this.nid = ''; Notes.save('docs'); this.renderNotes(); };
     this.render(); this.renderNotes(); this.side();
   }
   title() { return 'Checklist'; }
   shows(i) { return !this.filt || i.c === this.filt; }
   ask() { try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); } catch (_) { } }
   fmt(ms) { const d = new Date(ms), n = new Date(), t = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), day = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(n.getFullYear(), n.getMonth(), n.getDate())) / 86400000); return (day === 0 ? 'Today' : day === 1 ? 'Tomorrow' : day === -1 ? 'Yesterday' : d.toLocaleDateString([], { month: 'short', day: 'numeric' })) + ' ' + t; }
+  prune(keep) { const before = Notes.docs.length; Notes.docs = Notes.docs.filter(n => n.b.trim() || n.id === keep); if (Notes.docs.length !== before) Notes.save('docs'); }
   cur() { return Notes.docs.find(n => n.id === this.nid) || null; }
   group(i, t0) {   // which heading an item sits under
     if (i.done) return 5; if (!i.due) return 4; const d = Math.floor((i.due - t0) / 86400000);
@@ -3633,12 +3879,13 @@ class NotesTab {
     const t0 = new Date().setHours(0, 0, 0, 0), dayOf = ms => HOL.ymd0(new Date(ms));
     let mine = all.filter(i => this.shows(i) && (!this.q || i.t.toLowerCase().includes(this.q)) && (!this.day || (i.due && dayOf(i.due) === this.day)) && (this.showDone || !i.done));
     const df = $('.dayf', this.panel); df.hidden = !this.day; if (this.day) { df.innerHTML = `Showing ${esc(new Date(this.day + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }))} <button type="button">Show all days</button>`; $('button', df).onclick = () => { this.day = ''; this.render(); this.side(); }; }
-    const grp = i => this.group(i, t0); mine.sort((x, y) => grp(x) - grp(y) || (y.s ? 1 : 0) - (x.s ? 1 : 0) || (x.due || 9e15) - (y.due || 9e15));
+    const sm = prefs.get('nsort', 'due'), flat = sm !== 'due', grp = i => flat ? 0 : this.group(i, t0), ix = new Map(Notes.items.map((i, n) => [i, n]));
+    if (sm === 'az') mine.sort((x, y) => (x.done ? 1 : 0) - (y.done ? 1 : 0) || x.t.localeCompare(y.t, undefined, { sensitivity: 'base' })); else if (sm === 'star') mine.sort((x, y) => (x.done ? 1 : 0) - (y.done ? 1 : 0) || (y.s ? 1 : 0) - (x.s ? 1 : 0) || (x.due || 9e15) - (y.due || 9e15)); else if (sm === 'new') mine.sort((x, y) => (x.done ? 1 : 0) - (y.done ? 1 : 0) || ix.get(y) - ix.get(x)); else mine.sort((x, y) => grp(x) - grp(y) || (y.s ? 1 : 0) - (x.s ? 1 : 0) || (x.due || 9e15) - (y.due || 9e15));
     const items = mine, HEAD = { 0: 'Overdue', 1: 'Today', 2: 'Tomorrow', 3: 'This week', 3.5: 'Later', 4: 'No date', 5: 'Done' };
     this.list.innerHTML = items.length ? '' : `<div class="empty">${this.q || this.day ? 'No items match.' : this.filt ? 'No ' + (this.filt === 'w' ? 'work' : 'personal') + ' items yet.' : 'Nothing here yet. Add your first item above.'}</div>`;
     let lastg = null;
     for (const i of items) {
-      const g = grp(i); if (g !== lastg) { lastg = g; const hd = el('div', 'gh g' + String(g).replace('.', '_')); hd.innerHTML = `<span>${HEAD[g]}</span><small>${items.filter(x => grp(x) === g).length}</small>`; this.list.appendChild(hd); }
+      const g = grp(i); if (!flat && g !== lastg) { lastg = g; const hd = el('div', 'gh g' + String(g).replace('.', '_')); hd.innerHTML = `<span>${HEAD[g]}</span><small>${items.filter(x => grp(x) === g).length}</small>`; this.list.appendChild(hd); }
       const late = !i.done && i.due && i.fired, r = el('div', 'it' + (i.done ? ' done' : '') + (late ? ' due' : '') + (i.due && !i.done ? ' hd' : '')); r.dataset.id = i.id;
       r.innerHTML = `<input type="checkbox" aria-label="Done"><input type="text" class="tx" spellcheck="false" aria-label="Item"><span class="meta"><select class="cs" title="Work or personal" aria-label="Category"><option value="">–</option><option value="w">Work</option><option value="p">Personal</option></select><span class="when"></span></span><button class="star${i.s ? ' on' : ''}" title="Mark as important" aria-label="Important" aria-pressed="${!!i.s}">★</button><button class="x" title="Delete" aria-label="Delete item">${ic('trash', 14)}</button>`;
       const cb = $('input[type=checkbox]', r), tx = $('.tx', r), wh = $('.when', r), cs = $('.cs', r); cb.checked = i.done; tx.value = i.t; cs.value = i.c || ''; cs.className = 'cs ' + (i.c || ''); cs.onchange = () => { if (cs.value) i.c = cs.value; else delete i.c; Notes.save(); this.render(); };
@@ -3661,21 +3908,15 @@ class NotesTab {
     return out.sort((a, b) => (b.ad ? 1 : 0) - (a.ad ? 1 : 0) || a.s - b.s);
   }
   async side() {
-    const host = $('.mini', this.panel); if (!host) return; if (!CAL.loaded) { try { await CAL.load(); await CAL.script(); } catch (_) { } }
-    const now = new Date(), tk = HOL.ymd0(now), m = this.cm || new Date(now.getFullYear(), now.getMonth(), 1); this.cm = m;
-    const first = new Date(m.getFullYear(), m.getMonth(), 1), lead = (first.getDay() + 6) % 7, n = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(), ents = this.entries(first.getTime(), new Date(m.getFullYear(), m.getMonth() + 1, 1).getTime()), has = new Map();
-    for (const e of ents) { const k = HOL.ymd0(new Date(e.s)); has.set(k, (has.get(k) || 0) + 1); }
-    host.innerHTML = `<div class="mh"><button type="button" class="p" aria-label="Previous month">${ic('chev', 13)}</button><b>${esc(m.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }))}</b><button type="button" class="n" aria-label="Next month">${ic('chev', 13)}</button><button type="button" class="tdy">Today</button></div><div class="mg">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<i>${d}</i>`).join('')}${'<span></span>'.repeat(lead)}</div>`;
-    const g = $('.mg', host); for (let d = 1; d <= n; d++) { const dt = new Date(m.getFullYear(), m.getMonth(), d), k = HOL.ymd0(dt), c = has.get(k) || 0, b = el('button'); b.type = 'button'; b.innerHTML = `${d}${c ? `<em>${c > 3 ? '3+' : '•'.repeat(c)}</em>` : ''}`; b.className = (k === tk ? 'today ' : '') + (k === this.day ? 'sel ' : '') + (HOL.weekend().includes(dt.getDay()) ? 'we' : ''); b.title = dt.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }) + (c ? ` · ${c} item${c > 1 ? 's' : ''}` : ''); b.onclick = () => { this.day = this.day === k ? '' : k; this.render(); }; g.appendChild(b); }
-    $('.p', host).onclick = () => { this.cm = new Date(m.getFullYear(), m.getMonth() - 1, 1); this.side(); }; $('.n', host).onclick = () => { this.cm = new Date(m.getFullYear(), m.getMonth() + 1, 1); this.side(); }; $('.tdy', host).onclick = () => { this.cm = null; this.day = ''; this.render(); };
+    const ag = $('.agenda', this.panel); if (!ag) return; if (!CAL.loaded) { try { await CAL.load(); await CAL.script(); } catch (_) { } }
+    const tk = HOL.ymd0(new Date());
     // agenda: the chosen day, or the next seven days
-    const ah = $('.ah', this.panel), ag = $('.agenda', this.panel); let from, to;
-    if (this.day) { from = new Date(this.day + 'T00:00:00').getTime(); to = from + 86400000; ah.textContent = new Date(from).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }); }
-    else { from = new Date().setHours(0, 0, 0, 0); to = from + 7 * 86400000; ah.textContent = 'Coming up · next 7 days'; }
+    let from, to;
+    from = new Date().setHours(0, 0, 0, 0); to = from + 7 * 86400000;
     const list = this.entries(from, to).filter(e => !e.done); ag.innerHTML = list.length ? '' : '<div class="empty">Nothing scheduled.</div>'; let ld = '';
     for (const e of list) {
-      const dk = HOL.ymd0(new Date(e.s)); if (!this.day && dk !== ld) { ld = dk; const h = el('div', 'ad'); h.textContent = dk === tk ? 'Today' : new Date(e.s).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' }); ag.appendChild(h); }
-      const r = el('button', 'ae ' + e.k + (e.c ? ' ' + e.c : '')); r.type = 'button'; r.innerHTML = `<span class="tm">${e.ad ? 'all day' : esc(new Date(e.s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span><span class="tt"></span><small>${e.k === 'task' ? 'task' : 'event'}</small>`; $('.tt', r).textContent = (e.star ? '★ ' : '') + e.t;
+      const dk = HOL.ymd0(new Date(e.s)); if (dk !== ld) { ld = dk; const h = el('div', 'ad'); h.textContent = dk === tk ? 'Today' : new Date(e.s).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' }); ag.appendChild(h); }
+      const r = el('button', 'ae ' + e.k + (e.ev && e.ev.k === 'm' ? ' mt' : e.c ? ' ' + e.c : '')); r.type = 'button'; r.innerHTML = `<span class="tm">${e.ad ? 'all day' : esc(new Date(e.s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span><span class="tt"></span><small>${e.k === 'task' ? 'task' : e.ev && e.ev.k === 'm' ? 'meeting' : 'event'}</small>`; $('.tt', r).textContent = (e.star ? '★ ' : '') + e.t;
       r.onclick = () => { if (e.k === 'task') { this.day = HOL.ymd0(new Date(e.s)); this.render(); } else { actions.calendar(); setTimeout(() => { const t = Tabs.list.find(x => x.kind === 'cal'); if (t && t.cal) t.cal.goto(e.s, 'day'); }, 400); } }; ag.appendChild(r);
     }
   }
@@ -3683,12 +3924,12 @@ class NotesTab {
     const q = s => $(s, this.panel), docs = Notes.docs; if (!this.nid || !docs.some(n => n.id === this.nid)) this.nid = docs.length ? docs[0].id : '';
     const name = n => (n.t && n.t.trim()) || (n.b || '').split('\n').find(l => l.trim()) || 'Untitled note', f = docs.filter(n => !this.nq || (n.t + '\n' + n.b).toLowerCase().includes(this.nq)).sort((a, b) => b.u - a.u);
     const nl = q('.nlist'); nl.innerHTML = f.length ? '' : `<div class="empty">${docs.length ? 'No notes match.' : 'No notes yet. Press New note.'}</div>`;
-    for (const n of f) { const b = el('button', 'ni' + (n.id === this.nid ? ' on' : '')); b.type = 'button'; b.innerHTML = '<b></b><small></small>'; $('b', b).textContent = name(n); $('small', b).textContent = new Date(n.u).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' · ' + ((n.b || '').replace(/\s+/g, ' ').slice(0, 48) || 'empty'); b.onclick = () => { this.nid = n.id; this.renderNotes(); }; nl.appendChild(b); }
+    for (const n of f) { const b = el('button', 'ni' + (n.id === this.nid ? ' on' : '')); b.type = 'button'; b.innerHTML = '<b></b><small></small>'; $('b', b).textContent = name(n); $('small', b).textContent = new Date(n.u).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' · ' + ((n.b || '').replace(/\s+/g, ' ').slice(0, 48) || 'empty'); b.onclick = () => { if (this.nid !== n.id) { this.prune(n.id); this.nid = n.id; } this.renderNotes(); }; nl.appendChild(b); }
     const n = this.cur(), ed = q('.ned'); ed.hidden = !n; if (light) return;
     if (n) { q('.ntt').value = n.t || ''; this.pad.value = n.b || ''; q('.nmeta').textContent = `${(n.b || '').length.toLocaleString()} characters · edited ${new Date(n.u).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}`; }
   }
   onShow() { this.render(); this.renderNotes(); }
-  dispose() { Notes.flush(); }
+  dispose() { this.prune(); Notes.flush(); }
 }
 
 /* ───────────── calendar ─────────────
@@ -3722,8 +3963,8 @@ class CalendarTab {
       const M = await CAL.script(); await CAL.load(); if (!Notes.loaded) await Notes.load();
       const c = CAL.cfg, host = el('div'); host.style.cssText = 'height:100%'; this.panel.appendChild(host);
       this.cal = M.mount(host, {
-        events: CAL.events, view: c.view || 'month', ws: c.ws === 0 ? 0 : 1, h12: !!prefs.get('clock12', false),
-        tasks: () => Notes.items.filter(i => !i.k && i.due).map(i => ({ id: i.id, t: i.t, due: i.due, done: i.done, c: i.c })),
+        events: CAL.events, view: c.view || 'month', ws: Math.max(0, Math.min(6, +prefs.get('ws', 1) || 0)), h12: !!prefs.get('clock12', false), finder: (h, api) => FIND.render(h, api),
+        tasks: () => Notes.items.filter(i => !i.k && i.due).map(i => ({ id: i.id, t: i.t, due: i.due, done: i.done, c: i.c, rep: i.rep })),
         onChange: (ev, all) => { CAL.events = all; CAL.put(ev); },
         onView: v => { CAL.cfg = Object.assign({}, CAL.cfg, { view: v }); CAL.save(); },
         onTask: (t, how) => { const it = Notes.items.find(i => i.id === t.id); if (!it) return; if (how === 'open') { actions.notes(); return; } if (it.rep && !it.done) { RPT.advance(it); } else { it.done = !it.done; } Notes.save(); RPT.sync(false); Notes.arm(); Notes.badge(); Notes.refresh(); },
@@ -3734,7 +3975,55 @@ class CalendarTab {
   dispose() { if (this.cal) this.cal.destroy(); CAL.flush(); }
 }
 
+/* ───────────── find a time (inside the event dialog) ───────────── */
+const FIND = {
+  cfg() { const c = prefs.get('meet', null) || {}, a = (v, d) => Number.isFinite(+v) ? +v : d; return { from: a(c.hf, 9), to: a(c.ht, 17), off: Array.isArray(c.off) ? c.off : [], x: (Array.isArray(c.x) ? c.x : []).filter(z => typeof z === 'string' && WC.ok(z)) }; },
+  zones() { let z = prefs.get('zones', null); if (!Array.isArray(z) || !z.length) z = [WC.local(), 'UTC']; const c = this.cfg(); return [...z.filter(x => WC.ok(x)), ...c.x.filter(x => !z.includes(x))]; },
+  off(z, t) { const p = WC.parts(z, t), hn = HOL.on(`${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`, HOL.country(z)), wd = new Date(Date.UTC(p.year, p.month - 1, p.day)).getUTCDay(); return hn.length || HOL.weekend().includes(wd); },
+  ok(on, c, t, len) { for (const z of on) { const p = WC.parts(z, t), m = (p.hour % 24) * 60 + p.minute; if (m < c.from * 60 || m + len > c.to * 60 || this.off(z, t) || this.off(z, t + len * 60000 - 1)) return false; } return true; },
+  render(host, api) {
+    const DAY = 86400000, local = WC.local(), r0 = api.range() || { s: Date.now(), e: Date.now() + 3600000 }; let day0 = new Date(new Date(r0.s).getFullYear(), new Date(r0.s).getMonth(), new Date(r0.s).getDate()).getTime();
+    const draw = () => {
+      const c = this.cfg(), zs = this.zones(), on = zs.filter(z => !c.off.includes(z)), cur = api.range() || r0, len = Math.max(15, Math.round((cur.e - cur.s) / 60000) || 60), h12 = api.h12;
+      host.innerHTML = `<div class="ff"><div class="fz"></div><div class="fa"><input type="text" placeholder="Add a city or zone" aria-label="Add a zone" spellcheck="false"><div class="fsg" hidden></div></div></div>
+        <div class="fo"><label>Hours <select class="a"></select> to <select class="b"></select></label><span class="sp"></span><button type="button" class="p" aria-label="Previous days">${ic('chev', 12)}</button><b class="fr"></b><button type="button" class="n" aria-label="Next days">${ic('chev', 12)}</button></div>
+        <div class="fh"><span></span><div class="fhh"></div></div><div class="fd"></div><div class="fn"></div>`;
+      const q = s => host.querySelector(s), fz = q('.fz');
+      for (const z of zs) { const b = el('button'); b.type = 'button'; b.className = 'zc' + (c.off.includes(z) ? ' off' : ''); const ab = WC.abbr(z, Date.now()); b.innerHTML = `<span></span>${ab ? `<small>${esc(ab)}</small>` : ''}`; b.firstChild.textContent = WC.city(z); b.title = (c.off.includes(z) ? 'Include ' : 'Ignore ') + z; b.onclick = () => { const n = this.cfg(); n.off = n.off.includes(z) ? n.off.filter(a => a !== z) : [...n.off, z]; this.save(n); draw(); }; fz.appendChild(b); const extra = c.x.includes(z) && !(prefs.get('zones', []) || []).includes(z); if (extra) { const x = el('button'); x.type = 'button'; x.className = 'zx'; x.innerHTML = ic('x', 10); x.title = 'Remove ' + z; x.onclick = () => { const n = this.cfg(); n.x = n.x.filter(a => a !== z); this.save(n); draw(); }; fz.appendChild(x); } }
+      const ai = q('.fa input'), sg = q('.fsg'), addz = z => { const n = this.cfg(); if (!n.x.includes(z) && !zs.includes(z)) n.x.push(z); this.save(n); draw(); };
+      ai.oninput = () => { if (!ai.value.trim()) { sg.hidden = true; return; } ZP.fill(sg, ZP.list(ai.value, new Set(zs)), addz); };
+      ai.onblur = () => setTimeout(() => { sg.hidden = true; }, 120); ai.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); const f = sg.querySelector('div[data-z]'); if (f) addz(f.dataset.z); } else if (e.key === 'Escape') { sg.hidden = true; e.stopPropagation(); } };
+      const hs = (sel, v, lo, hi) => { for (let h = lo; h <= hi; h++) { const o = el('option'); o.value = h; o.textContent = h12 ? (h % 12 || 12) + (h < 12 || h === 24 ? ' am' : ' pm') : h + ':00'; sel.appendChild(o); } sel.value = v; };
+      hs(q('.a'), c.from, 0, 23); hs(q('.b'), c.to, 1, 24); q('.a').onchange = () => { const n = this.cfg(); n.hf = +q('.a').value; this.save(n); draw(); }; q('.b').onchange = () => { const n = this.cfg(); n.ht = +q('.b').value; this.save(n); draw(); };
+      q('.p').onclick = () => { day0 -= 7 * DAY; draw(); }; q('.n').onclick = () => { day0 += 7 * DAY; draw(); }; q('.p svg').style.transform = 'rotate(180deg)';
+      q('.fr').textContent = new Date(day0).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' – ' + new Date(day0 + 6 * DAY).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+      const hh = q('.fhh'); for (let h = 0; h < 24; h += 3) { const i = el('i'); i.style.left = (h / 24 * 100) + '%'; i.textContent = h12 ? (h % 12 || 12) + (h < 12 ? 'a' : 'p') : h; hh.appendChild(i); }
+      const fd = q('.fd'), step = 15 * 60000, tf = z => WC.f(z, 't', h12);
+      if (on.length < 1) { fd.innerHTML = '<div class="none">Tick at least one zone.</div>'; return; }
+      for (let d = 0; d < 7; d++) {
+        const d0 = new Date(day0); d0.setDate(d0.getDate() + d); const a = d0.getTime(), b = new Date(a); b.setDate(b.getDate() + 1); const t1 = b.getTime(), row = el('div', 'fr1'); row.innerHTML = `<span class="fl"></span><div class="fs"></div>`; const lab = row.firstChild; lab.textContent = d0.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' }); if (HOL.ymd0(d0) === HOL.ymd0(new Date())) lab.classList.add('today');
+        const bar = row.lastChild, runs = []; for (let t = a; t < t1; t += step) { if (t + len * 60000 > t1 + len * 60000) break; const ok = this.ok(on, c, t, len); if (ok) { const r = runs[runs.length - 1]; if (r && r.last + step === t) r.last = t; else runs.push({ first: t, last: t }); } }
+        const part = []; if (on.length >= 3) for (let t = a; t < t1; t += step) { let bad = null, n = 0; for (const z of on) if (!this.ok([z], c, t, len)) { n++; bad = z; if (n > 1) break; } if (n === 1) { const r = part[part.length - 1]; if (r && r.last + step === t && r.bad === bad) r.last = t; else part.push({ first: t, last: t, bad }); } }
+        for (const r of part) { const end = r.last + len * 60000, seg = el('button'); seg.type = 'button'; seg.className = 'ok part'; seg.style.left = ((r.first - a) / (t1 - a) * 100) + '%'; seg.style.width = (Math.min(end, t1 + 9e8) - r.first) / (t1 - a) * 100 + '%'; seg.title = `Works for all except ${WC.city(r.bad)}`; seg.onclick = e => { const bx = bar.getBoundingClientRect(), t = a + (e.clientX - bx.left) / bx.width * (t1 - a); let st = Math.round(t / step) * step - Math.round(len / 2 / 15) * step; st = Math.max(r.first, Math.min(r.last, st)); api.pick(st, st + len * 60000); draw(); }; bar.appendChild(seg); }
+        for (const r of runs) { const end = r.last + len * 60000, seg = el('button'); seg.type = 'button'; seg.className = 'ok'; seg.style.left = ((r.first - a) / (t1 - a) * 100) + '%'; seg.style.width = (Math.min(end, t1 + 9e8) - r.first) / (t1 - a) * 100 + '%'; seg.title = on.map(z => `${WC.city(z)}  ${tf(z).format(r.first)} – ${tf(z).format(end)}`).join('\n') + (r.last > r.first ? `\n(any ${len} min inside)` : ''); seg.onclick = e => { const bx = bar.getBoundingClientRect(), t = a + (e.clientX - bx.left) / bx.width * (t1 - a); let st = Math.round(t / step) * step - Math.round(len / 2 / 15) * step; st = Math.max(r.first, Math.min(r.last, st)); api.pick(st, st + len * 60000); draw(); }; bar.appendChild(seg); }
+        const e0 = cur.s >= a && cur.s < t1 ? cur : null; if (e0) { const m = el('i'); m.className = 'sel'; m.style.left = ((e0.s - a) / (t1 - a) * 100) + '%'; m.style.width = Math.max(.6, (Math.min(e0.e, t1) - e0.s) / (t1 - a) * 100) + '%'; bar.appendChild(m); }
+        fd.appendChild(row);
+      }
+      const anyGreen = fd.querySelector('.ok:not(.part)'), anyAmber = fd.querySelector('.part');
+      q('.fn').textContent = (anyGreen ? '' : on.length > 1 ? `No time this week suits all ${on.length} zones. ` + (anyAmber ? 'Amber = all but one. ' : 'Untick a zone, widen the hours or try another week. ') : 'No free time this week. ') + `Green = ${len} min inside ${c.from}:00 to ${c.to}:00 for everyone` + (on.length >= 3 ? '; amber = all but one' : '') + `. Times in ${WC.city(local)}.`;
+    };
+    draw();
+  },
+  save(n) { prefs.set('meet', Object.assign({}, prefs.get('meet', null) || {}, n)); }
+};
+
+/* selected lines and characters, bottom right */
+{ const out = $('#sb-sel'); let tm = 0; const show = () => {
+    let txt = ''; const a = document.activeElement; if (a && a.tagName === 'TEXTAREA' && a.selectionEnd > a.selectionStart) txt = a.value.slice(a.selectionStart, a.selectionEnd); else if (!(a && /INPUT|TEXTAREA/.test(a.tagName))) txt = getSelection().toString();
+    if (!txt) { out.hidden = true; return; } const body = txt.replace(/\n$/, ''), lines = body.split('\n').length; out.hidden = false; out.textContent = `${lines.toLocaleString()} line${lines === 1 ? '' : 's'} selected · ${txt.length.toLocaleString()} chars`; };
+  document.addEventListener('selectionchange', () => { clearTimeout(tm); tm = setTimeout(show, 60); }); document.addEventListener('keyup', () => { clearTimeout(tm); tm = setTimeout(show, 60); }); document.addEventListener('mouseup', () => { clearTimeout(tm); tm = setTimeout(show, 60); }); }
 /* ───────────── startup ───────────── */
+Pick.start();
 (async () => {
   Tabs.updateWelcome();
   try {

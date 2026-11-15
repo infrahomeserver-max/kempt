@@ -76,6 +76,10 @@ impl Zip {
         Ok(Zip { f, entries })
     }
 
+    pub fn names(&self) -> Vec<String> {
+        self.entries.keys().cloned().collect()
+    }
+
     pub fn has(&self, name: &str) -> bool {
         self.entries.contains_key(name)
     }
@@ -112,7 +116,7 @@ impl Zip {
 
 // ───────────── tiny XML helpers (the parts of an .xlsx are machine-written and regular) ─────────────
 
-fn decode_entities(s: &str) -> String {
+pub(crate) fn decode_entities(s: &str) -> String {
     if !s.contains('&') && !s.contains("_x") {
         return s.to_string();
     }
@@ -361,8 +365,6 @@ fn col_index(r: &str) -> Option<usize> {
 pub struct Sheet {
     pub name: String,
     pub csv: Vec<u8>,
-    pub rows: usize,
-    pub cols: usize,
 }
 
 pub struct Book {
@@ -570,7 +572,7 @@ impl Book {
         while csv.ends_with(b"\n\n") {
             csv.pop();
         }
-        Ok(Sheet { name, rows: written, cols: max_cols, csv })
+        Ok(Sheet { name, csv })
     }
 }
 
@@ -702,7 +704,7 @@ impl Book {
         while csv.ends_with(b"\n\n") {
             csv.pop();
         }
-        Ok(Sheet { name, rows: written, cols: max_cols, csv })
+        Ok(Sheet { name, csv })
     }
 }
 

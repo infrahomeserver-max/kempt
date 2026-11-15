@@ -15,7 +15,9 @@ def stub(name, log):
 env = dict(os.environ, KEMPT_CONFIG_DIR=cfg, XDG_CONFIG_HOME=xdg, KEMPT_NO_TRAY="1", KEMPT_NOTIFY_CMD=stub("n.sh", nlog), KEMPT_SOUND_CMD=stub("s.sh", slog))
 now = lambda: int(time.time() * 1000)
 NF = os.path.join(cfg, "notes.json")
-def notes(): return json.load(open(NF))
+def notes():
+    import subprocess
+    return json.loads(subprocess.check_output([BIN, "notes-export"], env=env, text=True))
 def lines(p): return open(p).read().strip().splitlines() if os.path.exists(p) else []
 def wait_for(cond, t=8):
     end = time.time() + t

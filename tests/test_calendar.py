@@ -49,7 +49,7 @@ with sync_playwright() as pw:
     saved = json.load(open(os.path.join(cfg, "calendar.json")))
     check("saved to calendar.json", len(saved.get("events", [])) == 2 and saved["cfg"].get("view"), saved.get("cfg"))
     # reminders became hidden checklist items; they do not show in the checklist list
-    notes = json.load(open(os.path.join(cfg, "notes.json")))
+    notes = read_notes(cfg)
     check("event reminder became a hidden item", any(i.get("k") == "cal" for i in notes.get("items", [])))
     # task with a time shows on the calendar
     pg.click("#btn-notes"); pg.wait_for_selector(".nt .t")

@@ -17,6 +17,7 @@ mod sdiff;
 mod source;
 mod state;
 mod table;
+mod office;
 mod xlsx;
 mod tsort;
 mod theme;
@@ -201,6 +202,8 @@ enum Cmd {
     Stop,
     /// Check which formatter tools are installed
     Doctor,
+    /// Print your decrypted notes and checklist as JSON (they are stored encrypted)
+    NotesExport,
 }
 
 fn main() {
@@ -293,5 +296,9 @@ fn real_main() -> anyhow::Result<i32> {
             Ok(0)
         }
         Cmd::Doctor => Ok(external::doctor()),
+        Cmd::NotesExport => {
+            println!("{}", state::export_notes());
+            Ok(0)
+        }
     }
 }

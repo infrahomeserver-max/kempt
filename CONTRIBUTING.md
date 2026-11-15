@@ -27,6 +27,7 @@ cargo build --release
 cargo test --release
 python3 tests/test_files.py        # CLI / formatter / viewer
 python3 tests/test_ui.py           # browser GUI (needs Playwright + Chromium)
+python3 tests/test_ui_v3.py        # Tools menu, settings, pickers, Office / picture / PDF opening
 ```
 
 The whole UI is one file, `ui/index.html`, embedded into the binary: rebuild

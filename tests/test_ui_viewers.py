@@ -150,7 +150,7 @@ with sync_playwright() as pw:
     clip = pg.evaluate("navigator.clipboard.readText()")
     check("Ctrl+C copies the whole file", clip == open(P("emoji.txt"), encoding="utf-8").read(), clip[:60])
     pg.keyboard.press("ArrowDown"); check("moving clears the selection", pg.locator(".allsel").count() == 0)
-    pg.keyboard.press("F1"); pg.wait_for_selector(".modal .help-grid"); check("F1 opens help with a Shortcuts section", "Shortcuts" in pg.inner_text(".modal .help-grid") and "Alt" in pg.inner_text(".modal .help-grid"))
+    pg.keyboard.press("F1"); pg.wait_for_selector(".modal .hp-cols"); check("F1 opens help with a Shortcuts view", "Find" in pg.inner_text(".modal .hp-cols") and "Alt" in pg.inner_text(".modal .hp-cols"))
     pg.keyboard.press("Escape"); pg.wait_for_timeout(200)
     pg.keyboard.press("Control+Shift+BracketRight"); pg.wait_for_timeout(300)
     check("Ctrl+Shift+] goes to the next tab", pg.locator("#tabs .tab.active").inner_text().strip().startswith("t.md"), pg.locator("#tabs .tab.active").inner_text())

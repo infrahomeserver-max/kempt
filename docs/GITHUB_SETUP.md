@@ -159,3 +159,17 @@ du -sh .git                                   # a few MB, not hundreds
 | `remote: error: GH013 ... secret scanning` | the push contains something that looks like a key or token. Remove it from the files **and from history** (`git commit --amend` before the first push), and rotate the secret |
 | CI job `ubuntu-22.04-arm` or `ubuntu-24.04-arm` never starts | ARM runners are free only on public repositories |
 | Release workflow says "tag … does not match Cargo.toml version" | tag name must be `v` + `Cargo.toml` version; delete the tag (`git push origin :refs/tags/vX`, `git tag -d vX`) and retag |
+
+## Day-to-day: apply changes, test, publish
+
+```
+cd ~/hub/scrap/kempt
+pkill -x kempt                                   # stop the running copy
+cargo build --release && ./target/release/kempt gui
+cargo test --release                             # unit tests
+python3 tests/test_ui_v3.py                      # browser tests (needs Playwright + Chromium); see CONTRIBUTING.md for the rest
+git add -A && git commit -s -m "Describe the change"
+git push                                         # then check the Actions tab: CI and Audit must be green
+```
+
+The UI is one embedded file, so always rebuild after editing `ui/index.html`. To release, follow "Later releases" above.

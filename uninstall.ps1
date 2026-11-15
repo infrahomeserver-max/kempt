@@ -12,7 +12,7 @@ param(
   [string]$Prefix,       # the install folder (default: the folder this script is in)
   [switch]$Yes,
   [switch]$DryRun,
-  [switch]$PurgeSettings,   # also delete Kempt's saved settings (%APPDATA%\kempt)
+  [switch]$PurgeSettings,   # also delete Kempt's saved settings, checklist, notes, calendar and key (%APPDATA%\kempt)
   [switch]$Relaunched    # internal
 )
 $ErrorActionPreference = 'Stop'
@@ -80,5 +80,5 @@ Say "Kempt has been removed."
 $cfg = if ($env:KEMPT_CONFIG_DIR) { $env:KEMPT_CONFIG_DIR } elseif ($env:APPDATA) { Join-Path $env:APPDATA 'kempt' } else { Join-Path $HOME '.config/kempt' }
 if (Test-Path -LiteralPath (Join-Path $cfg 'state.json')) {
   if ($PurgeSettings) { Remove-Item -LiteralPath $cfg -Recurse -Force -ErrorAction SilentlyContinue; Write-Host "Saved settings deleted ($cfg)." }
-  else { Write-Host "Your saved settings (theme, last folder, recent files) were kept in $cfg - run again with -PurgeSettings to delete them." }
+  else { Write-Host "Your saved settings, checklist, notes and calendar were kept in $cfg - run again with -PurgeSettings to delete them." }
 }

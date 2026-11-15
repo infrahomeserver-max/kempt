@@ -52,7 +52,7 @@
 .kc-cell.today .kc-num, .kc-dh.today .kc-num { background: var(--kc-accent); color: var(--accent-fg, #fff); font-weight: 700; }
 .kc-chip { --c: var(--kc-accent); display: flex; align-items: center; justify-content: flex-start; gap: 5px; height: 20px; flex: none; width: 100%; margin: 0 0 2px; padding: 0 6px; border: 0; border-left: 3px solid var(--c); border-radius: 4px; text-align: left; cursor: pointer;
   background: color-mix(in srgb, var(--c) 16%, transparent); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; line-height: 1.5; }
-.kc-chip:hover { background: color-mix(in srgb, var(--c) 28%, transparent); } .kc-chip.w { --c: var(--kc-work); } .kc-chip.p { --c: var(--kc-pers); }
+.kc-chip:hover { background: color-mix(in srgb, var(--c) 28%, transparent); } .kc-chip.w { --c: var(--kc-work); } .kc-chip.p { --c: var(--kc-pers); } .kc-chip.mt { --c: var(--kc-meet, #9b6bff); }
 .kc-chip.ad { background: var(--c); color: #fff; border-left-color: transparent; } .kc-chip.ad:hover { filter: brightness(1.08); background: var(--c); }
 .kc-chip.task { border-left-style: dashed; } .kc-chip.done { opacity: .55; text-decoration: line-through; }
 .kc-chip .tm { color: var(--kc-dim); font-variant-numeric: tabular-nums; flex: none; } .kc-chip .tt { overflow: hidden; text-overflow: ellipsis; }
@@ -69,7 +69,7 @@
 .kc-hl { position: absolute; left: 0; right: 0; border-top: 1px solid var(--kc-line); pointer-events: none; } .kc-hl.half { border-top-style: dotted; opacity: .5; }
 .kc-ev { --c: var(--kc-accent); display: block; position: absolute; padding: 2px 6px; border: 0; border-left: 3px solid var(--c); border-radius: 6px; text-align: left; cursor: pointer; overflow: hidden; font-size: 12px; line-height: 1.3;
   background: color-mix(in srgb, var(--c) 22%, var(--kc-bg)); box-shadow: 0 1px 2px rgba(0,0,0,.12); } .kc-ev:hover { background: color-mix(in srgb, var(--c) 34%, var(--kc-bg)); z-index: 3; }
-.kc-ev.w { --c: var(--kc-work); } .kc-ev.p { --c: var(--kc-pers); } .kc-ev b { display: block; font-weight: 600; } .kc-ev .tm { color: var(--kc-dim); font-size: 11px; }
+.kc-ev.w { --c: var(--kc-work); } .kc-ev.p { --c: var(--kc-pers); } .kc-ev.mt { --c: var(--kc-meet, #9b6bff); } .kc-ev b { display: block; font-weight: 600; } .kc-ev .tm { color: var(--kc-dim); font-size: 11px; }
 .kc-ev.task { border-left-style: dashed; background: color-mix(in srgb, var(--c) 12%, var(--kc-bg)); } .kc-ev.done { opacity: .55; text-decoration: line-through; }
 .kc-now { position: absolute; left: 0; right: 0; height: 2px; background: #e5484d; z-index: 2; pointer-events: none; } .kc-now::before { content: ''; position: absolute; left: -4px; top: -3px; width: 8px; height: 8px; border-radius: 4px; background: #e5484d; }
 /* year */
@@ -87,8 +87,8 @@
 .kc-empty { text-align: center; color: var(--kc-dim); padding: 60px 20px; }
 /* editor */
 .kc-shade { position: absolute; inset: 0; background: rgba(0,0,0,.42); display: flex; align-items: center; justify-content: center; z-index: 20; padding: 16px; }
-.kc-dlg { width: min(520px, 100%); max-height: 100%; overflow: auto; background: var(--kc-bg); border: 1px solid var(--kc-line); border-radius: 14px; box-shadow: 0 18px 60px rgba(0,0,0,.45); padding: 18px 20px; }
-.kc-dlg h3 { margin: 0 0 12px; font-size: 16px; } .kc-f { display: grid; grid-template-columns: 84px 1fr; gap: 8px 10px; align-items: center; margin-bottom: 8px; } .kc-f > label { color: var(--kc-dim); font-size: 12px; }
+.kc-dlg { width: min(480px, 100%); max-height: 100%; overflow: auto; background: var(--kc-bg); border: 1px solid var(--kc-line); border-radius: 14px; box-shadow: 0 18px 60px rgba(0,0,0,.45); padding: 14px 16px; }
+.kc-dlg h3 { margin: 0 0 8px; font-size: 15px; } .kc-tabs { display: flex; gap: 2px; margin: 0 0 10px; border-bottom: 1px solid var(--kc-line); } .kc-tabs button { border: 0; background: transparent; padding: 6px 12px; cursor: pointer; font: inherit; font-size: 12.5px; color: var(--kc-dim); border-bottom: 2px solid transparent; margin-bottom: -1px; } .kc-tabs button.on { color: var(--kc-fg); border-bottom-color: var(--kc-accent); font-weight: 600; } .kc-find { min-height: 120px; } .kc-f { display: grid; grid-template-columns: 84px 1fr; gap: 8px 10px; align-items: center; margin-bottom: 6px; } .kc-f > label { color: var(--kc-dim); font-size: 12px; }
 .kc-f input[type=text], .kc-f input[type=date], .kc-f input[type=time], .kc-f input[type=number], .kc-f select, .kc-f textarea { width: 100%; padding: 6px 8px; border: 1px solid var(--kc-line); border-radius: 8px; background: var(--kc-bg2); }
 .kc-f textarea { min-height: 60px; resize: vertical; } .kc-f input:focus, .kc-f select:focus, .kc-f textarea:focus { outline: 2px solid var(--kc-accent); outline-offset: 0; }
 .kc-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; } .kc-row input[type=number] { width: 70px !important; } .kc-row label { display: inline-flex; gap: 5px; align-items: center; color: var(--kc-fg); font-size: 12.5px; }
@@ -145,7 +145,7 @@
   function mount(host, opts) {
     opts = opts || {};
     if (!document.getElementById('kc-style')) { const s = document.createElement('style'); s.id = 'kc-style'; s.textContent = CSS; document.head.appendChild(s); }
-    const S = { view: VIEWS.some(v => v[0] === opts.view) ? opts.view : 'month', cur: Date.now(), events: Array.isArray(opts.events) ? opts.events.slice() : [], ws: opts.ws === 0 ? 0 : 1, h12: !!opts.h12, loc: opts.locale, more: 1, dlg: null };
+    const S = { view: VIEWS.some(v => v[0] === opts.view) ? opts.view : 'month', cur: Date.now(), events: Array.isArray(opts.events) ? opts.events.slice() : [], ws: Number.isInteger(opts.ws) && opts.ws >= 0 && opts.ws <= 6 ? opts.ws : 1, h12: !!opts.h12, loc: opts.locale, more: 1, dlg: null };
     const nf = (o) => new Intl.DateTimeFormat(S.loc, o);
     const tfmt = () => nf({ hour: 'numeric', minute: '2-digit', hour12: S.h12 });
     const root_ = document.createElement('div'); root_.className = 'kc'; root_.tabIndex = 0; root_.setAttribute('role', 'application'); root_.setAttribute('aria-label', 'Calendar');
@@ -158,7 +158,7 @@
       for (const t of tasks()) if (typeof t.due === 'number' && t.due >= from && t.due < to) out.push({ kind: 'task', task: t, ev: { t: t.t, c: t.c }, s: t.due, e: t.due, ad: false });
       return out.sort((a, b) => (b.ad - a.ad) || a.s - b.s || a.e - b.e);
     };
-    const cat = o => (o.ev && (o.ev.c === 'w' || o.ev.c === 'p')) ? o.ev.c : '';
+    const cat = o => o.ev && o.ev.k === 'm' ? 'mt' : (o.ev && (o.ev.c === 'w' || o.ev.c === 'p')) ? o.ev.c : '';
     const T = () => tfmt();
     const timeText = o => o.ad ? '' : T().format(o.s);
 
@@ -181,10 +181,11 @@
     // ---- toolbar
     function drawBar() {
       const bar = document.createElement('div'); bar.className = 'kc-bar';
-      bar.innerHTML = `<button class="kc-btn today" type="button">Today</button><span class="kc-nav"><button class="kc-btn prev" type="button" aria-label="Previous">‹</button><button class="kc-btn next" type="button" aria-label="Next">›</button></span><span class="kc-title" role="heading" aria-level="2" aria-live="polite">${esc(head())}</span><span class="kc-sp"></span><span class="kc-seg" role="group" aria-label="View">${VIEWS.map(([v, n]) => `<button type="button" data-v="${v}" aria-pressed="${S.view === v}">${n}</button>`).join('')}</span><button class="kc-btn pri add" type="button">+ New</button>`;
+      bar.innerHTML = `<button class="kc-btn today" type="button">Today</button><span class="kc-nav"><button class="kc-btn prev" type="button" aria-label="Previous">‹</button><button class="kc-btn next" type="button" aria-label="Next">›</button></span><span class="kc-title" role="heading" aria-level="2" aria-live="polite">${esc(head())}</span><span class="kc-sp"></span><span class="kc-seg" role="group" aria-label="View">${VIEWS.map(([v, n]) => `<button type="button" data-v="${v}" aria-pressed="${S.view === v}">${n}</button>`).join('')}</span><button class="kc-btn meet" type="button" title="Schedule a meeting: find a time that suits everyone">+ Meeting</button><button class="kc-btn pri add" type="button">+ New</button>`;
       bar.querySelector('.today').onclick = () => goto(Date.now());
       bar.querySelector('.prev').onclick = () => move(-1); bar.querySelector('.next').onclick = () => move(1);
       bar.querySelectorAll('.kc-seg button').forEach(b => b.onclick = () => setView(b.dataset.v));
+      bar.querySelector('.meet').onclick = () => edit(null, S.view === 'month' || S.view === 'year' || S.view === 'schedule' ? at(sod(S.cur), 9, 0) : at(sod(S.cur), Math.max(8, new Date().getHours() + 1), 0), null, false, { k: 'm', tab: 'find' });
       bar.querySelector('.add').onclick = () => edit(null, S.view === 'month' || S.view === 'year' || S.view === 'schedule' ? at(sod(S.cur), 9, 0) : at(sod(S.cur), Math.max(8, new Date().getHours() + 1), 0));
       return bar;
     }
@@ -195,7 +196,7 @@
       b.className = 'kc-chip ' + cat(o) + (o.ad && o.kind === 'ev' ? ' ad' : '') + (o.kind === 'task' ? ' task' : '') + (o.kind === 'task' && o.task.done ? ' done' : '') + (cls ? ' ' + cls : '');
       const tt = o.kind === 'task' ? (o.task.done ? '☑ ' : '☐ ') + o.ev.t : o.ev.t;
       b.innerHTML = (timeText(o) ? `<span class="tm">${esc(timeText(o))}</span>` : '') + `<span class="tt">${esc(tt)}</span>`;
-      b.title = (o.kind === 'task' ? 'Task: ' : '') + o.ev.t + (o.ad ? ' (all day)' : o.kind === 'task' ? ' · ' + T().format(o.s) : ' · ' + T().format(o.s) + ' – ' + T().format(o.e));
+      b.title = (o.kind === 'task' ? (o.task && o.task.rep ? 'Repeating task (click: done, moves to the next date; Shift+click: open checklist): ' : 'Task (click: tick off; Shift+click: open checklist): ') : '') + o.ev.t + (o.ad ? ' (all day)' : o.kind === 'task' ? ' · ' + T().format(o.s) : ' · ' + T().format(o.s) + ' – ' + T().format(o.e));
       b.onclick = e => { e.stopPropagation(); open(o, e); };
       return b;
     }
@@ -301,15 +302,18 @@
     }
 
     // ---- the editor
-    function edit(ev, startMs, occ, allDay) {
+    function edit(ev, startMs, occ, allDay, pre) {
       closeDlg();
-      const isNew = !ev, base = ev ? JSON.parse(JSON.stringify(ev)) : { id: uid(), t: '', s: startMs, e: startMs + HOUR, ad: !!allDay, c: '' };
+      const isNew = !ev, base = ev ? JSON.parse(JSON.stringify(ev)) : { id: uid(), t: '', s: startMs, e: startMs + HOUR, ad: !!allDay, c: '' }; if (isNew && pre && pre.k) base.k = pre.k;
       if (isNew && base.ad) { base.s = sod(startMs); base.e = addDays(base.s, 1); }
       const ds = ms => dkey(ms), tm = ms => String(new Date(ms).getHours()).padStart(2, '0') + ':' + String(new Date(ms).getMinutes()).padStart(2, '0');
       const endDay = base.ad ? addDays(base.e, -1) : base.e, r = base.r || null;
       const shade = document.createElement('div'); shade.className = 'kc-shade'; shade.setAttribute('role', 'dialog'); shade.setAttribute('aria-modal', 'true'); shade.setAttribute('aria-label', isNew ? 'New event' : 'Edit event');
       const wd = [0, 1, 2, 3, 4, 5, 6].map(i => (i + S.ws) % 7), by = new Set(r && r.by && r.by.length ? r.by : [new Date(base.s).getDay()]);
-      shade.innerHTML = `<form class="kc-dlg" novalidate><h3>${isNew ? 'New event' : 'Edit event'}</h3>
+      shade.innerHTML = `<form class="kc-dlg" novalidate><h3>${isNew ? 'New' : 'Edit'} ${base.k === 'm' ? 'meeting' : 'event'}</h3>
+        ${opts.finder ? '<div class="kc-tabs" role="tablist"><button type="button" role="tab" class="on" data-p="det">Details</button><button type="button" role="tab" data-p="find">Find a time</button></div>' : ''}
+        <div class="kc-find" hidden></div><div class="kc-det">
+        <div class="kc-f"><label for="kc-k">Type</label><div><select id="kc-k"><option value="">Event</option><option value="m">Meeting</option></select></div></div>
         <div class="kc-f"><label for="kc-t">Title</label><input id="kc-t" type="text" maxlength="300" value="${esc(base.t)}" placeholder="Add a title" autocomplete="off"></div>
         <div class="kc-f"><label>When</label><div class="kc-row"><label><input type="checkbox" class="ad" ${base.ad ? 'checked' : ''}> All day</label></div></div>
         <div class="kc-f"><label for="kc-sd">Starts</label><div class="kc-row"><input id="kc-sd" type="date" value="${ds(base.s)}" style="flex:1"><input class="st" type="time" value="${tm(base.s)}" style="flex:1" aria-label="Start time"></div></div>
@@ -323,11 +327,11 @@
         <div class="kc-f"><label for="kc-c">Category</label><div><select id="kc-c"><option value="">None</option><option value="w">Work</option><option value="p">Personal</option></select></div></div>
         <div class="kc-f"><label for="kc-l">Place</label><input id="kc-l" type="text" maxlength="300" value="${esc(base.l || '')}"></div>
         <div class="kc-f"><label for="kc-d">Notes</label><textarea id="kc-d" maxlength="5000">${esc(base.d || '')}</textarea></div>
-        <div class="kc-err" role="alert"></div>
+        </div><div class="kc-err" role="alert"></div>
         <div class="kc-foot">${isNew ? '' : '<button type="button" class="kc-btn danger del">Delete</button>'}<span class="kc-sp"></span><button type="button" class="kc-btn cancel">Cancel</button><button type="submit" class="kc-btn pri">Save</button></div></form>`;
       root_.appendChild(shade); S.dlg = shade;
       const $ = s => shade.querySelector(s), $$ = s => [...shade.querySelectorAll(s)];
-      $('#kc-r').value = r ? r.f : ''; $('#kc-c').value = base.c || ''; $('#kc-en').value = r && typeof r.until === 'number' ? 'until' : r && r.count ? 'count' : 'never';
+      $('#kc-k').value = base.k === 'm' ? 'm' : ''; $('#kc-r').value = r ? r.f : ''; $('#kc-c').value = base.c || ''; $('#kc-en').value = r && typeof r.until === 'number' ? 'until' : r && r.count ? 'count' : 'never';
       if (r && typeof r.until === 'number') $('.eu').value = ds(r.until); else $('.eu').value = ds(addDays(base.s, 90)); if (r && r.count) $('.ec').value = r.count;
       const sync = () => {
         const ad = $('.ad').checked; $('.st').hidden = $('.et').hidden = ad;
@@ -349,11 +353,11 @@
       };
       $('form').onsubmit = e => {
         e.preventDefault(); const err = $('.kc-err'); err.textContent = '';
-        const title = $('#kc-t').value.trim(); if (!title) { err.textContent = 'Give the event a title.'; $('#kc-t').focus(); return; }
+        const title = $('#kc-t').value.trim(); if (!title) { err.textContent = 'Give it a title.'; if (typeof show === 'function') show('det'); $('#kc-t').focus(); return; }
         const ad = $('.ad').checked, sd = $('#kc-sd').value, ed = $('#kc-ed').value || sd; if (!sd) { err.textContent = 'Choose a start date.'; return; }
         let s, en; if (ad) { s = fromKey(sd); en = addDays(fromKey(ed), 1); } else { const [sh, sm] = ($('.st').value || '09:00').split(':').map(Number), [eh, em] = ($('.et').value || '10:00').split(':').map(Number); s = at(fromKey(sd), sh, sm); en = at(fromKey(ed), eh, em); }
         if (en < s) { err.textContent = 'The event cannot end before it starts.'; return; }
-        const out = { id: base.id, t: title, s, e: en, u: Date.now() }; if (ad) out.ad = true;
+        const out = { id: base.id, t: title, s, e: en, u: Date.now() }; if (ad) out.ad = true; if ($('#kc-k').value === 'm') out.k = 'm';
         const f = $('#kc-r').value;
         if (f) {
           const rule = { f, n: Math.max(1, Math.min(999, parseInt($('#kc-n').value, 10) || 1)) };
@@ -365,6 +369,10 @@
         const c = $('#kc-c').value; if (c) out.c = c; const l = $('#kc-l').value.trim(); if (l) out.l = l; const d = $('#kc-d').value.trim(); if (d) out.d = d;
         commit(out); closeDlg();
       };
+      const tabs = $$('.kc-tabs button');
+      const readRange = () => { const sd = $('#kc-sd').value, ed = $('#kc-ed').value || sd; if (!sd) return null; const [sh, sm] = ($('.st').value || '09:00').split(':').map(Number), [eh, em] = ($('.et').value || '10:00').split(':').map(Number); return { s: at(fromKey(sd), sh, sm), e: at(fromKey(ed), eh, em) }; };
+      const show = p => { tabs.forEach(b => b.classList.toggle('on', b.dataset.p === p)); $('.kc-det').hidden = p !== 'det'; $('.kc-find').hidden = p !== 'find'; if (p === 'find' && opts.finder) { try { opts.finder($('.kc-find'), { range: readRange, h12: S.h12, pick: (s0, e0) => { const a = new Date(s0), b = new Date(e0), pad = n => String(n).padStart(2, '0'); $('.ad').checked = false; $('#kc-sd').value = dkey(s0); $('#kc-ed').value = dkey(e0); $('.st').value = pad(a.getHours()) + ':' + pad(a.getMinutes()); $('.et').value = pad(b.getHours()) + ':' + pad(b.getMinutes()); $('#kc-k').value = 'm'; sync(); } }); } catch (_) { } } };
+      tabs.forEach(b => b.onclick = () => show(b.dataset.p)); if (opts.finder && pre && pre.tab === 'find') show('find');
       setTimeout(() => $('#kc-t').focus(), 0);
     }
     function closeDlg() { if (S.dlg) { S.dlg.remove(); S.dlg = null; root_.focus({ preventScroll: true }); } }
@@ -400,7 +408,7 @@
       setEvents(list) { S.events = Array.isArray(list) ? list.slice() : []; draw(); },
       getEvents() { return S.events.slice(); },
       refresh() { draw(); }, setView, goto, view: () => S.view,
-      setOptions(o) { if (o && 'h12' in o) S.h12 = !!o.h12; if (o && 'ws' in o) S.ws = o.ws === 0 ? 0 : 1; if (o && 'locale' in o) S.loc = o.locale; draw(); },
+      setOptions(o) { if (o && 'h12' in o) S.h12 = !!o.h12; if (o && 'ws' in o) S.ws = Number.isInteger(o.ws) && o.ws >= 0 && o.ws <= 6 ? o.ws : 1; if (o && 'locale' in o) S.loc = o.locale; draw(); },
       newEvent(ms) { edit(null, ms || Date.now()); },
       focus() { root_.focus({ preventScroll: true }); },
       destroy() { clearInterval(minute); root_.remove(); },

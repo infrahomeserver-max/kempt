@@ -31,17 +31,6 @@ with sync_playwright() as pw:
     pg.get_by_role("button", name="Start without saving").click(); pg.wait_for_timeout(900)
     check("new file opens as a tab with the unsaved dot", "idea.md" in pg.inner_text("#tabs") and pg.locator("#tabs .dot").count() == 1, pg.inner_text("#tabs"))
     check("nothing was written to disk", not any(n.startswith("idea") for n in os.listdir(os.path.expanduser("~"))) and not os.path.exists(os.path.join(os.getcwd(), "idea.md")))
-    # meeting finder
-    pg.keyboard.press("Escape"); pg.keyboard.press("Alt+k"); pg.wait_for_timeout(1200)
-    check("meeting finder: rarely used options are folded away", pg.locator(".mmore").count() == 1 and not pg.locator(".mmore").evaluate("e=>e.open"))
-    rows = pg.locator(".mres .mr")
-    if rows.count():
-        txt = rows.first.inner_text()
-        check("meeting finder: a block shows a time range", "–" in txt, txt)
-        check("meeting finder: at most 8 blocks", rows.count() <= 8, rows.count())
-    else:
-        check("meeting finder: shows a message when nothing fits", pg.locator(".mres .none").count() == 1)
-    pg.screenshot(path="/tmp/ui_new_meeting.png")
     check("no page errors", not errs, errs)
     browser.close(); g.stop()
 print(f"\n{PASS} passed, {FAIL} failed"); sys.exit(1 if FAIL else 0)

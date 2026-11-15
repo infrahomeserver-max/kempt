@@ -404,6 +404,20 @@ impl App {
         Ok(json!({"info": first, "also": infos, "minified": false, "book": {"file": file, "sheets": total, "shown": infos.len() + 1}}))
     }
 
+    /// a Word / OpenDocument / PowerPoint file: its text, read-only
+    fn open_office(&self, path: &str) -> ApiResult {
+        let pb = expand(path.trim());
+        let (text, what) = crate::office::extract(&pb)?;
+        let file = pb.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+        let mut f = tempfile::tempfile().map_err(|e| ApiError { status: 500, msg: e.to_string() })?;
+        use std::io::Write as _;
+        f.write_all(text.as_bytes()).map_err(|e| ApiError { status: 500, msg: e.to_string() })?;
+        f.flush().ok();
+        let doc = Arc::new(Doc::from_generated(self.id(), &format!("{file} (text)"), &f, "text")?);
+        self.docs.lock().unwrap().insert(doc.id, doc.clone());
+        Ok(json!({"info": info_json(&doc.info()), "minified": false, "office": {"file": file, "what": what}}))
+    }
+
     /// {id} → existing doc, {path} → open it, {disk: id} → the on-disk version of an open doc
     fn resolve_side(&self, v: &Value) -> std::result::Result<Arc<Doc>, ApiError> {
         if let Some(id) = v.get("id").and_then(|x| x.as_u64()) {
@@ -495,13 +509,19 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
             if [".xlsx", ".xlsm", ".xltx", ".xltm", ".xlsb"].iter().any(|e| lower.ends_with(e)) {
                 return app.open_book(path);
             }
-            if lower.ends_with(".xls") || lower.ends_with(".ods") || lower.ends_with(".numbers") {
-                return bad("old .xls / .ods / .numbers spreadsheets cannot be read. Save the file as .xlsx or .csv in your spreadsheet program first.");
+            if crate::office::is_office(&lower) {
+                return app.open_office(path);
+            }
+            if crate::office::is_legacy(&lower) {
+                return bad("this older or closed format (.doc, .ppt, .xls, .numbers, .pages, .key) cannot be read. Save it as .docx, .pptx, .xlsx or .csv in its own program first.");
             }
             let d = app.open_path_as(path, if gb(p, "as_text").unwrap_or(false) { "text" } else { gs(p, "as").unwrap_or("auto") })?;
             let i = d.info();
             Ok(json!({"info": info_json(&i), "minified": looks_minified(&i)}))
         }
+
+        // which external formatters are installed (for Help → Formats)
+        "tools/status" => Ok(json!({"version": env!("CARGO_PKG_VERSION"), "tools": crate::external::ALL.iter().map(|t| json!({"name": t.name, "found": crate::external::find_bin(t.bin).is_some(), "install": t.install, "langs": t.langs})).collect::<Vec<_>>()})),
 
         // create an empty file with the chosen name (the extension decides how it is coloured and formatted) and open it
         "file/new" => {
@@ -1066,6 +1086,25 @@ fn header_value(req: &tiny_http::Request, name: &str) -> Option<String> {
     req.headers().iter().find(|h| h.field.as_str().as_str().eq_ignore_ascii_case(name)).map(|h| h.value.as_str().to_string())
 }
 
+fn pct_decode(s: &str) -> String {
+    let b = s.as_bytes();
+    let hex = |c: u8| (c as char).to_digit(16);
+    let mut out = Vec::with_capacity(b.len());
+    let mut i = 0;
+    while i < b.len() {
+        if b[i] == b'%' && i + 2 < b.len() {
+            if let (Some(h), Some(l)) = (hex(b[i + 1]), hex(b[i + 2])) {
+                out.push((h * 16 + l) as u8);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(if b[i] == b'+' { b' ' } else { b[i] });
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
 fn query_param(url: &str, key: &str) -> Option<String> {
     let q = url.split_once('?')?.1;
     q.split('&').find_map(|kv| {
@@ -1091,7 +1130,7 @@ fn handle(app: &Arc<App>, mut req: tiny_http::Request) {
         }
         // embed the saved settings so the page starts in the right theme with no flash (`<` escaped: safe inside <script>)
         let state = app.store.get().to_string().replace('<', "\\u003c");
-        let page = INDEX_HTML.replacen("/*@STATE@*/{}/*@END@*/", &state, 1);
+        let page = INDEX_HTML.replacen("/*@STATE@*/{}/*@END@*/", &state, 1).replacen("@VERSION@", env!("CARGO_PKG_VERSION"), 1);
         let r = Response::from_string(page)
             .with_header(hdr("Content-Type", "text/html; charset=utf-8"))
             .with_header(hdr("Cache-Control", "no-store"))
@@ -1120,6 +1159,32 @@ fn handle(app: &Arc<App>, mut req: tiny_http::Request) {
             .with_header(hdr("Content-Type", "text/javascript; charset=utf-8"))
             .with_header(hdr("Cache-Control", "no-store"))
             .with_header(hdr("X-Content-Type-Options", "nosniff"));
+        let _ = req.respond(r);
+        return;
+    }
+
+    if *req.method() == Method::Get && path == "/media" {
+        // a picture or PDF from disk, shown by the browser itself (token required; only these file types)
+        if !query_param(&url, "t").is_some_and(|t| same_secret(&t, &app.token)) {
+            return respond_json(req, 403, &json!({"error": "missing or wrong token"}));
+        }
+        let p = pct_decode(&query_param(&url, "path").unwrap_or_default());
+        let pb = expand(p.trim());
+        let ext = pb.extension().map(|e| e.to_string_lossy().to_ascii_lowercase()).unwrap_or_default();
+        let ct = match ext.as_str() {
+            "png" => "image/png", "jpg" | "jpeg" => "image/jpeg", "gif" => "image/gif", "webp" => "image/webp", "bmp" => "image/bmp",
+            "ico" => "image/x-icon", "svg" => "image/svg+xml", "avif" => "image/avif", "pdf" => "application/pdf",
+            _ => return respond_json(req, 415, &json!({"error": "not a picture or PDF"})),
+        };
+        let Ok(f) = std::fs::File::open(&pb) else { return respond_json(req, 404, &json!({"error": "cannot open the file"})) };
+        let mut r = Response::from_file(f)
+            .with_header(hdr("Content-Type", ct))
+            .with_header(hdr("Cache-Control", "no-store"))
+            .with_header(hdr("X-Frame-Options", "SAMEORIGIN"))
+            .with_header(hdr("X-Content-Type-Options", "nosniff"));
+        if ext == "svg" {
+            r = r.with_header(hdr("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox"));
+        }
         let _ = req.respond(r);
         return;
     }

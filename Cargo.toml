@@ -10,6 +10,7 @@ keywords = ["json","xml","formatter","log-viewer","diff"]
 categories = ["command-line-utilities","development-tools"]
 
 [dependencies]
+aes-gcm = { version = "0.10", default-features = false, features = ["aes", "alloc"] }
 ahash = "0.8.12"
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }

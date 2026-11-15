@@ -218,7 +218,7 @@ with sync_playwright() as pw:
     bg_dark = pg.evaluate("getComputedStyle(document.body).backgroundColor")
     set_theme(pg, "light")
     bg_light = pg.evaluate("getComputedStyle(document.body).backgroundColor")
-    check("dark and light themes differ", bg_dark == "rgb(30, 30, 30)" and bg_light == "rgb(255, 255, 255)", (bg_dark, bg_light))
+    check("dark and light themes differ", bg_dark == "rgb(30, 30, 30)" and bg_light == "rgb(251, 252, 254)", (bg_dark, bg_light))
     lv = pg.eval_on_selector(".sy-li", "e => getComputedStyle(e).color")
     pg.screenshot(path=f"{SHOTS}/viewer_light.png")
     pg.reload(); pg.wait_for_selector(".line:not(.loading)")
@@ -406,7 +406,7 @@ with sync_playwright() as pw:
     # ---------- compare dialog + compare with saved ----------
     print("== compare dialog / compare with saved")
     pg = new_page(g.url); pg.wait_for_timeout(500)
-    pg.click("#btn-compare"); pg.wait_for_selector(".modal input#cl")
+    pg.evaluate("void actions.compare()"); pg.wait_for_selector(".modal input#cl")
     pg.fill("#cl", TA); pg.fill("#cr", TB); pg.click(".modal .primary"); pg.wait_for_function("() => document.querySelector('#tabs').textContent.includes('A.txt')", timeout=8000)
     check("Compare… dialog opens a new comparison tab", pg.locator("#tabs .tab").count() == 2 and "A.txt" in pg.inner_text("#tabs"), pg.inner_text("#tabs"))
     pg.context.close()

@@ -130,8 +130,7 @@ with sync_playwright() as pw:
     check("second csv uses ';' and has its own state", "3 rows" in status(pg) and "2 columns" in status(pg) and "sorted" not in status(pg), status(pg))
     pg.locator("#tabs .tab").nth(2).click(); pg.wait_for_timeout(300)
     check("log tab is plain text, Table button available", pg.is_visible(".panel.show .editor") and "Ln" in status(pg))
-    pg.click(".panel.show .b-tbl"); pg.wait_for_selector(".panel.show .tgrid .td")
-    check("any text file can be viewed as a table", "200 rows" in status(pg) or "199 rows" in status(pg), status(pg))
+    check("Table is disabled for a plain log (only offered for data that looks tabular)", pg.evaluate("document.querySelector('.panel.show .b-tbl').disabled"))
     pg.locator("#tabs .tab").nth(0).click(); pg.wait_for_timeout(300)
     check("first tab kept its sort when switching back", "sorted by score" in status(pg), status(pg))
     pg.screenshot(path=f"{SHOTS}/table_light.png")
@@ -225,7 +224,7 @@ with sync_playwright() as pw:
     labels = pg.eval_on_selector_all(".panel.show .tstrip button", "els => els.map(e => e.innerText.trim())")
     check("table strip buttons show icons only (no words)", all(x == "" for x in labels), labels)
     tl = pg.eval_on_selector_all("#topbar .topright button.icon:has(.lbl)", "els => els.map(e => e.innerText.trim())")
-    check("top bar app buttons carry words", tl == ["Clock", "Calendar", "Checklist", "Help", "Settings"], tl)
+    check("top bar app buttons carry words", tl == ["Tools", "Help", "Settings"], tl)
     check("every icon button has a tooltip and an accessible name", pg.eval_on_selector_all(".panel.show .tstrip button, #topbar button", "els => els.every(e => e.title && e.getAttribute('aria-label'))"))
     check("the funnel icon is on the strip and on every column header", pg.locator(".panel.show .t-filter svg").count() == 1 and pg.locator(".panel.show .thc .hc .hf svg").count() == 4)
     pg.screenshot(path=f"{SHOTS}/table_icons.png")
@@ -266,7 +265,7 @@ with sync_playwright() as pw:
     pg.click(".t-dup")
     # custom single-character separator
     pg.locator("#tabs .tab").nth(1).click(); pg.wait_for_selector(".panel.show .b-tbl:visible")
-    pg.click(".panel.show .b-tbl"); pg.wait_for_selector(".panel.show .tgrid .td")
+    pg.keyboard.press("Alt+t"); pg.wait_for_selector(".panel.show .tgrid .td")   # button is off for text with no usual separator; Alt+T still forces it
     check("a ^-separated file is one column at first", "1 column" in status(pg), status(pg))
     pg.click(".panel.show .t-sepb"); pg.select_option(".panel.show .t-delim", "custom"); pg.fill(".panel.show .t-custom", "^"); pg.wait_for_timeout(600)
     names = pg.eval_on_selector_all(".panel.show .thc .hc .cn", "e => e.map(x => x.textContent)")
@@ -276,7 +275,7 @@ with sync_playwright() as pw:
     # doc + compare toolbars
     pg.locator("#tabs .tab").nth(0).click(); pg.click(".panel.show .b-tbl"); pg.wait_for_timeout(300)
     order = pg.eval_on_selector_all(".panel.show .toolbar > button", "els => els.map(e => e.className.split(' ')[0])")
-    check("toolbar order: file | edit | find | transform | compare | view", order == ["b-save", "b-saveas", "b-copy", "b-undo", "b-redo", "b-find", "b-fmt", "b-fix", "b-cmp-disk", "b-cmp", "b-view", "b-tbl"], order)
+    check("toolbar order: file | edit | find | transform | compare | view", order == ["b-save", "b-saveas", "b-copy", "b-undo", "b-redo", "b-find", "b-fmt", "b-fix", "b-cmp-disk", "b-cmp", "b-wrap", "b-view", "b-tbl"], order)
     check("document toolbar is icon-only too", all(t == "" for t in pg.eval_on_selector_all(".panel.show .toolbar > button:not([hidden])", "els => els.map(e => e.innerText.trim())")))
     errs = [e for e in pg.errors if "400 (Bad Request)" not in e]   # the 400 is the deliberate bad-number filter
     check("no JS errors", not errs, errs)

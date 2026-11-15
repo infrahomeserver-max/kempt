@@ -4,7 +4,7 @@
 #
 #   kempt-uninstall                 uninstall (finds the install by itself)
 #   ./uninstall.sh --user|--system|--prefix DIR     pick a specific install
-#   --purge-settings  also delete Kempt's saved settings (theme, last folder, recent files: one small file)
+#   --purge-settings  also delete Kempt's saved settings, checklist, notes, calendar and the notes encryption key
 #   --purge-tools   also remove OS packages / Rust that the installer added (apt, dnf, pacman, zypper, brew, rustup)
 #   --dry-run       show what would be removed
 #   -y              do not ask
@@ -103,7 +103,7 @@ if [ "$nf" -gt 0 ]; then
   done
 fi
 rm -rf -- "$SHARE/tools"
-if [ "$PSET" -eq 1 ] && [ -d "$CFG" ]; then rm -f -- "$CFG/state.json" "$CFG/state.json.tmp"; rmdir -- "$CFG" 2>/dev/null || true; fi
+if [ "$PSET" -eq 1 ] && [ -d "$CFG" ]; then rm -f -- "$CFG"/state.json "$CFG"/state.json.tmp "$CFG"/notes.json "$CFG"/notes.json.tmp "$CFG"/calendar.json "$CFG"/calendar.json.tmp "$CFG"/instance.json; rm -rf -- "$CFG/keys"; rmdir -- "$CFG" 2>/dev/null || true; fi
 if [ "$PURGE" -eq 1 ]; then
   if [ "$np" -gt 0 ]; then
     for p in "${PKGS[@]}"; do
@@ -140,5 +140,5 @@ fi
 [ -n "$FALLBACK" ] && rm -rf "$FALLBACK"
 say "Kempt has been removed."
 if [ "$PSET" -eq 0 ] && [ -f "$CFG/state.json" ]; then
-  echo "Your saved settings (theme, last folder, recent files) were kept in $CFG — add --purge-settings to delete them."
+  echo "Your saved settings, checklist, notes and calendar were kept in $CFG — add --purge-settings to delete them."
 fi

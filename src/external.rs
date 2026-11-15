@@ -12,21 +12,32 @@ pub struct ExtTool {
     pub langs: &'static str,
 }
 
-pub const PRETTIER: ExtTool = ExtTool { name: "prettier", bin: "prettier", install: "npm i -g prettier", langs: "HTML, CSS, JS/TS, YAML, Markdown" };
+pub const PRETTIER: ExtTool = ExtTool { name: "prettier", bin: "prettier", install: "npm i -g prettier", langs: "HTML, CSS, SCSS, Less, JS/TS, JSX/TSX, Vue, YAML, Markdown, MDX, GraphQL, Handlebars, JSON5" };
 pub const RUFF: ExtTool = ExtTool { name: "ruff", bin: "ruff", install: if cfg!(windows) { "pip install ruff   (or: winget install astral-sh.ruff)" } else if cfg!(target_os = "macos") { "brew install ruff" } else { "pipx install ruff   (or: pip install ruff)" }, langs: "Python" };
 pub const SHFMT: ExtTool = ExtTool { name: "shfmt", bin: "shfmt", install: if cfg!(windows) { "winget install mvdan.shfmt   (or: scoop install shfmt)" } else if cfg!(target_os = "macos") { "brew install shfmt" } else { "sudo apt install shfmt" }, langs: "shell" };
 pub const SQLFORMAT: ExtTool = ExtTool { name: "sqlformat", bin: "sqlformat", install: if cfg!(windows) || cfg!(target_os = "macos") { "pip install sqlparse" } else { "pipx install sqlparse" }, langs: "SQL" };
-pub const CLANG: ExtTool = ExtTool { name: "clang-format", bin: "clang-format", install: if cfg!(windows) { "winget install LLVM.LLVM   (includes clang-format)" } else if cfg!(target_os = "macos") { "brew install clang-format" } else { "sudo apt install clang-format" }, langs: "C, C++, Java" };
+pub const CLANG: ExtTool = ExtTool { name: "clang-format", bin: "clang-format", install: if cfg!(windows) { "winget install LLVM.LLVM   (includes clang-format)" } else if cfg!(target_os = "macos") { "brew install clang-format" } else { "sudo apt install clang-format" }, langs: "C, C++, C#, Java, Objective-C, Protobuf, CUDA" };
 
-pub const ALL: [&ExtTool; 5] = [&PRETTIER, &RUFF, &SHFMT, &SQLFORMAT, &CLANG];
+pub const GOFMT: ExtTool = ExtTool { name: "gofmt", bin: "gofmt", install: if cfg!(windows) { "winget install GoLang.Go   (includes gofmt)" } else if cfg!(target_os = "macos") { "brew install go" } else { "sudo apt install golang-go" }, langs: "Go" };
+pub const RUSTFMT: ExtTool = ExtTool { name: "rustfmt", bin: "rustfmt", install: "rustup component add rustfmt", langs: "Rust" };
+pub const TAPLO: ExtTool = ExtTool { name: "taplo", bin: "taplo", install: "cargo install taplo-cli   (or: brew install taplo)", langs: "TOML" };
+pub const STYLUA: ExtTool = ExtTool { name: "stylua", bin: "stylua", install: "cargo install stylua   (or: brew install stylua)", langs: "Lua" };
+pub const TERRAFORM: ExtTool = ExtTool { name: "terraform", bin: "terraform", install: if cfg!(windows) { "winget install Hashicorp.Terraform" } else if cfg!(target_os = "macos") { "brew install terraform" } else { "https://developer.hashicorp.com/terraform/install" }, langs: "Terraform" };
+
+pub const ALL: [&ExtTool; 10] = [&PRETTIER, &RUFF, &SHFMT, &SQLFORMAT, &CLANG, &GOFMT, &RUSTFMT, &TAPLO, &STYLUA, &TERRAFORM];
 
 pub fn tool_for_ext(ext: &str) -> Option<&'static ExtTool> {
     match ext {
-        "html" | "htm" | "css" | "scss" | "less" | "js" | "mjs" | "cjs" | "jsx" | "ts" | "tsx" | "vue" | "yaml" | "yml" | "md" | "markdown" | "graphql" | "json5" => Some(&PRETTIER),
+        "html" | "htm" | "css" | "scss" | "less" | "js" | "mjs" | "cjs" | "jsx" | "ts" | "tsx" | "vue" | "yaml" | "yml" | "md" | "markdown" | "graphql" | "gql" | "json5" | "mdx" | "hbs" | "handlebars" | "mts" | "cts" => Some(&PRETTIER),
         "py" | "pyi" => Some(&RUFF),
-        "sh" | "bash" => Some(&SHFMT),
+        "sh" | "bash" | "ksh" => Some(&SHFMT),
         "sql" => Some(&SQLFORMAT),
-        "c" | "h" | "cc" | "cpp" | "cxx" | "hpp" | "hh" | "java" => Some(&CLANG),
+        "c" | "h" | "cc" | "cpp" | "cxx" | "hpp" | "hh" | "hxx" | "java" | "cs" | "proto" | "m" | "mm" | "cu" | "cuh" | "ino" => Some(&CLANG),
+        "go" => Some(&GOFMT),
+        "rs" => Some(&RUSTFMT),
+        "toml" => Some(&TAPLO),
+        "lua" => Some(&STYLUA),
+        "tf" | "tfvars" => Some(&TERRAFORM),
         _ => None,
     }
 }
@@ -86,6 +97,18 @@ pub fn run(tool: &ExtTool, filename: &str, indent: usize, stdin: Stdio) -> Resul
         }
         "clang-format" => {
             cmd.args(["--assume-filename", filename]);
+        }
+        "rustfmt" => {
+            cmd.args(["--edition", "2021", "--emit", "stdout"]);
+        }
+        "taplo" => {
+            cmd.args(["format", "-"]);
+        }
+        "stylua" => {
+            cmd.args(["--indent-type", if indent == crate::jsonfmt::INDENT_TAB { "Tabs" } else { "Spaces" }, "--indent-width", &(if indent == crate::jsonfmt::INDENT_TAB { 4 } else { indent }).to_string(), "-"]);
+        }
+        "terraform" => {
+            cmd.args(["fmt", "-"]);
         }
         _ => {}
     }

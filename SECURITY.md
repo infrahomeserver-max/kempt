@@ -18,8 +18,9 @@ Only the latest release receives security fixes.
 - `kempt gui` listens on **127.0.0.1 only**, on a random port.
 - Every API request needs a per-run random token (`X-Token`) and a loopback
   `Host` header (blocks DNS-rebinding). No CORS headers are sent.
+- Pictures and PDFs are served by `/media`, which needs the same token and Host check, accepts only picture and PDF file types, and sandboxes SVG files with their own Content-Security-Policy.
 - A strict Content-Security-Policy is set; the UI loads no external resources.
-- Files are only read/written when you open/save them; settings and notes live in
+- Files are only read/written when you open/save them; settings, the calendar and the encrypted notes (AES-256-GCM, key in an owner-only file) live in
   your user config directory (`instance.json` is mode 0600 on Unix).
 - The only network access is the **opt-in** update check, done with `curl` to
   `api.github.com` for the configured repository.

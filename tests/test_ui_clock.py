@@ -30,7 +30,7 @@ with sync_playwright() as pw:
 
     print("== open")
     check("clock button exists in the top bar", pg.locator("#btn-clock").count() == 1)
-    pg.click("#btn-clock"); pg.wait_for_selector(".wc .zrow")
+    pg.evaluate("document.getElementById('btn-clock').click()"); pg.wait_for_selector(".wc .zrow")
     check("tab is named World clock", "World clock" in pg.inner_text("#tabs .tab.active"))
     pg.keyboard.press("Alt+k"); pg.wait_for_timeout(200)
     check("Alt+K does not open a second clock tab", pg.locator("#tabs .tab:has-text('World clock')").count() == 1)
@@ -98,7 +98,7 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(200)
     check("drag moves a zone to the top", names()[0] == "America/Los_Angeles", names())
     pg.wait_for_timeout(500)
-    pg.reload(); pg.wait_for_selector("#tabs .tab"); pg.click("#btn-clock"); pg.wait_for_selector(".wc .zrow")
+    pg.reload(); pg.wait_for_selector("#tabs .tab"); pg.evaluate("document.getElementById('btn-clock').click()"); pg.wait_for_selector(".wc .zrow")
     check("zones and order survive a reload", names() == ["America/Los_Angeles", "Asia/Kolkata", "UTC"], names())
     pg.screenshot(path=f"{SHOTS}/world_clock.png")
 
@@ -220,7 +220,7 @@ with sync_playwright() as pw:
     check("each change became one stored reminder (1 day before)", len(d1) == 2 and all(i["due"] > 0 and "London: clocks go" in i["t"] for i in d1), d1)
     pg.check(".wc .wl input[data-l='10080']"); pg.clock.run_for(1000)
     check("adding '1 week' doubles them", len(dstitems()) == 4, len(dstitems()))
-    pg.click("#btn-notes"); pg.wait_for_selector(".nt .addrow"); pg.wait_for_timeout(200)
+    pg.evaluate("document.getElementById('btn-notes').click()"); pg.wait_for_selector(".nt .addrow"); pg.wait_for_timeout(200)
     check("they stay out of the checklist and its badge", pg.locator(".nt .it").count() == 0 and not pg.locator("#btn-notes .nb").is_visible())
     pg.click("#tabs .tab:has-text('World clock')"); pg.wait_for_timeout(200)
     pg.locator(".wc .wch button").click(); pg.clock.run_for(1000)
@@ -286,7 +286,7 @@ with sync_playwright() as pw:
     pg.click("#tabs .tab:first-child"); pg.wait_for_timeout(100)
 
     print("== Compare dialog")
-    pg.click("#btn-compare"); pg.wait_for_selector("#cl")
+    pg.evaluate("void actions.compare()"); pg.wait_for_selector("#cl")
     check("left path is prefilled from the open file", pg.input_value("#cl").endswith("a.json"), pg.input_value("#cl"))
     check("recent files are offered as suggestions", pg.locator("#cmp-recent option").count() >= 1)
     pg.click("#br"); pg.wait_for_selector(".pick-list .pick-item", timeout=5000)

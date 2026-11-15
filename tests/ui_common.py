@@ -2,6 +2,11 @@ import os, re, subprocess, sys, tempfile, time
 from playwright.sync_api import sync_playwright
 BIN = os.environ.get("KEMPT_BIN") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "target", "release", "kempt" + (".exe" if os.name == "nt" else ""))
 
+def read_notes(cfg):
+    """notes.json is stored encrypted; ask the binary for the plain JSON."""
+    import subprocess, json
+    return json.loads(subprocess.check_output([BIN, "notes-export"], env=dict(os.environ, KEMPT_CONFIG_DIR=cfg), text=True))
+
 class Gui:
     @staticmethod
     def _cfg():

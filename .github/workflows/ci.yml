@@ -88,4 +88,6 @@ jobs:
           python3 tests/test_calendar.py
           python3 tests/test_clock_new.py
           python3 tests/test_notes_new.py
+          python3 tests/test_ui_v2.py
+          python3 tests/test_ui_v3.py
           python3 tests/test_tui.py

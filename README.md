@@ -9,8 +9,9 @@ make ordinary editors struggle: 250 MB logs, gigabyte-sized JSON, one-line minif
 - **Open huge files instantly.** A 325 MB log shows its first rows in about 0.2 s and uses a few MB of memory.
 - **Find and replace.** Search several keywords at once with AND / OR, `"exact phrases"`, `-exclusions`, case, whole-word and regex options. Every match is highlighted, each keyword in its own colour.
 - **Fix broken JSON and XML in one click.** Trailing commas, single quotes, comments, unclosed brackets and tags, and more.
-- **Format** JSON, JSONL and XML at any file size in constant memory (about 14 MB). With 2 spaces, 4 spaces or tabs. Other languages are formatted through the usual tools (prettier, ruff, shfmt, sqlformat, clang-format).
+- **Format** JSON, JSONL and XML at any file size in constant memory (about 14 MB). With 2 spaces, 4 spaces or tabs. Other languages are formatted through the usual tools (prettier, ruff, shfmt, sqlformat, clang-format, gofmt, rustfmt, taplo, stylua, terraform). Kempt formats JSON, JSONL and XML itself, and 25+ more file types through those tools.
 - **Compare two files side by side**, like VS Code, with colour-highlighted differences, a copy button on every changed line, undo and save.
+- **More than a text viewer.** Pictures and PDFs open in a viewer tab; Word, OpenDocument and PowerPoint files open as read-only text; Excel files open as tables. Built in too: a world clock with daylight-saving comparison, a calendar with a meeting finder, and an encrypted checklist and notes.
 - **Dark, light and colour-blind-safe themes**, all inside a Settings dialog.
 - **Private.** Everything runs on your computer. Nothing is uploaded. Kempt never goes online unless you switch on *Settings → General → Check for updates* (off by default), which makes one request a day to GitHub's release page.
 
@@ -214,15 +215,17 @@ with `--with-tools` (`-WithTools` on Windows):
 
 | Language | Tool | How it is installed |
 |---|---|---|
-| HTML, CSS, JS/TS, YAML, Markdown | prettier | privately, with npm. Old Node.js is handled: Node 18+ gets the latest prettier, 14-17 prettier 3.0.3, 10-13 prettier 2.8.8 (Ubuntu 22.04 ships Node 12) |
+| HTML, CSS, SCSS, Less, JS/TS, JSX/TSX, Vue, YAML, Markdown, MDX, GraphQL, Handlebars, JSON5 | prettier | privately, with npm. Old Node.js is handled: Node 18+ gets the latest prettier, 14-17 prettier 3.0.3, 10-13 prettier 2.8.8 (Ubuntu 22.04 ships Node 12) |
 | Python | ruff | privately, in a Python virtual environment (the installer adds `python3-venv` on Debian/Ubuntu if missing) |
 | SQL | sqlformat | privately, in the same virtual environment |
 | Shell | shfmt | OS package (apt / dnf / pacman / zypper / Homebrew); on Windows `winget install mvdan.shfmt` |
-| C, C++, Java | clang-format | OS package (`clang-format`, `clang-tools-extra` or `clang`); on Windows `winget install LLVM.LLVM` |
+| C, C++, C#, Java, Objective-C, Protobuf | clang-format | OS package (`clang-format`, `clang-tools-extra` or `clang`); on Windows `winget install LLVM.LLVM` |
+
+The tools below are not installed by `--with-tools`; install them yourself and Kempt finds them on PATH: `gofmt` (Go), `rustfmt` (Rust), `taplo` (TOML), `stylua` (Lua), `terraform` (Terraform).
 
 Private tools live in `share/kempt/tools` (`tools\` on Windows), are found by Kempt automatically, and are never added to PATH, so they
 disappear with Kempt. OS packages are installed only if missing, recorded, and kept on uninstall unless you pass `--purge-tools`.
-Run `kempt doctor` to see what is available.
+Run `kempt doctor`, or open **Help → Formats**, to see which are installed.
 
 ---
 
@@ -244,11 +247,13 @@ Over SSH, forward the port: `ssh -L PORT:127.0.0.1:PORT host`, then open the pri
 creates a separate working copy and can be undone with Ctrl+Z (the last 6 versions are kept).
 
 ### Settings (gear icon, top right)
-- **Appearance:** theme (System, Dark, Light, Colour-blind safe), code font size and the World clock colour season.
-- **Editor:** indentation for Format and Fix (2 spaces, 4 spaces or Tab; changing it re-indents the JSON or XML file you have open), opening files read-only, opening delimited .txt/.csv as plain text, and expanding JSON stored inside strings.
-- **General:** reminder sound (with a Test button), start Kempt in the background at login, which browser Kempt opens in, and its own-window mode.
-- **General** also holds **Updates** (check for a newer release, off by default; enter your GitHub `owner/repo` once, or build with `KEMPT_REPO=owner/repo`) and **Backup** (Export / Import one JSON file with settings, zones, alerts, checklist and notes; recent files and folders stay on this computer).
-- **About:** a short description, the keyboard shortcuts and Quit Kempt.
+- **Appearance:** theme (System, Dark, Light, Colour-blind safe), code font size, **code font** (built-in JetBrains Mono or your system's monospace font), **accent colour** (eight choices) and the World clock colour season.
+- **Editor:** indentation for Format and Fix (2 spaces, 4 spaces or Tab; changing it re-indents the JSON or XML file you have open), opening files read-only, opening delimited .txt/.csv as plain text, expanding JSON stored inside strings, the wrapped-line pane for long lines, and showing hidden files in the Open dialog.
+- **Calendar & clock:** first day of the week, **date format** (YYYY/MM/DD by default; ten others), 12- or 24-hour clock, and the working hours the meeting finder uses.
+- **General:** reminder sound (with a Test button), checklist sort order and whether ticked items show, start Kempt in the background at login, which browser Kempt opens in, and its own-window mode.
+- **General** also holds **Updates** (check for a newer release, off by default; enter your GitHub `owner/repo` once, or build with `KEMPT_REPO=owner/repo`), **Backup** (Export / Import one JSON file with settings, zones, alerts, checklist and notes) and **Reset preferences**, which returns theme, fonts, accent, formats, shortcuts and sorting to their defaults and keeps your files, notes, checklist, calendar, zones and holidays.
+- **About:** the version, a short description and Quit Kempt.
+- **Help (F1)** has four tabs: **Shortcuts** (click any shortcut to change it), **Features**, **Formats** (every language Kempt can format, with a ✓ for each tool found on your computer and the command to install the others) and **Terminal**.
 
 ### Saved settings and the last folder
 Your theme, code font size, indentation, recent files and the **last folder you opened a file from** are remembered
@@ -260,9 +265,9 @@ between runs. They live in one small JSON file (no database):
 | macOS | `~/Library/Application Support/kempt/state.json` |
 | Windows | `%APPDATA%\kempt\state.json` |
 
-Open (Ctrl+O) starts in the last folder; if it no longer exists it falls back to your home folder. Delete the file to
-reset everything. Only those few settings are stored, never file contents. The uninstaller keeps the file unless you
-pass `--purge-settings` (Windows: `-PurgeSettings`).
+Open (Ctrl+O) starts in the last folder; if it no longer exists it falls back to your home folder. Use **Settings → General → Reset preferences** to restore the defaults without losing your data, or delete the file to
+reset everything. Only settings are stored, never file contents. The checklist and notes (`notes.json`, encrypted) and the calendar (`calendar.json`) sit in the same folder. The uninstaller keeps the file unless you
+pass `--purge-settings` (Windows: `-PurgeSettings`), which also deletes the checklist, notes, calendar and the notes key. Export a backup first (Settings → General → Backup) if you want to keep them.
 
 ### Several files at once (tabs)
 Every file opens in its own tab, and so does every comparison. Each tab keeps its own scroll position, search,
@@ -357,10 +362,14 @@ column counter is approximate on lines that contain them.
 ### New file, editing, Excel files and syntax colours
 - **New** (top bar, **Alt+N**) creates a file with the name and extension you choose, in a folder you type or pick with **Browse…**, (quick buttons for `.txt .md .json .xml .csv .html .js .py .sh .log .yaml .sql`) in a folder of your choice, and opens it ready to type in. JSON, XML, HTML, shell and Python files get a small starter. An existing file is never overwritten. **Start without saving** keeps the new file only in memory: nothing is written until you press **Ctrl+S** and choose a place (closing it asks first); **Create file now** writes it straight away.
 - **Files are always editable.** Every file up to **2 MB** opens ready to type in; there is no Edit button to press. You get line numbers, colours as you type, **Tab / Shift+Tab** to indent a line or a block, **Enter** keeps the indentation (and adds one level after `{ [ ( :`), **Ctrl+/** comments or uncomments lines, **Ctrl+D** duplicates a line, and **Ctrl+Z / Ctrl+Y** undo and redo (including a Format or Fix). Your typing reaches the document a moment after you stop (and immediately before Save, Format, Fix, Compare or a view switch), so everything always sees it. **Find & Replace** switches to the search view and returns to the editor when you press Esc. Larger files open in the read-only viewer (Find & Replace, Format and Fix still work). Settings ▸ Formatting ▸ *Open files read-only* turns typing off if you prefer to browse safely. Line endings (LF / CRLF) and a byte-order mark are preserved. CSV / TSV and Excel sheets open as tables; the table icon switches them to the text editor.
+- **Long lines.** The **Wrap** button (**Alt+Z**) shows the current line wrapped in a pane under the editor, with a Copy button, so you can read a very long line without scrolling sideways. The editor itself keeps one row per line so huge files stay fast. The status bar shows how many lines and characters are selected.
+- **Table and Fix** are enabled only where they apply: Table for CSV, TSV, Excel and text split by tabs, commas, semicolons or `|` (Alt+T forces it); Fix for JSON and XML.
 - **Copy** (the copy icon next to Save, or **Ctrl+Shift+C**) puts the whole file on the clipboard, or just the selected text if you have selected some.
 - **In a comparison** every line is editable: click a line on either side, retype it and press Enter (Esc cancels); the comparison updates at once and the **Save L / Save R** buttons write the files. The **copy L / copy R** buttons copy a whole side to the clipboard, and the arrow buttons still copy changes across.
 - **JSON stored inside strings** (for example `"parameters": "{\"format\":\"%Y\"}"`): with *Settings ▸ Editor ▸ Expand JSON stored inside strings* on, **Format** and **Compare** show it as normal indented JSON (any depth). Only text that is valid JSON is expanded. This changes the data (a string becomes an object), so it is off by default and Ctrl+Z undoes it. On the command line: `kempt fmt --expand-embedded file.json`.
 - **Excel (`.xlsx`, `.xlsm`, `.xlsb`)** opens as a table with **one tab per sheet** (up to 50 sheets; empty sheets are skipped): values and dates look as Excel shows them, formulas show their last calculated result, and line breaks inside a cell show as ⏎. Formatting, colours, charts and images are not shown. **Save writes CSV** (use Save as and give a `.csv` name); the original workbook is never changed. Old `.xls`, `.ods` and `.numbers` files cannot be read: save them as `.xlsx` or `.csv` first.
+- **Word, OpenDocument and PowerPoint (`.docx`, `.odt`, `.odp`, `.ods`, `.pptx`)** open as read-only text: paragraphs, table cells (tab-separated) and one block per slide. Layout, pictures and charts are not shown. Older `.doc`, `.ppt`, `.xls`, `.pages`, `.key` and `.numbers` cannot be read; save them in the newer format first.
+- **Pictures and PDFs** (PNG, JPG, GIF, WebP, BMP, ICO, SVG, AVIF, PDF) open in a viewer tab: pictures with Fit, 100% and zoom buttons, PDFs in the browser's own PDF viewer. They are read from disk by the local server and never leave your computer.
 - **Delimited text**: `.txt` / `.dat` files whose lines are split by tabs, pipes, semicolons or commas (same number of columns on every line) open as a **table**. To see the raw text, use the **Open as** dropdown in the Open dialog (Automatic, Plain text, Table with a detected / comma / tab / semicolon / pipe separator, JSON, XML), switch the tab with the table icon, or turn on *Settings ▸ Formatting ▸ Opening files* to always open them as text. `.csv` and `.tsv` always open as tables.
 - **Syntax colours** follow the VS Code palette of the selected theme: *Dark+* in the dark theme, *Light+* in the light theme, and a colour-blind-safe variant. Covered: JSON, XML / HTML, CSS, JavaScript / TypeScript, Python, shell, SQL, YAML, TOML / INI, Markdown, diff / patch, C-family languages (C, C++, C#, Java, Go, Rust, Kotlin, Swift, PHP…) and **logs** (timestamps, ERROR / WARN / INFO / DEBUG, stack traces, exception names, URLs). Markdown code blocks are coloured by their language. This is a lightweight highlighter (it tracks multi-line comments and strings while you edit, not every corner of every language), so unusual syntax may be left uncoloured; the viewer colours each line on its own, so a comment that starts on an earlier, off-screen line is not coloured there.
 
@@ -387,10 +396,11 @@ strings; mismatched, missing or stray brackets; unterminated strings. For **XML*
 mismatched tags, stray `&`, unquoted or valueless attributes, and `<br>`-style void tags. It tells you exactly
 what it fixed, and Undo reverts it.
 
-**Escaped and nested JSON.** Text full of backslash-quotes (`{\"a\":1}`, or a whole quoted string) is unescaped first.
-A string value that itself contains a JSON object or array (common in API logs) is opened as real nested structure, up to
-three levels deep. Strings that only look like JSON are left alone. The report says "embedded JSON text expanded" when
-this happened, and Undo reverts it.
+**Escaped and nested JSON.** Text that is full of backslash-quotes (`{\"a\":1}`, or a whole quoted string such as
+`"{\"a\":1}"`) is unescaped first. A string value that itself contains a JSON object or array (common in API
+logs, e.g. `"X_RESPONSE": "{\"status\":…}"`) is opened as real nested structure, up to three levels deep. Strings that
+only look like JSON but are not valid are left alone. Note that this changes such a string into structure, so check the
+report line ("embedded JSON text expanded") if you need the file to keep the original strings; Undo reverts it.
 
 ### Format
 Pretty-prints JSON and XML at any size, and other languages through their tools. Indentation comes from
@@ -401,7 +411,7 @@ Settings. From the command line: `kempt format --indent 4 f.json` or `--indent t
 - `F7` / `Shift+F7` jump to the next or previous change. An overview ruler shows where the changes are.
 - Toggles: hide unchanged, ignore whitespace, ignore case, mask ids (timestamps, UUIDs, IPs), swap sides, find inside the comparison.
 - **Left ⇒ all** and **⇐ Right all** copy every change in one direction. **Save** each side when you are done.
-- **Changes vs saved** shows exactly what your edits changed compared with the file on disk.
+- **Changes** (the ± button) shows exactly what your edits changed compared with the file on disk.
 - Small JSON files are compared by structure (key order and layout ignored); larger files line by line.
 
 ### Keyboard shortcuts
@@ -424,12 +434,15 @@ On macOS use Cmd in place of Ctrl.
 | Alt+V | switch between source and the rendered view (Markdown, HTML, JSON tree) |
 | Alt+T | switch between text and table |
 | Alt+W | close the current tab |
+| Alt+Z | wrapped-line pane for the current line |
+| Alt+K / Alt+L / Alt+J | world clock / calendar / checklist (also in the **Tools** menu) |
+| Ctrl+E | in Find: add the selected word as another keyword |
 | Alt+PageDown / Alt+PageUp (also Alt+. / Alt+,) | next / previous tab (browsers keep Ctrl+Tab and Ctrl+PageDown for themselves) |
 | Alt+1 … Alt+8, Alt+9 | jump to that tab, last tab |
 | Ctrl+Shift+] / Ctrl+Shift+[ | next / previous tab (also Ctrl+PageDown / Ctrl+PageUp where the browser allows it) |
 | F7 / Shift+F7 | next / previous change (compare) |
 | Arrows, PageUp / PageDown, Ctrl+Home / Ctrl+End | move around |
-| F1 | help and shortcuts |
+| F1 | help and shortcuts (click a shortcut there to change it) |
 | Esc | close the find box, a menu or a dialog; clear a selection |
 
 Ctrl+W, Ctrl+T, Ctrl+N and Ctrl+Tab belong to your web browser, which does not pass them to web pages, so Kempt uses the
@@ -439,11 +452,11 @@ Alt and Ctrl+Shift alternatives above. Kempt runs in your browser, so these are 
 
 ## World clock
 
-The clock button in the top bar (or **Alt+K**) opens a **World clock** tab: this computer's zone and UTC by default. Type a city, a zone id or an abbreviation such as `PST` to add one, drag the ⋮⋮ handle to reorder, × to remove. Each zone has a 24-hour strip (three tones only: night, day, working hours 9–17, tinted by season: spring greens, summer golds, autumn rust and plum, winter blues; the season is set in Settings → Appearance and defaults to *Auto*, which follows the shown date using northern-hemisphere seasons, and has light and dark versions); click or drag on any strip, or use the arrow keys, and one marker moves across every zone. A date-and-time box (type it or use the calendar) jumps every zone to that moment; the **in …** menu beside it says which zone you are typing in (the chosen zone's row gets a blue edge, and changing the menu re-reads the same moment in the new zone), **Now** returns to live time, and 12 h / 24 h is a toggle. Zones are remembered. It uses the browser's built-in time-zone data and your computer's clock, so it works offline and adds no code to the server; its one-minute timer only runs while the tab is visible.
+The **Tools** menu in the top bar (Clock, Calendar, Checklist; or **Alt+K**) opens a **World clock** tab: this computer's zone and UTC by default. Type a city, a zone id, an abbreviation or an offset to add one (`pst`, `cst`, `cst6cdt`, `central`, `-6`, `kolkata`); each suggestion shows the city, abbreviation, offset and whether it observes daylight saving, for example *Chicago · CST · UTC-6*. The same search is used in the daylight-saving, clock-change-alert and meeting-finder boxes. Drag the ⋮⋮ handle to reorder, × to remove. Each zone has a 24-hour strip (three tones only: night, day, working hours 9–17, tinted by season: spring greens, summer golds, autumn rust and plum, winter blues; the season is set in Settings → Appearance and defaults to *Auto*, which follows the shown date using northern-hemisphere seasons, and has light and dark versions); click or drag on any strip, or use the arrow keys, and one marker moves across every zone. A date-and-time box (type it or use the calendar) jumps every zone to that moment; the **in …** menu beside it says which zone you are typing in (the chosen zone's row gets a blue edge, and changing the menu re-reads the same moment in the new zone), **Now** returns to live time, and 12 h / 24 h is a toggle. Zones are remembered. It uses the browser's built-in time-zone data and your computer's clock, so it works offline and adds no code to the server; its one-minute timer only runs while the tab is visible.
 
 **Holidays.** Under the clock, pick a country (India, United States, United Kingdom, Germany, France, Australia) to see its next ten public holidays; a ★ with the holiday's name appears on any zone row whose date falls on one. The built-in rules cover fixed dates, weekday rules (e.g. US Thanksgiving) and Easter-based days, including observed/substitute days for the US, UK and Australia. Holidays that follow the moon (Diwali, Eid, Holi, Chinese New Year…) change every year and cannot be worked out offline, so add them under "Your own dates" (tick *every year* to repeat). State, regional and company holidays are not included; check official calendars.
 
-**Calendar.** The calendar button in the top bar (or **Alt+L**) opens a built-in calendar with Day, Week, Month, Year and Schedule views (keys `d w m y a`, `t` for today, `j`/`k` for next/previous, `c` for a new event). Events can be all-day or timed, repeat daily, weekly (chosen weekdays), monthly or yearly (ending never, on a date or after a number of times), carry a category, place and notes, and ask for reminders (at the time, 10 minutes, 1 hour or 1 day before). Deleting one occurrence of a repeating event only removes that day. Checklist items that have a time appear on the calendar as dashed entries; click one to tick it. Reminders use the same desktop notification and sound as the checklist. Everything is saved in `calendar.json` next to the settings: nothing leaves your computer. The drawing code is one dependency-free file (`ui/kempt-calendar.js`) that knows nothing about storage, so the same file can be reused elsewhere.
+**Calendar.** **Tools → Calendar** (or **Alt+L**) opens a built-in calendar with Day, Week, Month, Year and Schedule views (keys `d w m y a`, `t` for today, `j`/`k` for next/previous, `c` for a new event). Events can be all-day or timed, repeat daily, weekly (chosen weekdays), monthly or yearly (ending never, on a date or after a number of times), carry a category, place and notes, and ask for reminders (at the time, 10 minutes, 1 hour or 1 day before). Deleting one occurrence of a repeating event only removes that day. **Meetings** have their own colour; the **+ Meeting** button opens the event window on its **Find a time** tab. Dates and times use the date-format setting and a built-in picker (a month grid and a half-hour list). Checklist items that have a time appear on the calendar as dashed entries; click one to tick it. Reminders use the same desktop notification and sound as the checklist. Everything is saved in `calendar.json` next to the settings: nothing leaves your computer. The drawing code is one dependency-free file (`ui/kempt-calendar.js`) that knows nothing about storage, so the same file can be reused elsewhere.
 
 ## Running in the background (reminders, tray icon, own window)
 
@@ -468,13 +481,13 @@ Cost: the background copy is one sleeping thread that wakes only when a reminder
 
 **Clock-change alerts.** The *Clock-change alerts* section lets you watch any zones (they need not be on the clock), pick how long before to be alerted (2 weeks, 1 week, 3 days, 1 day, 1 hour; several allowed) and shows the next 12 months of changes. Each alert is stored as an ordinary reminder (hidden from the checklist), so it uses the same desktop notification and sound, also with no browser open when Kempt runs in the background. The browser works out the dates, so Kempt schedules the next 12 months every time it is opened; if you never open it for a year, alerts stop until you do.
 
-**Meeting finder.** The *Meeting finder* section lists the next times (up to 12) that fall inside working hours for everyone you tick: pick a length (30 min to 2 h), the working hours (default 9-17) and how far ahead to look (3, 7 or 14 days). It uses every zone on your clock and lets you add other people's zones without adding them to the clock. Saturdays, Sundays and holidays in each zone are skipped. Click a time to show it on the clock. **Check a time** lets you type a proposed date and time in *any* zone (not just yours) and shows what it is for everyone ticked, with a ✓ or the reason it does not fit (before or after hours, weekend, holiday). *Show suggestions in* lists the suggested times in another zone's clock.
+**Meeting finder.** It lives in the calendar: open or create an event, choose the **Find a time** tab, tick the zones everyone is in (add more by city or abbreviation), and green bars mark the times inside everyone's working hours with no weekends or holidays. Click a bar to set the event to that time. Set working hours, weekend days and company holidays under the World clock.
 
-**Daylight saving.** A zone that is currently on daylight saving time gets an amber **DST** badge next to its name. Under the strips, **Daylight saving through the year** draws one bar per zone for the calendar year being shown: shaded where the clocks are shifted, with short points per zone (DST now or standard, "▲ Mar 8 +1 h", "▼ Nov 1 −1 h", next change) and a marker for the date shown. Its rows follow the zone list, so dragging a zone reorders both. To compare a zone without adding it to the clock, type it in the box at the top of the DST section; it is listed as "comparison only" until you remove it (× next to its name). Click the **Daylight saving** or **Holidays** bar to fold it away (remembered; a folded section is not drawn at all). Southern-hemisphere zones (e.g. Sydney) show their two stretches the other way round, and zones that never change are marked "No DST". The rules come from the browser's own time-zone database, so they work offline and follow whatever your browser knows (keep the browser updated for law changes).
+**Daylight saving.** A zone that is currently on daylight saving time gets an amber **DST** badge next to its name. Under the strips, **Daylight saving through the year** draws one bar per zone for the calendar year being shown: shaded where the clocks are shifted, with short points per zone (DST now or standard, "▲ Mar 8 +1 h", "▼ Nov 1 −1 h", next change) and a marker for the date shown. Its rows follow the zone list, so dragging a zone reorders both. The section is empty until a zone you added observes daylight saving. To compare a zone without adding it to the clock, type it in the box at the top of the DST section; it is listed as "comparison only" until you remove it (× next to its name). Click the **Daylight saving** or **Holidays** bar to fold it away (remembered; a folded section is not drawn at all). Southern-hemisphere zones (e.g. Sydney) show their two stretches the other way round, and zones that never change are marked "No DST". The rules come from the browser's own time-zone database, so they work offline and follow whatever your browser knows (keep the browser updated for law changes).
 
 ## Checklist, notes and reminders
 
-The notes button (or **Alt+J**) opens a checklist, each item marked **Work** or **Personal** (filter All / Work / Personal, with counts; move an item with its menu; older items without a category show under All), with an optional reminder time per item, plus a free-text scratchpad. Everything is saved in one small file, `notes.json`, next to the settings (limit 512 KB): no database. A single timer is armed for the next reminder only, so nothing runs when there are none. Reminders pop up (with **Snooze 10 min** and **Done**, plus a desktop notification if you allow it) **while Kempt is open in a browser tab**; a background or minimised tab is fine. Kempt cannot wake itself when it is closed, so anything that came due then is shown the next time you open it, and the top-bar button carries a red count of due items. **Repeat:** a reminder can repeat daily, on weekdays, weekly or monthly (the 31st falls back to the month's last day). The item itself is always the next occurrence; the following ones are stored ahead of time (30 daily, 22 weekday, 13 weekly or 12 monthly) as hidden reminders, so the background service announces them with no page open. Ticking a repeating item moves it to the next time instead of finishing it; clearing its time or deleting it stops the series. Open Kempt at least once in that span to schedule more. A due reminder also plays a short three-tone sound (switch it off or test it in Settings → General; browsers only allow sound after you have clicked or typed in the page once) and flashes the tab title when the tab is in the background.
+**Tools → Checklist** (or **Alt+J**) opens three columns: the checklist (items marked **Work** or **Personal**, with optional reminders and repeats, grouped by Overdue, Today, Tomorrow, This week, Later, No date and Done, or sorted by date, importance, newest or A to Z with the sort box; a star marks important ones; **Clear done** says so when nothing is ticked), what is coming up from your tasks and calendar, and your **notes** (any number, each with a title and text; empty notes are not kept). Items and notes are saved in `notes.json` next to the settings (limit 512 KB), **encrypted** with AES-256-GCM; the key is a separate owner-only file in `keys/` in the same folder. `kempt notes-export` prints the decrypted data. A single timer is armed for the next reminder only, so nothing runs when there are none. Reminders pop up (with **Snooze 10 min** and **Done**, plus a desktop notification if you allow it) **while Kempt is open in a browser tab**; a background or minimised tab is fine. Kempt cannot wake itself when it is closed, so anything that came due then is shown the next time you open it, and the top-bar button carries a red count of due items. **Repeat:** a reminder can repeat daily, on weekdays, weekly or monthly (the 31st falls back to the month's last day). The item itself is always the next occurrence; the following ones are stored ahead of time (30 daily, 22 weekday, 13 weekly or 12 monthly) as hidden reminders, so the background service announces them with no page open. Ticking a repeating item moves it to the next time instead of finishing it; clearing its time or deleting it stops the series. Open Kempt at least once in that span to schedule more. A due reminder also plays a short three-tone sound (switch it off or test it in Settings → General; browsers only allow sound after you have clicked or typed in the page once) and flashes the tab title when the tab is in the background.
 
 ## Command line
 
@@ -605,6 +618,7 @@ Formatting is lossless: minifying the formatted output gives back the original, 
 
 **Graphical interface**
 - Typing works up to 2 MB per file; the editor draws only the visible lines but keeps the whole text in the page, so very long single lines (over about 4,000 characters) are shown without colours. Spell-check and auto-close brackets are not provided. Typing is committed as one working copy per pause, so the 6-version history covers your last few pauses, not every keystroke (Ctrl+Z inside the editor undoes typing itself).
+- Word, OpenDocument and PowerPoint files show their text only (no layout, pictures or charts); PDFs and pictures are shown by the browser.
 - Excel: values only (no formulas, formatting, charts, merged-cell layout or hidden-sheet handling); at most 50 sheets are opened, hidden sheets are shown like the others; saving produces CSV.
 - Each edit creates a new working copy of the file, so very large files take about a second per edit, and history is limited to the last 6 versions. Memory grows with the number of lines (8 bytes per line per copy).
 - Table view: every line is one record, so a quoted CSV field that contains a line break is split across two rows; at most 1,000 columns are shown; cells are clipped to 400 characters on screen (Ctrl+C copies the full text); duplicate detection compares 64-bit hashes (the chance of a false match is about one in 10 billion for a million rows). The table is a read-only view; edit in Text view (Find/Replace switch to it automatically). Separators are one character (no `||` or fixed-width files); the funnel's value list shows the 500 most frequent values of a column (use a text filter for the rest); filters and duplicate keys are applied to the first 300 columns in the pickers.

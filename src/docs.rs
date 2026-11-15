@@ -162,6 +162,7 @@ pub fn looks_delimited(c: &Copy, name: &str) -> bool {
 }
 
 impl Doc {
+    #[cfg(test)]
     pub fn open(id: u64, path: &Path) -> Result<Doc> {
         Doc::open_as(id, path, "auto")
     }
