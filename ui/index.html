@@ -429,8 +429,10 @@ input[type=range]::-moz-range-thumb { width:12px; height:12px; border-radius:50%
 .panel.busy::after { content:'Working…'; position:absolute; right:16px; top:84px; padding:4px 10px; background:var(--accent); color:#fff; border-radius:6px; font-size:12px; z-index:50; }
 button.tgl.on { border-color:var(--accent); }
 
-/* icon-first toolbars: the words live in the tooltip */
+/* icon-first toolbars: words appear next to the icons when there is room, the tooltip always has them */
 .lbl { display:none !important; }
+@media (min-width:1180px) { #topbar .topright button.icon .lbl { display:inline !important; margin-left:2px; font-size:12px; font-weight:500; } #topbar .topright button.icon { padding:0 10px; width:auto; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; } }
+@media (min-width:1500px) { .toolbar .lbl { display:inline !important; font-size:12px; } .toolbar button:has(.lbl) { padding:0 9px; gap:5px; } }
 .toolbar button, .tstrip button, #topbar .topright button { min-width:var(--h); padding:0 8px; }
 #topbar .topright button { min-width:34px; }
 .toolbar button:has(.bdg) { width:42px; padding:0; justify-content:center; }
@@ -521,7 +523,7 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
 .wc .grip { color:var(--fg-dim); cursor:grab; display:flex; } .wc .grip:active { cursor:grabbing; }
 .wc .nm { min-width:0; } .wc .nm b { font-size:14px; font-weight:600; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .wc .nm span, .wc .tm span { color:var(--fg-dim); font-size:11.5px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.wc .nm i.dst { color:#b8650f; margin-left:5px; font-weight:600; } :root[data-theme=dark] .wc .nm i.dst { color:#f0a24e; }
+.wc .nm i.ab { color:var(--fg-dim); border:1px solid var(--border); border-radius:4px; padding:0 4px; font-size:10px; font-weight:600; } .wc .nm i.dst { color:#b8650f; margin-left:5px; font-weight:600; } :root[data-theme=dark] .wc .nm i.dst { color:#f0a24e; }
 .wc .nm i { font-style:normal; font-size:10.5px; color:var(--accent); margin-left:6px; }
 .wc .tm { text-align:right; } .wc .tm b { font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; display:block; line-height:1.15; }
 .wc .strip { display:grid; grid-template-columns:repeat(24,1fr); height:30px; border-radius:4px; overflow:hidden; cursor:ew-resize; user-select:none; touch-action:none; }
@@ -602,6 +604,68 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
 .wc .dstr .bar2.none { background:repeating-linear-gradient(90deg,var(--dy) 0 6px,transparent 6px 8px); opacity:.6; }
 .wc .dstr .tx2 { color:var(--fg-dim); font-size:11.5px; line-height:1.35; padding:3px 0; } .wc .dstr .tx2 em { font-style:normal; color:var(--fg); }
 @media (max-width:820px) { .wc .dsth, .wc .dstr { grid-template-columns:110px 1fr; } .wc .dstr .tx2 { grid-column:1 / 3; } .wc .dsth span:last-child { display:none; } }
+
+/* tab bar: no scrollbar (wheel, Alt+PageUp/PageDown and the tab list reach every tab) */
+#tabs { scrollbar-width:none; } #tabs::-webkit-scrollbar { display:none; }
+:root { --cat-w:#4c8dff; --cat-p:#2fb676; }
+.drow .cp { width:24px; height:18px; }
+/* checklist rows: one calm look for every control */
+.nt .it .cs, .nt .it .when input, .nt .it .when select { background:var(--bg2); color:var(--fg); border:1px solid var(--border); border-radius:6px; height:22px; font-size:11.5px; }
+.nt .it .cs { border-left:3px solid var(--border); padding:0 4px; } .nt .it .cs.w { border-left-color:var(--cat-w); color:var(--fg); } .nt .it .cs.p { border-left-color:var(--cat-p); color:var(--fg); }
+.nt .it .when button.clrr { border:1px solid var(--border); border-radius:6px; background:transparent; color:var(--fg-dim); } .nt .it .when button.clrr:hover { color:var(--fg); }
+.nt .it .x { border-radius:6px; display:inline-flex; align-items:center; justify-content:center; } .nt .it .x:hover { color:var(--danger); background:color-mix(in srgb, var(--danger) 14%, transparent); }
+/* world clock: use the whole page, big live clock, draggable sections, month calendar, holiday tables */
+.wc { padding:18px 32px 36px; } .wc .wrap { max-width:none; }
+.wc .zrow { grid-template-columns:18px minmax(130px,200px) 250px minmax(0,1fr) 26px; }
+.wc .hero { display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; margin:0 0 14px; } .wc .hero .hc1 { font-size:46px; font-weight:600; letter-spacing:.01em; font-variant-numeric:tabular-nums; line-height:1.1; } .wc .hero .hc2 { color:var(--fg-dim); font-size:15px; }
+.wc .secs { display:flex; flex-direction:column; } .wc .secs > section { position:relative; margin-top:16px; border-top:0; padding-top:0; } .wc .secs > section.sdrag { opacity:.45; }
+.wc .sgrip { position:absolute; right:10px; top:9px; z-index:2; color:var(--fg-dim); cursor:grab; display:flex; border-radius:4px; padding:1px; } .wc .sgrip:hover, .wc .sgrip:focus-visible { color:var(--fg); background:var(--bg-hover); outline:none; } .wc .sgrip:active { cursor:grabbing; }
+.wc .mlay { display:grid; grid-template-columns:minmax(230px,270px) minmax(0,1fr); gap:22px; align-items:start; } @media (max-width:900px) { .wc .mlay { grid-template-columns:1fr; } }
+.wc .mcal { border:1px solid var(--border); border-radius:10px; padding:10px; background:var(--bg); }
+.wc .mch { display:flex; align-items:center; gap:4px; margin-bottom:8px; } .wc .mch .mct { flex:1; text-align:center; font-size:13px; } .wc .mch button { height:24px; min-width:24px; padding:0 6px; font-size:13px; }
+.wc .mcg { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; text-align:center; } .wc .mcg i { font-style:normal; font-size:10.5px; color:var(--fg-dim); padding:2px 0; }
+.wc .mcg button { height:30px; min-width:0; padding:0; border:0; border-radius:6px; background:transparent; color:var(--fg); font-size:12px; font-variant-numeric:tabular-nums; }
+.wc .mcg button:hover { background:var(--bg-hover); } .wc .mcg button.off { color:var(--fg-dim); background:repeating-linear-gradient(135deg, rgba(128,128,128,.22) 0 3px, transparent 3px 7px); }
+.wc .mcg button.win { background:color-mix(in srgb, var(--accent) 22%, transparent); } .wc .mcg button.win.off { background:color-mix(in srgb, var(--accent) 10%, transparent); }
+.wc .mcg button.today { box-shadow:inset 0 0 0 1.5px var(--fg-dim); } .wc .mcg button.start, .wc .mcg button.start.off, .wc .mcg button.start.win { background:var(--accent); color:var(--accent-fg,#fff); font-weight:700; }
+.wc .mcl { display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:8px; color:var(--fg-dim); font-size:11px; } .wc .mcl i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px; } .wc .mcl .s1 { background:color-mix(in srgb, var(--accent) 30%, transparent); } .wc .mcl .s2 { background:repeating-linear-gradient(135deg, rgba(128,128,128,.5) 0 2px, transparent 2px 4px); } .wc .mcl .s3 { background:var(--accent); }
+.wc .hsel { justify-content:space-between; flex-wrap:wrap; } .wc .hwe { display:flex; align-items:center; gap:10px; color:var(--fg-dim); flex-wrap:wrap; } .wc .hwe label { display:inline-flex; align-items:center; gap:4px; }
+.wc .hcols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:22px; align-items:start; } @media (max-width:1000px) { .wc .hcols { grid-template-columns:1fr; } }
+.wc .hcols h4 { margin:0 0 6px; font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--fg-dim); font-weight:600; } .wc .hcols h4 small { text-transform:none; letter-spacing:0; font-weight:400; }
+.wc .hl > div { grid-template-columns:150px minmax(0,1fr) auto auto auto; } .wc .hl .hnm { overflow:hidden; text-overflow:ellipsis; }
+.wc .hl button { width:auto; min-width:24px; padding:0 6px; border-radius:6px; font-size:11.5px; } .wc .hl button:hover { color:var(--fg); background:var(--bg-hover); } .wc .hl .hdl:hover { color:var(--danger); }
+.wc .hadd .hs { height:var(--h,28px); } .wc .hadd button { height:var(--h,28px); } .wc .hpaste textarea { width:100%; margin-top:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--fg); padding:8px 10px; font:12.5px/1.45 var(--mono); resize:vertical; }
+
+/* checklist: three calm columns, grouped by day */
+.nt .wrap { max-width:none; grid-template-columns:minmax(380px,1.5fr) minmax(290px,.9fr) minmax(300px,1fr); gap:24px; }
+@media (max-width:1300px) { .nt .wrap { grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); } .nt .ntn { grid-column:1 / -1; } } @media (max-width:820px) { .nt .wrap { grid-template-columns:1fr; } }
+.nt { padding:20px 28px 36px; } .nt h2 .sp { flex:1; } .nt h2 button { display:inline-flex; align-items:center; gap:5px; }
+.nt .addcard { border:1px solid var(--border); border-radius:12px; padding:10px; background:var(--bg2); margin-bottom:12px; }
+.nt .addcard .t { width:100%; height:34px; font-size:14px; margin-bottom:8px; } .nt .addcard .addrow { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:0; }
+.nt .qk { display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; } .nt .qk button { border:0; border-right:1px solid var(--border); border-radius:0; background:transparent; height:26px; padding:0 10px; font-size:12px; } .nt .qk button:last-child { border-right:0; } .nt .qk button:hover { background:var(--bg-hover); }
+.nt .addcard select, .nt .addcard input[type=datetime-local] { height:26px; font-size:12px; } .nt .addcard .go { margin-left:auto; height:28px; }
+.nt .star { width:24px; min-width:24px; height:24px; padding:0; border:0; background:transparent; color:var(--fg-dim); font-size:15px; line-height:1; border-radius:6px; opacity:.55; } .nt .star:hover { opacity:1; background:var(--bg-hover); } .nt .star.on { color:#e0a526; opacity:1; }
+.nt .tools { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px; } .nt .tools .seg { margin:0; } .nt .tools .fq { flex:1 1 120px; min-width:0; height:26px; font-size:12px; } .nt .tools .sd { height:26px; font-size:12px; padding:0 10px; }
+.nt .dayf { display:flex; align-items:center; gap:8px; padding:6px 10px; margin-bottom:8px; border-radius:8px; background:color-mix(in srgb, var(--accent) 14%, transparent); font-size:12.5px; } .nt .dayf button { height:22px; font-size:11.5px; padding:0 8px; }
+.nt .it { grid-template-columns:22px minmax(0,1fr) auto 24px 24px; } .nt .it .meta { grid-column:2 / 3; grid-row:2; justify-self:start; } .nt .it.hd .meta { grid-row:2; grid-column:2 / 4; }
+.nt .gh { display:flex; align-items:center; gap:8px; padding:7px 10px 5px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--fg-dim); background:var(--bg2); border-top:1px solid var(--border); font-weight:600; } .nt .gh:first-child { border-top:0; } .nt .gh small { font-weight:400; opacity:.8; } .nt .gh.g0 { color:var(--danger); }
+.nt .ntc, .nt .ntn { min-width:0; }
+.nt .mini { border:1px solid var(--border); border-radius:12px; padding:10px; background:var(--bg2); margin-bottom:12px; }
+.nt .mh { display:flex; align-items:center; gap:4px; margin-bottom:6px; } .nt .mh b { flex:1; text-align:center; font-size:13px; } .nt .mh button { height:24px; min-width:24px; padding:0 6px; } .nt .mh .p svg { transform:rotate(180deg); }
+.nt .mg { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; text-align:center; } .nt .mg i { font-style:normal; font-size:10.5px; color:var(--fg-dim); padding:2px 0; }
+.nt .mg button { position:relative; height:34px; min-width:0; padding:0; border:0; border-radius:8px; background:transparent; font-size:12px; font-variant-numeric:tabular-nums; } .nt .mg button:hover { background:var(--bg-hover); } .nt .mg button.we { color:var(--fg-dim); }
+.nt .mg button em { position:absolute; left:0; right:0; bottom:1px; font-style:normal; font-size:8px; line-height:6px; color:var(--accent); letter-spacing:1px; } .nt .mg button.today { box-shadow:inset 0 0 0 1.5px var(--accent); } .nt .mg button.sel { background:var(--accent); color:var(--accent-fg,#fff); } .nt .mg button.sel em { color:var(--accent-fg,#fff); }
+.nt .ah { margin-top:4px; } .nt .agenda { display:flex; flex-direction:column; gap:3px; } .nt .agenda .ad { margin:8px 0 2px; font-size:11.5px; color:var(--fg-dim); font-weight:600; }
+.nt .ae { display:grid; grid-template-columns:62px minmax(0,1fr) auto; gap:8px; align-items:center; width:100%; height:auto; min-height:30px; padding:4px 8px; border:0; border-left:3px solid var(--accent); border-radius:6px; background:var(--bg2); text-align:left; font-weight:400; } .nt .ae:hover { background:var(--bg-hover); }
+.nt .ae.w { border-left-color:var(--cat-w); } .nt .ae.p { border-left-color:var(--cat-p); } .nt .ae.task { border-left-style:dashed; } .nt .ae .tm { color:var(--fg-dim); font-size:11.5px; font-variant-numeric:tabular-nums; } .nt .ae .tt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .nt .ae small { color:var(--fg-dim); font-size:10.5px; }
+.nt .nsq { width:100%; height:28px; margin-bottom:8px; font-size:12.5px; } .nt .nlist { display:flex; flex-direction:column; gap:3px; max-height:210px; overflow:auto; margin-bottom:10px; }
+.nt .ni { display:flex; flex-direction:column; align-items:flex-start; gap:1px; height:auto; padding:6px 10px; border:1px solid transparent; border-radius:8px; background:var(--bg2); text-align:left; font-weight:400; } .nt .ni b { font-weight:600; font-size:13px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .nt .ni small { color:var(--fg-dim); font-size:11px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .nt .ni.on { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, var(--bg2)); } .nt .ni:hover { background:var(--bg-hover); }
+.nt .ntt { width:100%; height:32px; font-size:14px; font-weight:600; margin-bottom:6px; } .nt .ned textarea.pad { min-height:240px; height:36vh; } .nt .nfoot { display:flex; align-items:center; gap:8px; margin-top:6px; color:var(--fg-dim); font-size:11.5px; } .nt .nfoot .sp { flex:1; } .nt .nfoot button { height:24px; display:inline-flex; align-items:center; gap:5px; font-size:11.5px; } .nt .nfoot .nd:hover { color:var(--danger); }
+.nt .empty { padding:16px; color:var(--fg-dim); text-align:center; }
+
+.nt .mg span { height:34px; } .nt .addcard .addrow { flex-wrap:nowrap; } .nt .addcard .addrow .w { flex:1 1 150px; min-width:0; width:auto; } .nt .addcard .go { margin-left:0; }
+@media (max-width:1500px) { .nt .addcard .addrow { flex-wrap:wrap; } }
+.nt input[type=search] { background:var(--bg); color:var(--fg); border:1px solid var(--border); border-radius:6px; padding:0 8px; }
 </style>
 </head>
 <body>
@@ -614,12 +678,12 @@ article.md .md-tw { overflow:auto; } article.md img { max-width:100%; } article.
       <button id="btn-open" title="Open a file (Ctrl+O)" aria-label="Open a file"><i data-ic="folder"></i><span class="lbl">Open</span></button>
       <button id="btn-compare" title="Compare two files" aria-label="Compare two files"><i data-ic="columns"></i><span class="lbl">Compare</span></button>
       <span class="vsep"></span>
-      <button id="btn-clock" class="icon" title="World clock: time in several zones (Alt+K)" aria-label="World clock"><i data-ic="clock"></i></button>
-      <button id="btn-cal" class="icon" title="Calendar (Alt+L)" aria-label="Calendar"><i data-ic="cal"></i></button>
-      <button id="btn-notes" class="icon" title="Checklist &amp; notes with reminders (Alt+J)" aria-label="Checklist and notes"><i data-ic="notes"></i><em class="nb" hidden></em></button>
+      <button id="btn-clock" class="icon" title="World clock: time in several zones (Alt+K)" aria-label="World clock"><i data-ic="clock"></i><span class="lbl">Clock</span></button>
+      <button id="btn-cal" class="icon" title="Calendar (Alt+L)" aria-label="Calendar"><i data-ic="cal"></i><span class="lbl">Calendar</span></button>
+      <button id="btn-notes" class="icon" title="Checklist &amp; notes with reminders (Alt+J)" aria-label="Checklist and notes"><i data-ic="notes"></i><span class="lbl">Checklist</span><em class="nb" hidden></em></button>
       <span class="vsep"></span>
-      <button id="btn-help" class="icon" title="Help &amp; shortcuts" aria-label="Help"><i data-ic="help"></i></button>
-      <button id="btn-settings" class="icon" title="Settings" aria-label="Settings"><i data-ic="gear"></i></button>
+      <button id="btn-help" class="icon" title="Help &amp; shortcuts" aria-label="Help"><i data-ic="help"></i><span class="lbl">Help</span></button>
+      <button id="btn-settings" class="icon" title="Settings" aria-label="Settings"><i data-ic="gear"></i><span class="lbl">Settings</span></button>
     </div>
   </div>
   <div id="main"></div>
@@ -679,6 +743,9 @@ const IC = {
   swap: '<path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
   file: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>',
   x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16v4zM13 7l4 4"/>',
+  chev: '<path d="M9 6l6 6-6 6"/>',
+  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   palette: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.7-.8 1.7-1.7 0-.5-.2-.8-.4-1.2-.2-.3-.4-.7-.4-1.1 0-.9.7-1.5 1.6-1.5H16a5 5 0 0 0 5-5c0-4-4-7.5-9-7.5z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
   braces: '<path d="M8 4c-2 0-3 1-3 3v2c0 1.5-.8 3-2 3 1.200 0 2 1.500 2 3v2c0 2 1 3 3 3M16 4c2 0 3 1 3 3v2c0 1.500.8 3 2 3-1.200 0-2 1.500-2 3v2c0 2-1 3-3 3"/>',
@@ -2629,7 +2696,7 @@ class DiffTab {
   applyState(s, first) {
     const prev = this.st; this.st = s;
     const q = this.q;
-    const cols = (() => { const w = String(Math.max(s.left.lines, s.right.lines)).length * 8 + 18; return `${w}px minmax(0,1fr) 78px ${w}px minmax(0,1fr)`; })();
+    const cols = (() => { const w = String(Math.max(s.left.lines, s.right.lines)).length * 8 + 18; return `${w}px minmax(0,1fr) 60px ${w}px minmax(0,1fr)`; })();
     this.panel.style.setProperty('--dcols', cols);
     const head = (side, i) => `${esc(i.name)}${i.dirty ? ' <span class="dirty">●</span>' : ''} <span style="font-weight:400;color:var(--fg-dim)">${fmtNum(i.lines)} lines</span>`;
     q('.lh').innerHTML = head('l', s.left); q('.rh').innerHTML = head('r', s.right);
@@ -2887,7 +2954,21 @@ window.addEventListener('error', e => console.error('UI error:', e.message));
 
 /* ───────────── world clock (own tab; nothing runs until it is opened, and nothing ticks while it is hidden) ───────────── */
 const WC = {
-  ALIAS: { IST: 'Asia/Kolkata', PST: 'America/Los_Angeles', PDT: 'America/Los_Angeles', PT: 'America/Los_Angeles', MST: 'America/Denver', CST: 'America/Chicago', CT: 'America/Chicago', EST: 'America/New_York', EDT: 'America/New_York', ET: 'America/New_York', GMT: 'Europe/London', BST: 'Europe/London', CET: 'Europe/Paris', CEST: 'Europe/Paris', EET: 'Europe/Athens', MSK: 'Europe/Moscow', JST: 'Asia/Tokyo', KST: 'Asia/Seoul', SGT: 'Asia/Singapore', HKT: 'Asia/Hong_Kong', AEST: 'Australia/Sydney', AEDT: 'Australia/Sydney', NZST: 'Pacific/Auckland', GST: 'Asia/Dubai', PKT: 'Asia/Karachi', UTC: 'UTC' },
+  ABBR: (() => { const m = {}; const g = (std, dst, zs) => zs.split(' ').forEach(z => { m[z] = [std, dst]; });
+    g('EST', 'EDT', 'America/New_York America/Toronto America/Detroit America/Nassau'); g('CST', 'CDT', 'America/Chicago America/Winnipeg America/Mexico_City America/Menominee'); g('MST', 'MDT', 'America/Denver America/Edmonton America/Boise'); g('MST', '', 'America/Phoenix');
+    g('PST', 'PDT', 'America/Los_Angeles America/Vancouver America/Tijuana'); g('AKST', 'AKDT', 'America/Anchorage America/Juneau'); g('HST', '', 'Pacific/Honolulu'); g('AST', 'ADT', 'America/Halifax'); g('NST', 'NDT', 'America/St_Johns');
+    g('GMT', 'BST', 'Europe/London'); g('GMT', 'IST', 'Europe/Dublin'); g('WET', 'WEST', 'Europe/Lisbon Atlantic/Canary'); g('GMT', '', 'Africa/Accra Africa/Abidjan Atlantic/Reykjavik');
+    g('CET', 'CEST', 'Europe/Paris Europe/Berlin Europe/Madrid Europe/Rome Europe/Amsterdam Europe/Brussels Europe/Vienna Europe/Zurich Europe/Stockholm Europe/Oslo Europe/Copenhagen Europe/Prague Europe/Warsaw Europe/Budapest Europe/Belgrade Europe/Zagreb Europe/Luxembourg Europe/Malta Europe/Monaco Africa/Tunis Africa/Algiers');
+    g('EET', 'EEST', 'Europe/Athens Europe/Helsinki Europe/Kyiv Europe/Kiev Europe/Bucharest Europe/Sofia Europe/Riga Europe/Tallinn Europe/Vilnius Asia/Beirut Asia/Nicosia Africa/Cairo'); g('MSK', '', 'Europe/Moscow Europe/Minsk'); g('TRT', '', 'Europe/Istanbul');
+    g('IST', '', 'Asia/Kolkata Asia/Calcutta Asia/Colombo'); g('IST', 'IDT', 'Asia/Jerusalem'); g('PKT', '', 'Asia/Karachi'); g('NPT', '', 'Asia/Kathmandu'); g('BST', '', 'Asia/Dhaka'); g('GST', '', 'Asia/Dubai Asia/Muscat'); g('AST', '', 'Asia/Riyadh Asia/Baghdad Asia/Kuwait Asia/Qatar'); g('IRST', 'IRDT', 'Asia/Tehran');
+    g('ICT', '', 'Asia/Bangkok Asia/Ho_Chi_Minh Asia/Phnom_Penh'); g('WIB', '', 'Asia/Jakarta'); g('SGT', '', 'Asia/Singapore'); g('MYT', '', 'Asia/Kuala_Lumpur'); g('HKT', '', 'Asia/Hong_Kong'); g('CST', '', 'Asia/Shanghai Asia/Taipei Asia/Macau'); g('PHT', '', 'Asia/Manila'); g('JST', '', 'Asia/Tokyo'); g('KST', '', 'Asia/Seoul'); g('MMT', '', 'Asia/Yangon');
+    g('AEST', 'AEDT', 'Australia/Sydney Australia/Melbourne Australia/Hobart Australia/Canberra'); g('AEST', '', 'Australia/Brisbane'); g('ACST', 'ACDT', 'Australia/Adelaide'); g('ACST', '', 'Australia/Darwin'); g('AWST', '', 'Australia/Perth'); g('NZST', 'NZDT', 'Pacific/Auckland');
+    g('SAST', '', 'Africa/Johannesburg Africa/Maseru'); g('WAT', '', 'Africa/Lagos Africa/Kinshasa Africa/Luanda'); g('EAT', '', 'Africa/Nairobi Africa/Addis_Ababa Africa/Dar_es_Salaam'); g('CAT', '', 'Africa/Maputo Africa/Harare Africa/Lusaka');
+    g('BRT', '', 'America/Sao_Paulo'); g('ART', '', 'America/Argentina/Buenos_Aires America/Buenos_Aires'); g('CLT', 'CLST', 'America/Santiago'); g('COT', '', 'America/Bogota'); g('PET', '', 'America/Lima'); g('VET', '', 'America/Caracas'); g('UTC', '', 'UTC Etc/UTC');
+    return m; })(),
+  abbr(z, ms) { const e = WC.ABBR[z]; if (!e) return ''; return e[1] && WC.isDst(z, ms) ? e[1] : e[0]; },
+  byAbbr(a) { a = a.toUpperCase(); return Object.keys(WC.ABBR).filter(z => WC.ABBR[z][0] === a || WC.ABBR[z][1] === a); },
+  ALIAS: { IST: 'Asia/Kolkata', PST: 'America/Los_Angeles', PDT: 'America/Los_Angeles', PT: 'America/Los_Angeles', MST: 'America/Denver', CST: 'America/Chicago', CT: 'America/Chicago', EST: 'America/New_York', EDT: 'America/New_York', ET: 'America/New_York', GMT: 'Europe/London', BST: 'Europe/London', CET: 'Europe/Paris', CEST: 'Europe/Paris', EET: 'Europe/Athens', MSK: 'Europe/Moscow', JST: 'Asia/Tokyo', KST: 'Asia/Seoul', SGT: 'Asia/Singapore', HKT: 'Asia/Hong_Kong', AEST: 'Australia/Sydney', AEDT: 'Australia/Sydney', NZST: 'Pacific/Auckland', GST: 'Asia/Dubai', PKT: 'Asia/Karachi', UTC: 'UTC', CDT: 'America/Chicago', MDT: 'America/Denver', EEST: 'Europe/Athens', AKST: 'America/Anchorage', HST: 'Pacific/Honolulu', WET: 'Europe/Lisbon', WEST: 'Europe/Lisbon', TRT: 'Europe/Istanbul', NPT: 'Asia/Kathmandu', IRST: 'Asia/Tehran', ICT: 'Asia/Bangkok', WIB: 'Asia/Jakarta', MYT: 'Asia/Kuala_Lumpur', PHT: 'Asia/Manila', ACST: 'Australia/Adelaide', AWST: 'Australia/Perth', NZDT: 'Pacific/Auckland', SAST: 'Africa/Johannesburg', WAT: 'Africa/Lagos', EAT: 'Africa/Nairobi', CAT: 'Africa/Maputo', BRT: 'America/Sao_Paulo', ART: 'America/Argentina/Buenos_Aires', CLT: 'America/Santiago', COT: 'America/Bogota', PET: 'America/Lima' },
   LEGACY: { 'Asia/Calcutta': 'Asia/Kolkata', 'Asia/Saigon': 'Asia/Ho_Chi_Minh', 'Asia/Rangoon': 'Asia/Yangon', 'Asia/Katmandu': 'Asia/Kathmandu', 'Europe/Kiev': 'Europe/Kyiv', 'Asia/Dacca': 'Asia/Dhaka', 'Atlantic/Faeroe': 'Atlantic/Faroe' },
   // day/night colours by season: [night, day, working hours, night text, day text]
   SEASONS: {
@@ -2908,6 +2989,7 @@ const WC = {
     if (kind === 't') Object.assign(o, { hour: '2-digit', minute: '2-digit', hour12: h12 });
     else if (kind === 'd') Object.assign(o, { weekday: 'short', month: 'short', day: 'numeric' });
     else if (kind === 'a') Object.assign(o, { timeZoneName: 'short' });
+    else if (kind === 'ts') Object.assign(o, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: h12 });
     else Object.assign(o, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23' });
     return (WC.fmt[k] = new Intl.DateTimeFormat(kind === 'p' ? 'en-US' : undefined, o));
   },
@@ -2966,7 +3048,7 @@ const Backup = {
   async export() {
     const st = await api('state/get'), nt = await api('notes/get'), state = {};
     for (const [k, v] of Object.entries(st)) if (!this.LOCAL.includes(k)) state[k] = v;
-    const body = { kempt: 'backup', version: 1, saved: new Date().toISOString(), state, notes: { items: (nt.items || []).filter(i => !i.k), pad: nt.pad || '' } };
+    const body = { kempt: 'backup', version: 1, saved: new Date().toISOString(), state, notes: { items: (nt.items || []).filter(i => !i.k), pad: nt.pad || '', docs: Array.isArray(nt.docs) ? nt.docs : [] } };
     const a = el('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(body, null, 2)], { type: 'application/json' })); a.download = `kempt-backup-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('Backup saved to your downloads.', 'ok', 3500);
   },
@@ -2977,7 +3059,7 @@ const Backup = {
     const ok = await modal('Import backup?', `<p>Replaces your settings, clock zones and alerts with the file's, and your checklist (${n} item${n === 1 ? '' : 's'}) and notes. This cannot be undone.</p><p class="s-note">Saved ${esc(String(j.saved || '').slice(0, 10) || 'on an unknown date')}.</p>`, [{ label: 'Cancel', value: false }, { label: 'Replace', primary: true, value: true }]);
     if (!ok) return;
     const patch = {}; for (const [k, v] of Object.entries(j.state)) if (!this.LOCAL.includes(k)) patch[k] = v;
-    await api('state/set', { patch }); await api('notes/set', { patch: { items: j.notes.items.filter(i => !i.k && typeof i.id === 'string'), pad: typeof j.notes.pad === 'string' ? j.notes.pad : '' } });
+    await api('state/set', { patch }); await api('notes/set', { patch: { items: j.notes.items.filter(i => !i.k && typeof i.id === 'string'), pad: typeof j.notes.pad === 'string' ? j.notes.pad : '', docs: Array.isArray(j.notes.docs) ? j.notes.docs.filter(n => n && typeof n.id === 'string').slice(0, 300) : [] } });
     toast('Imported. Reloading…', 'ok', 1500); setTimeout(() => location.reload(), 600);
   },
 };
@@ -3075,17 +3157,21 @@ const HOL = {
   cache: {},
   year(cc, y) { const k = cc + y; return this.cache[k] || (this.cache[k] = this.list(cc, y)); },
   country(z) { if (/^(Asia\/(Kolkata|Calcutta))$/.test(z)) return 'IN'; if (z === 'Europe/London') return 'GB'; if (z === 'Europe/Berlin') return 'DE'; if (z === 'Europe/Paris') return 'FR'; if (/^Australia\//.test(z)) return 'AU'; if (/^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Boise|Indiana\/|Kentucky\/|North_Dakota\/|Juneau|Adak)|^Pacific\/Honolulu$/.test(z)) return 'US'; return null; },
-  custom() { const a = prefs.get('hols', []); return Array.isArray(a) ? a.filter(h => h && /^\d{4}-\d\d-\d\d$/.test(h.d) && typeof h.n === 'string') : []; },
+  ymd0: d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'),
+  weekend() { const w = prefs.get('wkend', null); return Array.isArray(w) ? w.filter(x => Number.isInteger(x) && x >= 0 && x <= 6) : [0, 6]; },
+  hidden() { const a = prefs.get('holx', []); return Array.isArray(a) ? a.filter(x => typeof x === 'string') : []; },
+  shown(cc, y) { const hid = HOL.hidden(); return HOL.year(cc, y).filter(h => !hid.includes(cc + '|' + h.n.replace(/ \((observed|substitute day)\)$/, ''))); },
+  custom() { const a = prefs.get('hols', []); return Array.isArray(a) ? a.filter(h => h && /^\d{4}-\d\d-\d\d$/.test(h.d) && typeof h.n === 'string').map(h => ({ d: h.d, n: h.n, ...(h.y ? { y: true } : {}), ...(typeof h.c === 'string' && HOL.NAMES[h.c] ? { c: h.c } : {}) })) : []; },
   on(date, cc) {   // names of holidays on one calendar date (YYYY-MM-DD)
     const out = [], y = +date.slice(0, 4);
-    if (cc) for (const h of HOL.year(cc, y)) if (h.d === date) out.push(h.n);
-    for (const h of HOL.custom()) if (h.d === date || (h.y && h.d.slice(5) === date.slice(5))) out.push(h.n);
+    if (cc) for (const h of HOL.shown(cc, y)) if (h.d === date) out.push(h.n);
+    for (const h of HOL.custom()) if ((!h.c || h.c === cc) && (h.d === date || (h.y && h.d.slice(5) === date.slice(5)))) out.push(h.n);
     return out;
   },
   upcoming(cc, fromYmd, n) {
     const y = +fromYmd.slice(0, 4), res = [];
-    for (const yy of [y, y + 1]) { if (cc) for (const h of HOL.year(cc, yy)) if (h.d >= fromYmd) res.push({ d: h.d, n: h.n }); }
-    for (const h of HOL.custom()) for (const yy of h.y ? [y, y + 1] : [+h.d.slice(0, 4)]) { const d = h.y ? yy + h.d.slice(4) : h.d; if (d >= fromYmd) res.push({ d, n: h.n, own: true }); }
+    for (const yy of [y, y + 1]) { if (cc) for (const h of (arguments[3] ? HOL.shown(cc, yy) : HOL.shown(cc, yy))) if (h.d >= fromYmd) res.push({ d: h.d, n: h.n }); }
+    for (const h of HOL.custom()) if (!h.c || h.c === cc) for (const yy of h.y ? [y, y + 1] : [+h.d.slice(0, 4)]) { const d = h.y ? yy + h.d.slice(4) : h.d; if (d >= fromYmd) res.push({ d, n: h.n, own: true }); }
     return res.sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : 0).slice(0, n);
   },
 };
@@ -3097,6 +3183,7 @@ class ClockTab {
     this.h12 = !!prefs.get('clock12', false);
     this.panel = el('div', 'panel');
     this.panel.innerHTML = `<div class="wc"><div class="wrap">
+      <div class="hero"><b class="hc1" aria-live="off"></b><span class="hc2"></span></div>
       <div class="bar"><input type="text" class="add" placeholder="Add a city or time zone, e.g. Tokyo, PST, Europe/Paris…" spellcheck="false" aria-label="Add a time zone"><input type="datetime-local" class="dt" title="Type or pick a date and time" aria-label="Date and time"><label class="dzl" title="Which zone the date and time above is in">in <select class="dz" aria-label="Time zone of the date and time"></select></label><button class="h12" title="Switch between 12-hour and 24-hour time"></button><button class="now primary" title="Back to the live time">Now</button><div class="sug" hidden></div></div>
       <div class="grid"><div class="rows"></div><div class="cur" hidden><b></b></div></div>
       <div class="legend"><span><i style="background:var(--nt)"></i>night</span><span><i style="background:var(--dy)"></i>day</span><span><i style="background:var(--wk)"></i>working hours (9–17)</span><span><i style="background:var(--dy) repeating-linear-gradient(135deg,rgba(128,128,128,.4) 0 2px,transparent 2px 5px)"></i>weekend or holiday (not working)</span></div>
@@ -3110,6 +3197,7 @@ class ClockTab {
         <div class="wup"></div>
         <p class="hint">Alerts use the same desktop notification and sound as reminders. Kempt schedules the next 12 months each time it is opened; keep it running in the background (Settings → General) so alerts arrive with no browser open.</p></div></section>
       <section class="meet" data-f="meet"><button class="fold" aria-expanded="true"><span class="car"></span>Meeting finder</button><div class="fb">
+        <div class="mcal"><div class="mch"><button type="button" class="mcp" aria-label="Previous month">‹</button><b class="mct"></b><button type="button" class="mcn" aria-label="Next month">›</button><button type="button" class="mcnow">Today</button></div><div class="mcg" role="grid"></div><div class="mcl"><span><i class="s1"></i>search window</span><span><i class="s2"></i>weekend / holiday</span><span><i class="s3"></i>start day</span></div></div>
         <div class="mrow"><label>Length <select class="mlen"><option value="30">30 min</option><option value="60">1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option></select></label>
           <label>Working hours <select class="mfrom"></select> to <select class="mto"></select></label>
           <label>Look ahead <select class="mdays"><option value="3">3 days</option><option value="7">7 days</option><option value="14">14 days</option></select></label></div>
@@ -3122,9 +3210,14 @@ class ClockTab {
         </details>
         <div class="mres"></div>
         <p class="hint">Finds times inside working hours for everyone ticked, skipping weekends and holidays in each zone. Type a time in any zone to see how it lands for everyone. Neighbouring times are joined into one block. Click a block to show its start on the clock.</p></div></section>
-      <section class="hol" data-f="hol"><button class="fold" aria-expanded="true"><span class="car"></span>Holidays</button><div class="fb"><div class="hsel"><label>Country <select class="hc"></select></label></div><div class="hl"></div>
-        <div class="hadd"><input type="date" class="hd" aria-label="Date"><input type="text" class="hn" placeholder="Your own date, e.g. Diwali" spellcheck="false" aria-label="Name"><label><input type="checkbox" class="hy"> every year</label><button class="hgo">Add</button></div>
-        <p class="hint">Built-in: fixed dates, weekday rules and Easter-based days for the countries listed. Holidays that follow the moon (Diwali, Eid, Holi, Chinese New Year…) change every year and cannot be worked out offline, so add them as your own dates; they repeat yearly if you tick the box. Check official calendars for regional or company holidays.</p></div></section>
+      <section class="hol" data-f="hol"><button class="fold" aria-expanded="true"><span class="car"></span>Holidays &amp; working days</button><div class="fb">
+        <div class="hsel"><label>Built-in list for <select class="hc"></select></label><span class="hwe"><span>Weekend days</span></span></div>
+        <div class="hcols"><div><h4>Built-in <small class="hhid"></small></h4><div class="hl"></div></div>
+        <div><h4>Your company holidays <small class="hcnt"></small></h4><div class="hl hl2"></div>
+        <div class="hadd"><input type="date" class="hd" aria-label="Date"><input type="text" class="hn" placeholder="Name, e.g. Diwali, Founders' day" spellcheck="false" aria-label="Name"><select class="hs" aria-label="Applies to"></select><label><input type="checkbox" class="hy"> every year</label><button class="hgo">Add</button></div>
+        <div class="hadd"><button class="hbulk" type="button">Paste a list…</button><button class="hexp" type="button">Copy list</button><button class="hclr" type="button">Remove all</button></div>
+        <div class="hpaste" hidden><textarea class="hta" rows="5" spellcheck="false" placeholder="One per line, for example:&#10;2027-01-26 Republic Day&#10;15/08/2027, Independence Day&#10;2027-11-01 Company offsite day"></textarea><div class="hadd"><label><input type="checkbox" class="hpy"> these repeat every year</label><button class="hdo" type="button">Import</button></div></div></div></div>
+        <p class="hint">Built-in holidays cover fixed dates, weekday rules and Easter-based days for a few countries; use <b>Hide</b> for any that your company does not observe. Holidays that follow the moon (Diwali, Eid, Holi, Chinese New Year…) change every year and cannot be worked out offline, so add them under <b>Your company holidays</b> (scope them to one country or all zones; tick "every year" for fixed dates). Holidays and weekend days are skipped when finding meeting times.</p></div></section>
       <p class="hint">Click or drag on any hour strip to move the marker; every zone follows. Arrow keys on a strip move it by 15 minutes. Drag ⋮⋮ to reorder. Times come from this computer's clock; no internet is used.</p></div></div>`;
     const q = s => $(s, this.panel); this.rows = q('.rows'); this.sug = q('.sug'); this.add = q('.add'); this.cur = q('.cur'); this.grid = q('.grid');
     q('.now').onclick = () => { this.ref = null; this.dt.value = ''; this.update(); this.schedule(); };
@@ -3160,9 +3253,45 @@ class ClockTab {
       i.oninput = i.onfocus = () => this.zsug(i, sg, new Set([...this.zones, ...this.mcfg().x]), pick); i.onblur = () => { sg.hidden = true; };
       i.onkeydown = e => { if (e.key === 'Escape') sg.hidden = true; else if (e.key === 'Enter') { const f = $('div[data-z]', sg); if (f) pick(f.dataset.z); } }; }
     this.hc = q('.hc'); this.hc.innerHTML = '<option value="">None</option>' + Object.entries(HOL.NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
-    this.hc.value = prefs.get('holc', null) ?? (HOL.country(WC.local()) || ''); this.hc.onchange = () => { prefs.set('holc', this.hc.value); this.holidays(); };
-    this.hd = q('.hd'); this.hn = q('.hn'); this.hy = q('.hy');
-    q('.hgo').onclick = () => { const n = this.hn.value.trim(); if (!/^\d{4}-\d\d-\d\d$/.test(this.hd.value) || !n) { toast('Pick a date and give it a name.', 'info'); return; } const a = HOL.custom(); a.push({ d: this.hd.value, n, y: this.hy.checked }); prefs.set('hols', a); this.hn.value = ''; this.hy.checked = false; this.holidays(); this.update(); };
+    this.hc.value = prefs.get('holc', null) ?? (HOL.country(WC.local()) || ''); this.hc.onchange = () => { prefs.set('holc', this.hc.value); this.holidays(); this.update(); };
+    this.hd = q('.hd'); this.hn = q('.hn'); this.hy = q('.hy'); this.hs = q('.hs');
+    this.hs.innerHTML = '<option value="">All zones</option>' + Object.entries(HOL.NAMES).map(([k, v]) => `<option value="${k}">${v} only</option>`).join('');
+    { const we = q('.hwe'); const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      days.forEach((n, d) => { const l = el('label'); l.innerHTML = `<input type="checkbox" data-d="${d}"> ${n}`; we.appendChild(l); });
+      const paint = () => { const w = HOL.weekend(); we.querySelectorAll('input').forEach(c => { c.checked = w.includes(+c.dataset.d); }); }; paint();
+      we.onchange = () => { const w = [...we.querySelectorAll('input:checked')].map(c => +c.dataset.d); prefs.set('wkend', w); this.update(); this.meet(); this.holidays(); }; }
+    const own = () => HOL.custom();
+    q('.hgo').onclick = () => { const n = this.hn.value.trim(); if (!/^\d{4}-\d\d-\d\d$/.test(this.hd.value) || !n) { toast('Pick a date and give it a name.', 'info'); return; } const a = own(); const e = { d: this.hd.value, n: n.slice(0, 80), y: this.hy.checked }; if (this.hs.value) e.c = this.hs.value; a.push(e); prefs.set('hols', a); this.hn.value = ''; this.hy.checked = false; q('.hgo').textContent = 'Add'; this.holidays(); this.update(); this.meet(); };
+    q('.hbulk').onclick = () => { const p = q('.hpaste'); p.hidden = !p.hidden; if (!p.hidden) q('.hta').focus(); };
+    q('.hdo').onclick = () => {
+      const lines = q('.hta').value.split(/\r?\n/).map(l => l.trim()).filter(Boolean), a = own(), bad = []; let ok = 0;
+      for (const ln of lines) { const m = ln.match(/^(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[\/.-]\d{1,2}[\/.-]\d{4})\s*[,;\t ]\s*(.+)$/); let d = null; if (m) { const t = m[1].split(/[\/.-]/); const [y, mo, da] = t[0].length === 4 ? t : [t[2], t[1], t[0]]; d = `${y}-${String(mo).padStart(2, '0')}-${String(da).padStart(2, '0')}`; const dt = new Date(d + 'T00:00:00Z'); if (isNaN(dt) || dt.toISOString().slice(0, 10) !== d) d = null; }
+        if (!d) { bad.push(ln); continue; } const e = { d, n: m[2].trim().slice(0, 80), y: q('.hpy').checked }; if (this.hs.value) e.c = this.hs.value; if (!a.some(x => x.d === e.d && x.n === e.n)) { a.push(e); ok++; } }
+      if (a.length > 400) { toast('Too many holidays (400 at most).', 'err'); return; }
+      prefs.set('hols', a); if (!bad.length) { q('.hta').value = ''; q('.hpaste').hidden = true; } else q('.hta').value = bad.join('\n');
+      toast(`${ok} holiday${ok === 1 ? '' : 's'} added` + (bad.length ? `; ${bad.length} line${bad.length === 1 ? '' : 's'} not understood (left in the box)` : ''), bad.length ? 'info' : 'ok', 5000); this.holidays(); this.update(); this.meet(); };
+    q('.hexp').onclick = async () => { const t = own().sort((a, b) => a.d < b.d ? -1 : 1).map(h => `${h.d}\t${h.n}`).join('\n'); if (!t) { toast('No company holidays to copy yet.', 'info'); return; } try { await navigator.clipboard.writeText(t); toast('List copied: paste it into a file or into another Kempt.', 'ok', 4000); } catch (_) { q('.hpaste').hidden = false; q('.hta').value = t; q('.hta').select(); toast('Copy it from the box.', 'info'); } };
+    q('.hclr').onclick = () => { if (!own().length) return; if (!confirm('Remove all your company holidays?')) return; prefs.set('hols', []); this.holidays(); this.update(); this.meet(); };
+    // meeting finder calendar
+    this.mcm = null;
+    q('.mcp').onclick = () => { this.mcm = new Date(this.mcm.getFullYear(), this.mcm.getMonth() - 1, 1); this.mcal(); };
+    q('.mcn').onclick = () => { this.mcm = new Date(this.mcm.getFullYear(), this.mcm.getMonth() + 1, 1); this.mcal(); };
+    q('.mcnow').onclick = () => { this.mcm = null; const n = this.mcfg(); n.start = ''; this.mset(n); };
+    // sections can be dragged into any order
+    { const wrap = q('.wrap'), secs = [...wrap.querySelectorAll(':scope > section')], box = el('div', 'secs'); secs[0].before(box); secs.forEach(x => box.appendChild(x));
+      const saved = prefs.get('wcsec', []); if (Array.isArray(saved)) for (const k of saved) { const x = box.querySelector(`:scope > section[data-f="${k}"]`); if (x) box.appendChild(x); }
+      const save = () => prefs.set('wcsec', [...box.children].map(x => x.dataset.f));
+      for (const sec of secs) {
+        const g = el('span', 'sgrip'); g.innerHTML = ic('grip', 14); g.draggable = true; g.tabIndex = 0; g.setAttribute('role', 'button'); g.setAttribute('aria-label', 'Move this section (drag, or press Alt+Up / Alt+Down)'); g.title = 'Drag to reorder (or Alt+↑ / Alt+↓)'; sec.prepend(g);
+        g.ondragstart = e => { this._dsec = sec; e.dataTransfer.setData('text/plain', sec.dataset.f); e.dataTransfer.effectAllowed = 'move'; sec.classList.add('sdrag'); try { e.dataTransfer.setDragImage($('.fold', sec), 20, 16); } catch (_) { } };
+        g.ondragend = () => { this._dsec = null; sec.classList.remove('sdrag'); save(); };
+        g.onkeydown = e => { if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return; e.preventDefault(); if (e.key === 'ArrowUp' && sec.previousElementSibling) box.insertBefore(sec, sec.previousElementSibling); else if (e.key === 'ArrowDown' && sec.nextElementSibling) box.insertBefore(sec.nextElementSibling, sec); g.focus(); save(); };
+      }
+      box.ondragover = e => { if (!this._dsec) return; e.preventDefault(); const t = [...box.children].filter(x => x !== this._dsec).find(x => { const r = x.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; }); if (t !== this._dsec.nextElementSibling) box.insertBefore(this._dsec, t || null); };
+      box.ondrop = e => { if (this._dsec) e.preventDefault(); };
+      // the meeting finder gets its calendar beside the controls
+      const fb = $('.meet .fb', this.panel), cal = $('.mcal', fb), lay = el('div', 'mlay'), rest = el('div', 'mrest'); [...fb.children].forEach(c => { if (c !== cal && !c.classList.contains('hint')) rest.appendChild(c); }); lay.append(cal, rest); fb.prepend(lay);
+    }
     this.build();
   }
   title() { return 'World clock'; }
@@ -3172,9 +3301,9 @@ class ClockTab {
   save() { prefs.set('zones', this.zones); }
   off(z, t) {   // why working hours do not apply to that zone's day: '' (they do), 'weekend' or 'holiday: <name>'
     const p = WC.parts(z, t), hn = HOL.on(`${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`, HOL.country(z)), wd = new Date(Date.UTC(p.year, p.month - 1, p.day)).getUTCDay();
-    return hn.length ? 'holiday: ' + hn.join(', ') : wd === 0 || wd === 6 ? 'weekend' : '';
+    return hn.length ? 'holiday: ' + hn.join(', ') : HOL.weekend().includes(wd) ? 'weekend' : '';
   }
-  mcfg() { const c = prefs.get('meet', null) || {}, a = (v, d) => Number.isFinite(+v) ? +v : d; return { len: [30, 60, 90, 120].includes(+c.len) ? +c.len : 60, from: a(c.from, 9), to: a(c.to, 17), days: [3, 7, 14].includes(+c.days) ? +c.days : 7, off: Array.isArray(c.off) ? c.off : [], x: (Array.isArray(c.x) ? c.x : []).filter(z => typeof z === 'string' && WC.ok(z)), show: typeof c.show === 'string' && WC.ok(c.show) ? c.show : '' }; }
+  mcfg() { const c = prefs.get('meet', null) || {}, a = (v, d) => Number.isFinite(+v) ? +v : d; return { len: [30, 60, 90, 120].includes(+c.len) ? +c.len : 60, from: a(c.from, 9), to: a(c.to, 17), days: [3, 7, 14].includes(+c.days) ? +c.days : 7, off: Array.isArray(c.off) ? c.off : [], x: (Array.isArray(c.x) ? c.x : []).filter(z => typeof z === 'string' && WC.ok(z)), show: typeof c.show === 'string' && WC.ok(c.show) ? c.show : '', start: /^\d{4}-\d\d-\d\d$/.test(c.start || '') && c.start > HOL.ymd0(new Date()) ? c.start : '' }; }
   mset(c) { prefs.set('meet', c); this._mk = null; this.meet(); }
   mcheck() {   // how one proposed time, typed in any zone, lands for everybody ticked
     const host = $('.mchk', this.panel), v = $('.mt', this.panel).value, tz = $('.mtz', this.panel).value; host.innerHTML = '';
@@ -3189,15 +3318,15 @@ class ClockTab {
   }
   meet() {
     const sec = $('.meet', this.panel); if (sec.classList.contains('shut')) return;
-    const c = this.mcfg(), key = JSON.stringify(c) + '|' + this.zones.join(',') + '|' + Math.floor(Date.now() / 900000) + '|' + this.h12 + '|' + JSON.stringify([prefs.get('hols', null), prefs.get('holc', '')]); if (this._mk === key) return; this._mk = key;
+    const c = this.mcfg(), key = JSON.stringify(c) + '|' + this.zones.join(',') + '|' + Math.floor(Date.now() / 900000) + '|' + this.h12 + '|' + JSON.stringify([prefs.get('hols', null), prefs.get('holc', ''), prefs.get('holx', null), prefs.get('wkend', null)]); if (this._mk === key) return; this._mk = key;
     const zones = [...this.zones, ...c.x.filter(z => !this.zones.includes(z))], on = zones.filter(z => !c.off.includes(z));
-    const mz = $('.mz', this.panel); mz.innerHTML = '';
+    this.mcal(); const mz = $('.mz', this.panel); mz.innerHTML = '';
     for (const z of zones) { const l = el('label'), cb = el('input'); cb.type = 'checkbox'; cb.checked = !c.off.includes(z); cb.onchange = () => { const n = this.mcfg(); n.off = cb.checked ? n.off.filter(a => a !== z) : [...n.off, z]; this.mset(n); }; l.appendChild(cb); l.append(' ' + WC.city(z)); if (!this.zones.includes(z)) { const x = el('button'); x.type = 'button'; x.innerHTML = ic('x', 10); x.title = 'Remove from the meeting'; x.setAttribute('aria-label', 'Remove ' + z); x.onclick = () => { const n = this.mcfg(); n.x = n.x.filter(a => a !== z); this.mset(n); }; l.appendChild(x); } mz.appendChild(l); }
     const fillSel = (sel, val, withLocal) => { const keep = val || sel.value; sel.innerHTML = ''; for (const z of [WC.local(), ...zones.filter(z => z !== WC.local())]) { const o = el('option'); o.value = z; o.textContent = WC.city(z) + (z === WC.local() ? ' (this computer)' : ''); sel.appendChild(o); } sel.value = zones.includes(keep) || keep === WC.local() ? keep : WC.local(); };
     fillSel($('.mtz', this.panel), '', true); fillSel($('.mshow', this.panel), c.show, true); this.mcheck();
     const host = $('.mres', this.panel); host.innerHTML = '';
     if (on.length < 2) { host.innerHTML = '<div class="none">Tick at least two zones (add more above) to look for a shared time.</div>'; return; }
-    const step = 30 * 60000, now = Date.now(), t0 = Math.ceil(now / step) * step, end = now + c.days * 86400000, found = [];
+    const step = 30 * 60000, now = Date.now(), sd = c.start ? new Date(c.start + 'T00:00:00').getTime() : 0, base = Math.max(now, sd), t0 = Math.ceil(base / step) * step, end = base + c.days * 86400000, found = [];
     for (let t = t0; t < end && found.length < 60; t += step) {
       let ok = true;
       for (const z of on) { const p = WC.parts(z, t), m = (p.hour % 24) * 60 + p.minute; if (m < c.from * 60 || m + c.len > c.to * 60 || this.off(z, t) || this.off(z, t + c.len * 60000 - 1)) { ok = false; break; } }
@@ -3227,11 +3356,11 @@ class ClockTab {
   dsx() { const a = prefs.get('dstx', []); return (Array.isArray(a) ? a : []).filter(z => typeof z === 'string' && WC.ok(z) && !this.zones.includes(z)); }
   zsug(inp, sg, have, pick) {
     const v = inp.value.trim().toLowerCase().replace(/\s+/g, '_'); if (!v) { sg.hidden = true; return; }
-    const al = WC.ALIAS[v.toUpperCase()], out = [];
-    if (al && !have.has(al)) out.push(al);
+    const out = [], al = WC.ALIAS[v.toUpperCase()]; if (al && !have.has(al)) out.push(al);
+    for (const z of WC.byAbbr(v)) if (!have.has(z) && !out.includes(z) && out.length < 8) out.push(z);
     for (const z of WC.zones()) { if (out.length >= 8) break; if (!have.has(z) && !out.includes(z) && z.toLowerCase().includes(v)) out.push(z); }
     sg.innerHTML = out.length ? '' : '<div style="cursor:default"><small>No match</small></div>';
-    for (const z of out) { const d = el('div'); d.dataset.z = z; d.innerHTML = `<span>${esc(WC.city(z))}</span><small>${esc(z)}</small>`; d.onmousedown = e => { e.preventDefault(); pick(z); }; sg.appendChild(d); }
+    for (const z of out) { const d = el('div'); d.dataset.z = z; d.innerHTML = `<span>${esc(WC.city(z))}</span><small>${esc(WC.abbr(z, Date.now()) ? WC.abbr(z, Date.now()) + ' · ' : '')}${esc(z)}</small>`; d.onmousedown = e => { e.preventDefault(); pick(z); }; sg.appendChild(d); }
     sg.hidden = false;
   }
   dsSuggest() { this.zsug($('.dsa', this.panel), $('.dsug', this.panel), new Set([...this.zones, ...this.dsx()]), z => this.dsAdd(z)); }
@@ -3254,13 +3383,40 @@ class ClockTab {
   dsAdd(z) { prefs.set('dstx', [...this.dsx(), z]); $('.dsa', this.panel).value = ''; $('.dsug', this.panel).hidden = true; this._dk = null; this.update(); }
   addZone(z) { if (!this.zones.includes(z)) { this.zones.push(z); this.save(); this.build(); } this.add.value = ''; this.sug.hidden = true; }
   holidays() {
-    const hl = $('.hl', this.panel), from = new Date(this.at()).toISOString().slice(0, 10), up = HOL.upcoming(this.hc.value, from, 10);
-    hl.innerHTML = up.length ? '' : '<span class="none">No holidays to show. Pick a country or add your own dates.</span>';
+    const from = new Date(this.at()).toISOString().slice(0, 10), cc = this.hc.value, fmtd = (d, y) => { const t = new Date(d + 'T12:00:00Z'); return y ? 'every ' + t.toLocaleDateString(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' }) : t.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }); };
+    // built-in list for the chosen country, with Hide
+    const hl = $('.hl:not(.hl2)', this.panel), up = HOL.upcoming(cc, from, 14, true).filter(h => !h.own), hid = HOL.hidden(); hl.innerHTML = '';
+    const nh = hid.filter(k => k.startsWith(cc + '|')).length, hh = $('.hhid', this.panel); hh.innerHTML = nh ? `· ${nh} hidden <a href="#" class="hrest">restore</a>` : ''; const ra = $('.hrest', hh); if (ra) ra.onclick = e => { e.preventDefault(); prefs.set('holx', hid.filter(k => !k.startsWith(cc + '|'))); this.holidays(); this.update(); this.meet(); };
+    if (!up.length) hl.innerHTML = `<span class="none">${cc ? 'Nothing left to show: all built-in holidays are hidden.' : 'No built-in list chosen. Your own holidays are below.'}</span>`;
     for (const h of up) {
-      const r = el('div'); r.innerHTML = `<span class="dd"></span><span></span><span class="own"></span><button title="Remove" aria-label="Remove holiday"></button>`;
-      const d = new Date(h.d + 'T12:00:00Z'); $('.dd', r).textContent = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }); r.children[1].textContent = h.n;
-      const b = $('button', r); if (h.own) { $('.own', r).textContent = 'your date'; b.innerHTML = ic('x', 11); b.onclick = () => { prefs.set('hols', HOL.custom().filter(x => !(x.n === h.n && (x.d === h.d || (x.y && x.d.slice(5) === h.d.slice(5)))))); this.holidays(); this.update(); }; } else b.remove();
+      const r = el('div'); r.innerHTML = `<span class="dd"></span><span class="hnm"></span><button type="button" class="hhide" title="Your company does not observe this one">Hide</button>`;
+      $('.dd', r).textContent = fmtd(h.d); $('.hnm', r).textContent = h.n; $('.hhide', r).onclick = () => { prefs.set('holx', [...hid, cc + '|' + h.n.replace(/ \((observed|substitute day)\)$/, '')]); this.holidays(); this.update(); this.meet(); };
       hl.appendChild(r);
+    }
+    // company list: every date, with edit and remove
+    const h2 = $('.hl2', this.panel), mine = HOL.custom().map((h, i) => ({ ...h, i })).sort((a, b) => (a.y ? from.slice(0, 4) + a.d.slice(4) : a.d) < (b.y ? from.slice(0, 4) + b.d.slice(4) : b.d) ? -1 : 1); h2.innerHTML = '';
+    $('.hcnt', this.panel).textContent = mine.length ? '· ' + mine.length : '';
+    if (!mine.length) h2.innerHTML = '<span class="none">None yet. Add the days your company observes: a date, a name, and where it applies.</span>';
+    for (const h of mine) {
+      const r = el('div'); r.innerHTML = `<span class="dd"></span><span class="hnm"></span><span class="own"></span><button type="button" class="hed" title="Edit" aria-label="Edit holiday">${ic('edit', 13)}</button><button type="button" class="hdl" title="Remove" aria-label="Remove holiday">${ic('trash', 13)}</button>`;
+      $('.dd', r).textContent = fmtd(h.d, h.y); $('.hnm', r).textContent = h.n; $('.own', r).textContent = h.c ? HOL.NAMES[h.c] || h.c : 'all zones';
+      $('.hdl', r).onclick = () => { const a = HOL.custom(); a.splice(h.i, 1); prefs.set('hols', a); this.holidays(); this.update(); this.meet(); };
+      $('.hed', r).onclick = () => { const a = HOL.custom(); a.splice(h.i, 1); prefs.set('hols', a); this.hd.value = h.d; this.hn.value = h.n; this.hy.checked = !!h.y; this.hs.value = h.c || ''; $('.hgo', this.panel).textContent = 'Save'; this.holidays(); this.update(); this.meet(); this.hn.focus(); };
+      h2.appendChild(r);
+    }
+  }
+  mcal() {   // month grid for the meeting finder: pick the first day to search from
+    const c = this.mcfg(), host = $('.mcg', this.panel); if (!host) return; const now = new Date(), tk = HOL.ymd0(now), sd = c.start || tk, cc = HOL.country(WC.local());
+    if (!this.mcm) { const b = new Date(sd + 'T12:00:00'); this.mcm = new Date(b.getFullYear(), b.getMonth(), 1); }
+    const m = this.mcm, first = new Date(m.getFullYear(), m.getMonth(), 1), lead = (first.getDay() + 6) % 7, n = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(), end = new Date(new Date(sd + 'T12:00:00').getTime() + (c.days - 1) * 86400000), ek = HOL.ymd0(end);
+    $('.mct', this.panel).textContent = m.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    host.innerHTML = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<i>${d}</i>`).join('') + '<span></span>'.repeat(lead);
+    for (let d = 1; d <= n; d++) {
+      const dt = new Date(m.getFullYear(), m.getMonth(), d), k = HOL.ymd0(dt), b = el('button'); b.type = 'button'; b.textContent = d; const hn = HOL.on(k, cc), we = HOL.weekend().includes(dt.getDay());
+      b.className = (k === tk ? 'today ' : '') + (k === sd ? 'start ' : '') + (k >= sd && k <= ek ? 'win ' : '') + (hn.length || we ? 'off' : '');
+      b.title = dt.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }) + (hn.length ? ' · ' + hn.join(', ') : we ? ' · weekend' : '') + ' · search from this day';
+      b.onclick = () => { const x = this.mcfg(); x.start = k <= tk ? '' : k; this.mcm = null; this.mset(x); };
+      host.appendChild(b);
     }
   }
   dstChart() {
@@ -3321,7 +3477,7 @@ class ClockTab {
     const ms = this.at(), loc = WC.local(), lo = WC.offset(loc, ms), h = this.h12, d0 = this.day0();
     this.hb.textContent = h ? '12 h' : '24 h';
     // the 24 hour cells depend only on the shown day, so they are recomputed only when the day (or a zone) changes
-    const hk = JSON.stringify([prefs.get('hols', null), prefs.get('holc', '')]), rebuild = !this.hours || this.hours.d0 !== d0 || this.hours.h !== h || this.hours.hk !== hk;
+    const hk = JSON.stringify([prefs.get('hols', null), prefs.get('holc', ''), prefs.get('holx', null), prefs.get('wkend', null)]), rebuild = !this.hours || this.hours.d0 !== d0 || this.hours.h !== h || this.hours.hk !== hk;
     if (rebuild) this.hours = { d0, h, hk };
     if (this.season !== (WC.SEASONS[prefs.get('season', 'auto')] ? prefs.get('season', 'auto') : WC.seasonOf(ms)) + (document.documentElement.dataset.theme === 'light' ? 'L' : 'D')) this.paint();
     if (!$('.dstc', this.panel).classList.contains('shut')) this.dstChart();
@@ -3329,9 +3485,9 @@ class ClockTab {
     if (this._hd !== d0 && this.hc && !$('.hol', this.panel).classList.contains('shut')) { this._hd = d0; this.holidays(); }
     for (const r of this.rows.querySelectorAll('.zrow')) {
       const z = r.dataset.z, off = WC.offset(z, ms), ab = WC.f(z, 'a', h).formatToParts(ms).find(p => p.type === 'timeZoneName');
-      { const on = WC.isDst(z, ms); $('.nm b', r).innerHTML = esc(WC.city(z)) + (z === loc ? '<i>this computer</i>' : '') + (on ? '<i class="dst" title="Daylight saving time is in effect here (clocks are 1 hour ahead of standard time)">DST</i>' : ''); }
-      $('.nm span', r).textContent = z + (ab && ab.value !== z ? ' · ' + ab.value : '');
-      $('.tm b', r).textContent = WC.f(z, 't', h).format(ms);
+      { const on = WC.isDst(z, ms); $('.nm b', r).innerHTML = esc(WC.city(z)) + (z === loc ? '<i>this computer</i>' : '') + (WC.abbr(z, ms) ? `<i class="ab" title="Time zone abbreviation">${WC.abbr(z, ms)}</i>` : '') + (on ? '<i class="dst" title="Daylight saving time is in effect here (clocks are 1 hour ahead of standard time)">DST</i>' : ''); }
+      { const sn = WC.abbr(z, ms); $('.nm span', r).textContent = (sn ? sn + ' · ' : '') + z + (ab && ab.value !== z && ab.value !== sn ? ' · ' + ab.value : ''); }
+      $('.tm b', r).textContent = WC.f(z, this.ref == null ? 'ts' : 't', h).format(ms);
       $('.tm span', r).textContent = `${WC.offName(off)} | ${z === loc ? 'local' : WC.rel(off - lo)} | ${WC.f(z, 'd', h).format(ms)}`;
       { const p = WC.parts(z, ms), ymd = `${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`, hn = HOL.on(ymd, HOL.country(z)); let b = $('.hd2', r); if (hn.length) { if (!b) { b = el('span', 'hd2'); $('.tm', r).appendChild(b); } b.textContent = '★ ' + hn.join(', '); b.title = hn.join(', '); } else if (b) b.remove(); }
       r.classList.toggle('sel', this.ref != null && z === this.zone());
@@ -3343,7 +3499,7 @@ class ClockTab {
           let cls = hr >= 21 || hr < 6 ? 'n' : hr >= 9 && hr < 17 ? 'w' : 'd', why = '';
           if (cls === 'w') {   // working hours do not apply on Saturday, Sunday or a holiday in that zone
             const p = WC.parts(z, t), wd = new Date(Date.UTC(p.year, p.month - 1, p.day)).getUTCDay(), hn = HOL.on(`${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`, HOL.country(z));
-            if (hn.length) { cls = 'o'; why = ' · holiday: ' + hn.join(', '); } else if (wd === 0 || wd === 6) { cls = 'o'; why = ' · weekend'; }
+            if (hn.length) { cls = 'o'; why = ' · holiday: ' + hn.join(', '); } else if (HOL.weekend().includes(wd)) { cls = 'o'; why = ' · weekend'; }
           }
           c.className = cls; if (hr === 0) c.className += ' m';
           c.textContent = h ? (hr % 12 || 12) : hr; c.title = WC.f(z, 't', h).format(t) + ' · ' + WC.f(z, 'd', h).format(t) + why;
@@ -3358,14 +3514,19 @@ class ClockTab {
       this.cur.classList.toggle('flip', f > 0.85); $('b', this.cur).textContent = WC.f(loc, 't', h).format(ms);
     }
   }
+  tickSec() {   // the big clock and the live rows count seconds
+    if (!this.panel.classList.contains('show')) return; const loc = WC.local(), h = this.h12, now = Date.now();
+    $('.hc1', this.panel).textContent = WC.f(loc, 'ts', h).format(now); $('.hc2', this.panel).textContent = WC.f(loc, 'd', h).format(now) + ' · ' + WC.city(loc);
+    if (this.ref == null) for (const r of this.rows.querySelectorAll('.zrow')) $('.tm b', r).textContent = WC.f(r.dataset.z, 'ts', h).format(now);
+  }
   schedule() {   // live: one wake-up per minute, only while this tab is visible
     clearTimeout(this.timer); this.timer = 0;
     if (this.ref != null || !this.panel.classList.contains('show')) return;
     this.timer = setTimeout(() => { this.update(); this.schedule(); }, 60500 - (Date.now() % 60000));
   }
-  onShow() { this.update(); this.schedule(); if (!this.tm) { this.tm = new MutationObserver(() => this.paint()); this.tm.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } if (!this.ro && window.ResizeObserver) { this.ro = new ResizeObserver(() => this.panel.classList.contains('show') && this.update()); this.ro.observe(this.grid); } }
-  onHide() { clearTimeout(this.timer); this.timer = 0; }
-  dispose() { clearTimeout(this.timer); if (this.ro) this.ro.disconnect(); if (this.tm) this.tm.disconnect(); WC.fmt = {}; }
+  onShow() { this.update(); this.schedule(); clearInterval(this.sti); this.sti = setInterval(() => this.tickSec(), 1000); this.tickSec(); if (!this.tm) { this.tm = new MutationObserver(() => this.paint()); this.tm.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } if (!this.ro && window.ResizeObserver) { this.ro = new ResizeObserver(() => this.panel.classList.contains('show') && this.update()); this.ro.observe(this.grid); } }
+  onHide() { clearTimeout(this.timer); this.timer = 0; clearInterval(this.sti); }
+  dispose() { clearTimeout(this.timer); clearInterval(this.sti); if (this.ro) this.ro.disconnect(); if (this.tm) this.tm.disconnect(); WC.fmt = {}; }
 }
 
 
@@ -3374,11 +3535,11 @@ class ClockTab {
    armed for the next due item only, so nothing runs when there are none. They fire while Kempt is open in a browser
    tab; anything that came due while it was closed is reported the next time it opens. */
 const Notes = {
-  items: [], pad: '', caps: {}, loaded: false, timer: 0, _t: 0, _dirty: {},
-  async load() { try { const j = await api('notes/get'); this.caps = j.caps || {}; this.items = Array.isArray(j.items) ? j.items.filter(i => i && typeof i.t === 'string') : []; this.pad = typeof j.pad === 'string' ? j.pad : ''; } catch (e) { console.warn('notes not loaded:', e.message); } this.loaded = true; try { DSTA.sync(); RPT.sync(); } catch (e) { console.warn('clock alerts / repeats:', e.message); } this.badge(); this.arm(true); },
+  items: [], pad: '', docs: [], caps: {}, loaded: false, timer: 0, _t: 0, _dirty: {},
+  async load() { try { const j = await api('notes/get'); this.caps = j.caps || {}; this.items = Array.isArray(j.items) ? j.items.filter(i => i && typeof i.t === 'string') : []; this.pad = typeof j.pad === 'string' ? j.pad : ''; this.docs = Array.isArray(j.docs) ? j.docs.filter(n => n && typeof n.id === 'string').map(n => ({ id: n.id, t: String(n.t || ''), b: String(n.b || ''), u: +n.u || Date.now() })) : []; if (!this.docs.length && this.pad.trim()) { this.docs = [{ id: this.id(), t: 'Scratchpad', b: this.pad, u: Date.now() }]; this.pad = ''; this._dirty.docs = 1; this._dirty.pad = 1; setTimeout(() => this.flush(), 800); } } catch (e) { console.warn('notes not loaded:', e.message); } this.loaded = true; try { DSTA.sync(); RPT.sync(); } catch (e) { console.warn('clock alerts / repeats:', e.message); } this.badge(); this.arm(true); },
   save(k) { this._dirty[k || 'items'] = 1; clearTimeout(this._t); this._t = setTimeout(() => this.flush(), 500); },
-  async flush() { clearTimeout(this._t); const d = this._dirty; this._dirty = {}; const patch = {}; if (d.items) patch.items = this.items; if (d.pad) patch.pad = this.pad; if (Object.keys(patch).length) { try { await api('notes/set', { patch }); } catch (e) { toast('Notes not saved: ' + e.message, 'err', 6000); } } },
-  beacon() { if (!Object.keys(this._dirty).length) return; const patch = {}; if (this._dirty.items) patch.items = this.items; if (this._dirty.pad) patch.pad = this.pad; this._dirty = {}; try { fetch('/api/notes/set', { method: 'POST', keepalive: true, headers: { 'X-Token': TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ patch }) }); } catch (_) { } },
+  async flush() { clearTimeout(this._t); const d = this._dirty; this._dirty = {}; const patch = {}; if (d.items) patch.items = this.items; if (d.pad) patch.pad = this.pad; if (d.docs) patch.docs = this.docs; if (Object.keys(patch).length) { try { await api('notes/set', { patch }); } catch (e) { toast('Notes not saved: ' + e.message, 'err', 6000); } } },
+  beacon() { if (!Object.keys(this._dirty).length) return; const patch = {}; if (this._dirty.items) patch.items = this.items; if (this._dirty.pad) patch.pad = this.pad; if (this._dirty.docs) patch.docs = this.docs; this._dirty = {}; try { fetch('/api/notes/set', { method: 'POST', keepalive: true, headers: { 'X-Token': TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ patch }) }); } catch (_) { } },
   id: () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
   due() { return this.items.filter(i => !i.done && i.due && i.fired && !i.k); },
   badge() { const n = this.due().length, b = $('#btn-notes .nb'); if (b) { b.hidden = !n; b.textContent = n; } },
@@ -3422,35 +3583,64 @@ const Sound = {
 const toLocalInput = ms => { const d = new Date(ms), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
 class NotesTab {
   constructor() {
-    this.kind = 'notes'; this.icon = ic('notes', 14); this.showDone = true;
+    this.kind = 'notes'; this.icon = ic('notes', 14); this.showDone = prefs.get('ndone', true) !== false; this.day = ''; this.q = ''; this.nid = ''; this.nq = ''; this.cm = null;
     this.panel = el('div', 'panel');
     this.panel.innerHTML = `<div class="nt"><div class="wrap">
-      <section><h2>Checklist<span class="sp"></span><button class="clr" title="Remove all ticked items">Clear done</button></h2>
-        <div class="addrow"><input type="text" class="t" placeholder="Add an item, then press Enter" spellcheck="false" aria-label="New item"><input type="datetime-local" class="w" title="Optional reminder time" aria-label="Reminder time"><select class="cat" title="Work or personal" aria-label="Category">${[['w', 'Work'], ['p', 'Personal']].map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select><select class="rp" title="Repeat" aria-label="Repeat">${RPT.OPTS.map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select><button class="primary go">Add</button></div>
-        <div class="seg" role="group" aria-label="Show"></div>
+      <section class="ntl"><h2>Checklist<span class="sp"></span><button class="clr" title="Remove every ticked item">${ic('trash', 12)} Clear done</button></h2>
+        <div class="addcard"><input type="text" class="t" placeholder="Add an item, then press Enter" spellcheck="false" aria-label="New item">
+          <div class="addrow"><span class="qk" role="group" aria-label="Quick times"><button type="button" data-q="today" title="Reminder this evening, or in an hour">Today</button><button type="button" data-q="tom" title="Reminder tomorrow 9:00">Tomorrow</button><button type="button" data-q="week" title="Reminder next Monday 9:00">Next week</button></span><input type="datetime-local" class="w" title="Optional reminder time" aria-label="Reminder time">
+          <select class="cat" title="Work or personal" aria-label="Category">${[['w', 'Work'], ['p', 'Personal']].map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select><select class="rp" title="Repeat" aria-label="Repeat"><option value="">No repeat</option>${RPT.OPTS.filter(o => o[0]).map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select><button type="button" class="star qs" title="Mark as important" aria-pressed="false" aria-label="Important">★</button><button class="go primary">Add</button></div></div>
+        <div class="tools"><div class="seg" role="group" aria-label="Show"></div><input type="search" class="fq" placeholder="Search items" aria-label="Search items" spellcheck="false"><button class="sd" type="button" title="Show or hide ticked items"></button></div>
+        <div class="dayf" hidden></div>
         <div class="list"></div>
-        <p class="hint">Set a time to get a reminder. Reminders are announced with a desktop notification and sound while Kempt is running (start it at login in Settings → General to keep it running with no browser open); anything that came due while it was closed is shown when you next open it.</p></section>
-      <section><h2>Notes</h2><textarea class="pad" placeholder="Scratchpad: free text, saved automatically." spellcheck="false" aria-label="Notes"></textarea><p class="hint">Saved on this computer in <code>notes.json</code> next to the settings.</p></section></div></div>`;
+        <p class="hint">A time gives you a reminder: a desktop notification and sound while Kempt is running (start it at login in Settings → General to keep it running with no browser open). Anything that came due while it was closed is shown when you next open it.</p></section>
+      <section class="ntc"><h2>Calendar<span class="sp"></span><button class="opc" title="Open the full calendar (Alt+L)">${ic('cal', 12)} Open calendar</button></h2><div class="mini"></div><h2 class="ah"></h2><div class="agenda"></div></section>
+      <section class="ntn"><h2>Notes<span class="sp"></span><button class="nn" title="Start a new note">${ic('plus', 12)} New note</button></h2>
+        <input type="search" class="nsq" placeholder="Search notes" aria-label="Search notes" spellcheck="false"><div class="nlist"></div>
+        <div class="ned"><input type="text" class="ntt" placeholder="Title" maxlength="120" spellcheck="false" aria-label="Note title"><textarea class="pad" placeholder="Write here. Saved automatically on this computer." maxlength="100000" spellcheck="false" aria-label="Note text"></textarea>
+        <div class="nfoot"><span class="nmeta"></span><span class="sp"></span><button class="nd" title="Delete this note">${ic('trash', 12)} Delete note</button></div></div></section></div></div>`;
     const q = s => $(s, this.panel); this.list = q('.list'); this.pad = q('.pad'); this.t = q('.t'); this.w = q('.w'); this.rp = q('.rp'); this.cat = q('.cat'); this.cat.value = prefs.get('ncat', 'w') === 'p' ? 'p' : 'w'; this.cat.onchange = () => prefs.set('ncat', this.cat.value); this.seg = q('.seg'); this.filt = ['w', 'p'].includes(prefs.get('nfilt', '')) ? prefs.get('nfilt', '') : '';
-    this.pad.value = Notes.pad; this.pad.oninput = () => { Notes.pad = this.pad.value; Notes.save('pad'); };
-    const add = () => { const t = this.t.value.trim(); if (!t) return; const due = this.w.value ? new Date(this.w.value).getTime() : null; const it = { id: Notes.id(), t, c: this.cat.value, done: false, due: due && !isNaN(due) ? due : null, fired: false }; if (it.due && this.rp.value) { it.rep = this.rp.value; it.base = it.due; } Notes.items.push(it); this.t.value = ''; this.w.value = ''; this.rp.value = ''; if (due) this.ask(); Notes.save(); RPT.sync(false); Notes.arm(); Notes.badge(); this.render(); this.t.focus(); };
+    this.imp = false; q('.qs').onclick = () => { this.imp = !this.imp; q('.qs').classList.toggle('on', this.imp); q('.qs').setAttribute('aria-pressed', String(this.imp)); };
+    q('.qk').onclick = e => { const b = e.target.closest('button'); if (!b) return; const n = new Date(), d = new Date(n.getFullYear(), n.getMonth(), n.getDate(), 9, 0); if (b.dataset.q === 'today') { d.setHours(n.getHours() < 17 ? 18 : n.getHours() + 1, 0); } else if (b.dataset.q === 'tom') d.setDate(d.getDate() + 1); else d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); this.w.value = toLocalInput(d.getTime()); this.t.focus(); };
+    const add = () => { const t = this.t.value.trim(); if (!t) return; const due = this.w.value ? new Date(this.w.value).getTime() : null; const it = { id: Notes.id(), t, c: this.cat.value, done: false, due: due && !isNaN(due) ? due : null, fired: false }; if (it.due && this.rp.value) { it.rep = this.rp.value; it.base = it.due; } Notes.items.push(it); if (this.imp) it.s = 1; this.imp = false; q('.qs').classList.remove('on'); this.t.value = ''; this.w.value = ''; this.rp.value = ''; if (due) this.ask(); Notes.save(); RPT.sync(false); Notes.arm(); Notes.badge(); this.render(); this.t.focus(); };
     q('.go').onclick = add; this.t.onkeydown = e => { if (e.key === 'Enter') add(); };
     q('.clr').onclick = () => { Notes.items = Notes.items.filter(i => i.k || !i.done || !this.shows(i)); Notes.save(); RPT.sync(false); Notes.arm(); Notes.badge(); this.render(); };
-    this.render();
+    q('.fq').oninput = e => { this.q = e.target.value.trim().toLowerCase(); this.render(); };
+    q('.sd').onclick = () => { this.showDone = !this.showDone; prefs.set('ndone', this.showDone); this.render(); };
+    q('.opc').onclick = () => actions.calendar();
+    // notes: many, each with a title
+    q('.nn').onclick = () => { const n = { id: Notes.id(), t: '', b: '', u: Date.now() }; Notes.docs.unshift(n); this.nid = n.id; Notes.save('docs'); this.renderNotes(); q('.ntt').focus(); };
+    q('.nsq').oninput = e => { this.nq = e.target.value.trim().toLowerCase(); this.renderNotes(); };
+    q('.ntt').oninput = () => { const n = this.cur(); if (n) { n.t = q('.ntt').value; n.u = Date.now(); Notes.save('docs'); this.renderNotes(true); } };
+    this.pad.oninput = () => { const n = this.cur(); if (n) { n.b = this.pad.value; n.u = Date.now(); Notes.save('docs'); this.renderNotes(true); } };
+    q('.nd').onclick = () => { const n = this.cur(); if (!n) return; if ((n.t || n.b) && !confirm('Delete this note?')) return; Notes.docs = Notes.docs.filter(x => x !== n); this.nid = ''; Notes.save('docs'); this.renderNotes(); };
+    this.render(); this.renderNotes(); this.side();
   }
   title() { return 'Checklist'; }
   shows(i) { return !this.filt || i.c === this.filt; }
   ask() { try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); } catch (_) { } }
   fmt(ms) { const d = new Date(ms), n = new Date(), t = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), day = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(n.getFullYear(), n.getMonth(), n.getDate())) / 86400000); return (day === 0 ? 'Today' : day === 1 ? 'Tomorrow' : day === -1 ? 'Yesterday' : d.toLocaleDateString([], { month: 'short', day: 'numeric' })) + ' ' + t; }
+  cur() { return Notes.docs.find(n => n.id === this.nid) || null; }
+  group(i, t0) {   // which heading an item sits under
+    if (i.done) return 5; if (!i.due) return 4; const d = Math.floor((i.due - t0) / 86400000);
+    return i.due < t0 ? 0 : d < 1 ? 1 : d < 2 ? 2 : d < 8 ? 3 : 3.5;
+  }
   render() {
     const keep = document.activeElement && this.list.contains(document.activeElement) ? document.activeElement.closest('.it')?.dataset.id : null;
     const all = Notes.items.filter(i => !i.k), cnt = { '': all.length, w: all.filter(i => i.c === 'w').length, p: all.filter(i => i.c === 'p').length };
     this.seg.innerHTML = ''; for (const [v, n] of [['', 'All'], ['w', 'Work'], ['p', 'Personal']]) { const b = el('button'); b.type = 'button'; b.dataset.f = v; b.setAttribute('aria-pressed', String(this.filt === v)); b.innerHTML = `${n}<small>${cnt[v]}</small>`; b.onclick = () => { this.filt = v; prefs.set('nfilt', v); if (v) { this.cat.value = v; prefs.set('ncat', v); } this.render(); }; this.seg.appendChild(b); }
-    const mine = all.filter(i => this.shows(i)), items = [...mine.filter(i => !i.done), ...mine.filter(i => i.done)];   // clock-change alerts live in the World clock tab
-    this.list.innerHTML = items.length ? '' : `<div class="empty">${this.filt ? 'No ' + (this.filt === 'w' ? 'work' : 'personal') + ' items yet.' : 'Nothing here yet. Add your first item above.'}</div>`;
+    const nd = all.filter(i => i.done).length, sd = $('.sd', this.panel); sd.textContent = this.showDone ? `Hide done (${nd})` : `Show done (${nd})`;
+    const t0 = new Date().setHours(0, 0, 0, 0), dayOf = ms => HOL.ymd0(new Date(ms));
+    let mine = all.filter(i => this.shows(i) && (!this.q || i.t.toLowerCase().includes(this.q)) && (!this.day || (i.due && dayOf(i.due) === this.day)) && (this.showDone || !i.done));
+    const df = $('.dayf', this.panel); df.hidden = !this.day; if (this.day) { df.innerHTML = `Showing ${esc(new Date(this.day + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }))} <button type="button">Show all days</button>`; $('button', df).onclick = () => { this.day = ''; this.render(); this.side(); }; }
+    const grp = i => this.group(i, t0); mine.sort((x, y) => grp(x) - grp(y) || (y.s ? 1 : 0) - (x.s ? 1 : 0) || (x.due || 9e15) - (y.due || 9e15));
+    const items = mine, HEAD = { 0: 'Overdue', 1: 'Today', 2: 'Tomorrow', 3: 'This week', 3.5: 'Later', 4: 'No date', 5: 'Done' };
+    this.list.innerHTML = items.length ? '' : `<div class="empty">${this.q || this.day ? 'No items match.' : this.filt ? 'No ' + (this.filt === 'w' ? 'work' : 'personal') + ' items yet.' : 'Nothing here yet. Add your first item above.'}</div>`;
+    let lastg = null;
     for (const i of items) {
+      const g = grp(i); if (g !== lastg) { lastg = g; const hd = el('div', 'gh g' + String(g).replace('.', '_')); hd.innerHTML = `<span>${HEAD[g]}</span><small>${items.filter(x => grp(x) === g).length}</small>`; this.list.appendChild(hd); }
       const late = !i.done && i.due && i.fired, r = el('div', 'it' + (i.done ? ' done' : '') + (late ? ' due' : '') + (i.due && !i.done ? ' hd' : '')); r.dataset.id = i.id;
-      r.innerHTML = `<input type="checkbox" aria-label="Done"><input type="text" class="tx" spellcheck="false" aria-label="Item"><span class="meta"><select class="cs" title="Work or personal" aria-label="Category"><option value="">–</option><option value="w">Work</option><option value="p">Personal</option></select><span class="when"></span></span><button class="x" title="Delete" aria-label="Delete item">${ic('x', 12)}</button>`;
+      r.innerHTML = `<input type="checkbox" aria-label="Done"><input type="text" class="tx" spellcheck="false" aria-label="Item"><span class="meta"><select class="cs" title="Work or personal" aria-label="Category"><option value="">–</option><option value="w">Work</option><option value="p">Personal</option></select><span class="when"></span></span><button class="star${i.s ? ' on' : ''}" title="Mark as important" aria-label="Important" aria-pressed="${!!i.s}">★</button><button class="x" title="Delete" aria-label="Delete item">${ic('trash', 14)}</button>`;
       const cb = $('input[type=checkbox]', r), tx = $('.tx', r), wh = $('.when', r), cs = $('.cs', r); cb.checked = i.done; tx.value = i.t; cs.value = i.c || ''; cs.className = 'cs ' + (i.c || ''); cs.onchange = () => { if (cs.value) i.c = cs.value; else delete i.c; Notes.save(); this.render(); };
       cb.onchange = () => { if (i.rep && cb.checked) { RPT.advance(i); toast('Next: ' + this.fmt(i.due), 'info', 4000); RPT.sync(false); Notes.save(); Notes.arm(); Notes.badge(); this.render(); return; } i.done = cb.checked; if (i.done && i.rep) { delete i.rep; delete i.base; } if (!i.done && i.due && i.due <= Date.now()) i.fired = true; Notes.save(); Notes.arm(); Notes.badge(); this.render(); };
       tx.onchange = () => { const v = tx.value.trim(); if (v) i.t = v; else tx.value = i.t; Notes.save(); };
@@ -3458,11 +3648,46 @@ class NotesTab {
       if (i.due) { wh.className = 'when' + (late ? ' late' : ''); wh.innerHTML = `${ic('bell', 13)}<input type="datetime-local" aria-label="Reminder time"><select class="rps" title="Repeat" aria-label="Repeat">${RPT.OPTS.map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select><button class="clrr" title="Remove the reminder, keep the item" aria-label="Remove reminder">clear</button>`; const di = $('input', wh); di.value = toLocalInput(i.due); di.title = this.fmt(i.due); di.onchange = () => setDue(di.value); const rs = $('.rps', wh); rs.value = i.rep || ''; rs.onchange = () => { if (rs.value) { i.rep = rs.value; i.base = i.due; } else { delete i.rep; delete i.base; } Notes.save(); RPT.sync(false); Notes.arm(); Notes.badge(); this.render(); }; $('button', wh).onclick = () => setDue(''); }
       else if (!i.done) { wh.innerHTML = `<button title="Add a reminder" aria-label="Add a reminder">${ic('bell', 13)}</button>`; $('button', wh).onclick = () => { wh.innerHTML = '<input type="datetime-local" aria-label="Reminder time">'; const di = $('input', wh); di.value = toLocalInput(Date.now() + 3600000); di.onchange = () => setDue(di.value); di.focus(); try { di.showPicker && di.showPicker(); } catch (_) { } }; }
       $('.x', r).onclick = () => { Notes.items = Notes.items.filter(a => a !== i); Notes.save(); RPT.sync(false); Notes.arm(); Notes.badge(); this.render(); };
+      $('.star', r).onclick = () => { if (i.s) delete i.s; else i.s = 1; Notes.save(); this.render(); };
       this.list.appendChild(r);
     }
     if (keep) { const r = this.list.querySelector(`.it[data-id="${keep}"] .tx`); if (r) r.focus(); }
+    this.side();
   }
-  onShow() { this.render(); }
+  // everything dated: tasks with a time and calendar events
+  entries(from, to) {
+    const out = []; for (const i of Notes.items) if (!i.k && i.due && i.due >= from && i.due < to) out.push({ k: 'task', s: i.due, t: i.t, done: i.done, c: i.c, id: i.id, star: !!i.s });
+    if (window.KemptCalendar) for (const ev of CAL.events) for (const o of window.KemptCalendar.occurrences(ev, from, to)) out.push({ k: 'event', s: o.s, e: o.e, t: ev.t, ad: !!ev.ad, c: ev.c, ev });
+    return out.sort((a, b) => (b.ad ? 1 : 0) - (a.ad ? 1 : 0) || a.s - b.s);
+  }
+  async side() {
+    const host = $('.mini', this.panel); if (!host) return; if (!CAL.loaded) { try { await CAL.load(); await CAL.script(); } catch (_) { } }
+    const now = new Date(), tk = HOL.ymd0(now), m = this.cm || new Date(now.getFullYear(), now.getMonth(), 1); this.cm = m;
+    const first = new Date(m.getFullYear(), m.getMonth(), 1), lead = (first.getDay() + 6) % 7, n = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(), ents = this.entries(first.getTime(), new Date(m.getFullYear(), m.getMonth() + 1, 1).getTime()), has = new Map();
+    for (const e of ents) { const k = HOL.ymd0(new Date(e.s)); has.set(k, (has.get(k) || 0) + 1); }
+    host.innerHTML = `<div class="mh"><button type="button" class="p" aria-label="Previous month">${ic('chev', 13)}</button><b>${esc(m.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }))}</b><button type="button" class="n" aria-label="Next month">${ic('chev', 13)}</button><button type="button" class="tdy">Today</button></div><div class="mg">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<i>${d}</i>`).join('')}${'<span></span>'.repeat(lead)}</div>`;
+    const g = $('.mg', host); for (let d = 1; d <= n; d++) { const dt = new Date(m.getFullYear(), m.getMonth(), d), k = HOL.ymd0(dt), c = has.get(k) || 0, b = el('button'); b.type = 'button'; b.innerHTML = `${d}${c ? `<em>${c > 3 ? '3+' : '•'.repeat(c)}</em>` : ''}`; b.className = (k === tk ? 'today ' : '') + (k === this.day ? 'sel ' : '') + (HOL.weekend().includes(dt.getDay()) ? 'we' : ''); b.title = dt.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }) + (c ? ` · ${c} item${c > 1 ? 's' : ''}` : ''); b.onclick = () => { this.day = this.day === k ? '' : k; this.render(); }; g.appendChild(b); }
+    $('.p', host).onclick = () => { this.cm = new Date(m.getFullYear(), m.getMonth() - 1, 1); this.side(); }; $('.n', host).onclick = () => { this.cm = new Date(m.getFullYear(), m.getMonth() + 1, 1); this.side(); }; $('.tdy', host).onclick = () => { this.cm = null; this.day = ''; this.render(); };
+    // agenda: the chosen day, or the next seven days
+    const ah = $('.ah', this.panel), ag = $('.agenda', this.panel); let from, to;
+    if (this.day) { from = new Date(this.day + 'T00:00:00').getTime(); to = from + 86400000; ah.textContent = new Date(from).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }); }
+    else { from = new Date().setHours(0, 0, 0, 0); to = from + 7 * 86400000; ah.textContent = 'Coming up · next 7 days'; }
+    const list = this.entries(from, to).filter(e => !e.done); ag.innerHTML = list.length ? '' : '<div class="empty">Nothing scheduled.</div>'; let ld = '';
+    for (const e of list) {
+      const dk = HOL.ymd0(new Date(e.s)); if (!this.day && dk !== ld) { ld = dk; const h = el('div', 'ad'); h.textContent = dk === tk ? 'Today' : new Date(e.s).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' }); ag.appendChild(h); }
+      const r = el('button', 'ae ' + e.k + (e.c ? ' ' + e.c : '')); r.type = 'button'; r.innerHTML = `<span class="tm">${e.ad ? 'all day' : esc(new Date(e.s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span><span class="tt"></span><small>${e.k === 'task' ? 'task' : 'event'}</small>`; $('.tt', r).textContent = (e.star ? '★ ' : '') + e.t;
+      r.onclick = () => { if (e.k === 'task') { this.day = HOL.ymd0(new Date(e.s)); this.render(); } else { actions.calendar(); setTimeout(() => { const t = Tabs.list.find(x => x.kind === 'cal'); if (t && t.cal) t.cal.goto(e.s, 'day'); }, 400); } }; ag.appendChild(r);
+    }
+  }
+  renderNotes(light) {
+    const q = s => $(s, this.panel), docs = Notes.docs; if (!this.nid || !docs.some(n => n.id === this.nid)) this.nid = docs.length ? docs[0].id : '';
+    const name = n => (n.t && n.t.trim()) || (n.b || '').split('\n').find(l => l.trim()) || 'Untitled note', f = docs.filter(n => !this.nq || (n.t + '\n' + n.b).toLowerCase().includes(this.nq)).sort((a, b) => b.u - a.u);
+    const nl = q('.nlist'); nl.innerHTML = f.length ? '' : `<div class="empty">${docs.length ? 'No notes match.' : 'No notes yet. Press New note.'}</div>`;
+    for (const n of f) { const b = el('button', 'ni' + (n.id === this.nid ? ' on' : '')); b.type = 'button'; b.innerHTML = '<b></b><small></small>'; $('b', b).textContent = name(n); $('small', b).textContent = new Date(n.u).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' · ' + ((n.b || '').replace(/\s+/g, ' ').slice(0, 48) || 'empty'); b.onclick = () => { this.nid = n.id; this.renderNotes(); }; nl.appendChild(b); }
+    const n = this.cur(), ed = q('.ned'); ed.hidden = !n; if (light) return;
+    if (n) { q('.ntt').value = n.t || ''; this.pad.value = n.b || ''; q('.nmeta').textContent = `${(n.b || '').length.toLocaleString()} characters · edited ${new Date(n.u).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}`; }
+  }
+  onShow() { this.render(); this.renderNotes(); }
   dispose() { Notes.flush(); }
 }
 

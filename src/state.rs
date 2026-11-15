@@ -10,7 +10,7 @@ const KEYS: &[&str] = &["theme", "indent", "fs", "dir", "recent", "tdelim", "the
 const MAX_BYTES: usize = 64 * 1024;
 
 /// Checklist items and the scratchpad live in their own file so they never compete with the settings for space.
-const NOTE_KEYS: &[&str] = &["items", "pad"];
+const NOTE_KEYS: &[&str] = &["items", "pad", "docs"];
 const NOTE_MAX_BYTES: usize = 512 * 1024;
 
 /// The calendar lives in its own file too: events (with sync-ready ids, change times and deletion markers) and view settings.

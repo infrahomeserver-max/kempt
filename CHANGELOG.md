@@ -6,8 +6,12 @@ versioning: [SemVer](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- World clock: live seconds, a big clock for your first zone, full-width layout, draggable sections (or Alt+Up/Down), a calendar in the meeting finder, and short zone names (IST, CST, EST, PST, CET and more; `cst6cdt`-style names are understood).
+- Company holidays: add, import, scope to a country, hide built-in ones, and choose your weekend days.
+- Checklist redesign: grouped by Overdue, Today, Tomorrow, This week, Later, No date and Done; quick Today/Tomorrow/Next week chips, important star, search, and a month calendar plus a "Coming up" list that includes calendar events.
+- Notes: keep many notes, each with a title, a list and search. The old single scratchpad becomes the first note.
+- Top bar buttons carry words on wide windows. Diff gutter buttons are smaller. No scrollbar in the tab bar.
 - Built-in calendar (Alt+L): Day, Week, Month, Year and Schedule views, repeating events, per-event reminders, and checklist items shown on their day. Stored locally in `calendar.json`; the view code is a separate reusable file.
-
 - New file can start in memory and is written only on the first Save.
 - Fix unescapes backslash-escaped JSON and expands JSON stored inside string values.
 - Excel binary workbooks (`.xlsb`) open like `.xlsx`, one tab per sheet.
