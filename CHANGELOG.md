@@ -5,6 +5,8 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-24
+
 ### Added
 - `install-deb.sh` release asset: one-line clean install of the newest `.deb` (amd64 / arm64), verified against `SHA256SUMS`, with `--purge` to start from a first-run state. The release job now checks the checksums and unpacks every `.deb` before publishing.
 - More settings: accent colour, code font, 12/24-hour clock, working hours for meetings, checklist sort and ticked items, wrapped-line pane, hidden files in Open, and **Reset preferences**. About shows the version; Help → Formats shows which formatters are installed.

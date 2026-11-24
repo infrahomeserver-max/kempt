@@ -1,6 +1,6 @@
 [package]
 name = "kempt"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "Format, view, search, fix and compare huge JSON, XML and log files; offline browser GUI"
 license = "MIT"
