@@ -50,6 +50,8 @@
 .kc-cell:hover { background: color-mix(in srgb, var(--kc-accent) 7%, var(--kc-bg)); }
 .kc-num { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 4px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-bottom: 2px; }
 .kc-cell.today .kc-num, .kc-dh.today .kc-num { background: var(--kc-accent); color: var(--accent-fg, #fff); font-weight: 700; }
+.kc-drag { opacity: .45; } .kc-drop { outline: 2px solid var(--kc-accent); outline-offset: -2px; }
+.kc-ghost { position: absolute; left: 2px; right: 2px; border: 2px dashed var(--kc-accent); border-radius: 6px; background: color-mix(in srgb, var(--kc-accent) 14%, transparent); color: var(--kc-accent); font-size: 11px; padding: 1px 5px; pointer-events: none; z-index: 6; }
 .kc-chip { --c: var(--kc-accent); display: flex; align-items: center; justify-content: flex-start; gap: 5px; height: 20px; flex: none; width: 100%; margin: 0 0 2px; padding: 0 6px; border: 0; border-left: 3px solid var(--c); border-radius: 4px; text-align: left; cursor: pointer;
   background: color-mix(in srgb, var(--c) 16%, transparent); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; line-height: 1.5; }
 .kc-chip:hover { background: color-mix(in srgb, var(--c) 28%, transparent); } .kc-chip.w { --c: var(--kc-work); } .kc-chip.p { --c: var(--kc-pers); } .kc-chip.mt { --c: var(--kc-meet, #9b6bff); }
@@ -124,7 +126,7 @@
     };
     const r = ev.r;
     if (!r) { push(ev.s); return out; }
-    const st = new Date(ev.s), n = Math.max(1, r.n | 0 || 1), until = typeof r.until === 'number' ? r.until + (ev.ad ? DAY - 1 : 0) : Infinity, cap = r.count ? r.count : Infinity;
+    const st = new Date(ev.s), n = Math.max(1, r.n | 0 || 1), until = typeof r.until === 'number' ? r.until + DAY - 1 : Infinity, cap = r.count ? r.count : Infinity;
     let made = 0, guard = 0;
     const at_ = (y, m, d) => new Date(y, m, d, st.getHours(), st.getMinutes(), 0, 0).getTime();
     const take = s => { if (s < ev.s) return true; if (s > until || s >= to + (ev.ad ? 0 : 0) && s > to) return false; if (made >= cap) return false; made++; push(s); return true; };
@@ -142,6 +144,44 @@
   }
 
   // ───────────── the calendar ─────────────
+
+  /** An .ics file (RFC 5545) with every live event: titles, places, notes, all-day, repeat rules, skipped days and reminders.
+   *  Timed single events are written in UTC; repeating timed events keep their local wall-clock time (TZID) so daylight saving still works.
+   *  Monthly events on the 29th or 30th follow Kempt's rule in the app (the last day of a short month); other apps may skip that month. */
+  function toICS(events, o) {
+    o = o || {};
+    const zone = o.zone || (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (_) { return 'UTC'; } })();
+    const now = typeof o.now === 'number' ? o.now : Date.now(), p2 = n => String(n).padStart(2, '0'), enc = new TextEncoder();
+    const utc = ms => { const d = new Date(ms); return `${d.getUTCFullYear()}${p2(d.getUTCMonth() + 1)}${p2(d.getUTCDate())}T${p2(d.getUTCHours())}${p2(d.getUTCMinutes())}${p2(d.getUTCSeconds())}Z`; };
+    const dl = ms => { const d = new Date(ms); return `${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}`; };
+    const tl = ms => { const d = new Date(ms); return `${dl(ms)}T${p2(d.getHours())}${p2(d.getMinutes())}00`; };
+    const txt = v => String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/\r?\n|\r/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,');
+    const fold = line => { if (enc.encode(line).length <= 75) return line; const out = []; let cur = '', n = 0; for (const ch of line) { const b = enc.encode(ch).length; if (n + b > 75) { out.push(cur); cur = ' '; n = 1; } cur += ch; n += b; } out.push(cur); return out.join('\r\n'); };
+    const L = [], add = l => L.push(fold(l));
+    const FREQ = { d: 'DAILY', w: 'WEEKLY', m: 'MONTHLY', y: 'YEARLY' }, DAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+    add('BEGIN:VCALENDAR'); add('VERSION:2.0'); add('PRODID:-//Kempt//Calendar//EN'); add('CALSCALE:GREGORIAN'); add('X-WR-CALNAME:Kempt');
+    for (const ev of Array.isArray(events) ? events : []) {
+      if (!ev || ev.x || typeof ev.s !== 'number' || !ev.id) continue;
+      const rep = ev.r && FREQ[ev.r.f] ? ev.r : null, end = typeof ev.e === 'number' && ev.e > ev.s ? ev.e : ev.s + (ev.ad ? DAY : HOUR);
+      add('BEGIN:VEVENT'); add(`UID:${String(ev.id).replace(/[^A-Za-z0-9._:|-]/g, '')}@kempt`); add(`DTSTAMP:${utc(typeof ev.u === 'number' && ev.u > 0 ? ev.u : now)}`);
+      if (ev.ad) { add(`DTSTART;VALUE=DATE:${dl(ev.s)}`); add(`DTEND;VALUE=DATE:${dl(Math.max(end, addDays(ev.s, 1)))}`); }
+      else if (rep) { add(`DTSTART;TZID=${zone}:${tl(ev.s)}`); add(`DTEND;TZID=${zone}:${tl(end)}`); }
+      else { add(`DTSTART:${utc(ev.s)}`); add(`DTEND:${utc(end)}`); }
+      if (rep) {
+        const part = [`FREQ=${FREQ[rep.f]}`]; if ((rep.n | 0) > 1) part.push(`INTERVAL=${rep.n | 0}`);
+        if (rep.f === 'w') { part.push('WKST=SU'); if (Array.isArray(rep.by) && rep.by.length) part.push('BYDAY=' + rep.by.filter(d => d >= 0 && d <= 6).map(d => DAYS[d]).join(',')); }
+        if (rep.f === 'm' && new Date(ev.s).getDate() === 31) part.push('BYMONTHDAY=-1');
+        if (rep.count) part.push(`COUNT=${rep.count | 0}`); else if (typeof rep.until === 'number') part.push('UNTIL=' + (ev.ad ? dl(rep.until) : utc(rep.until + DAY - 1)));
+        add('RRULE:' + part.join(';'));
+        const hh = new Date(ev.s); for (const k of (ev.ex || []).slice(0, 500)) { const t = fromKey(k); if (!Number.isFinite(t)) continue; if (ev.ad) add(`EXDATE;VALUE=DATE:${dl(t)}`); else add(`EXDATE;TZID=${zone}:${dl(t)}T${p2(hh.getHours())}${p2(hh.getMinutes())}00`); }
+      }
+      add('SUMMARY:' + txt(ev.t)); if (ev.l) add('LOCATION:' + txt(ev.l)); if (ev.d) add('DESCRIPTION:' + txt(ev.d)); if (ev.c === 'w' || ev.c === 'p') add('CATEGORIES:' + (ev.c === 'w' ? 'Work' : 'Personal'));
+      for (const m of Array.isArray(ev.rem) ? ev.rem : []) { add('BEGIN:VALARM'); add('ACTION:DISPLAY'); add('DESCRIPTION:' + txt(ev.t)); add(m > 0 ? `TRIGGER:-PT${m | 0}M` : 'TRIGGER:PT0S'); add('END:VALARM'); }
+      add('END:VEVENT');
+    }
+    add('END:VCALENDAR'); return L.join('\r\n') + '\r\n';
+  }
+
   function mount(host, opts) {
     opts = opts || {};
     if (!document.getElementById('kc-style')) { const s = document.createElement('style'); s.id = 'kc-style'; s.textContent = CSS; document.head.appendChild(s); }
@@ -181,10 +221,11 @@
     // ---- toolbar
     function drawBar() {
       const bar = document.createElement('div'); bar.className = 'kc-bar';
-      bar.innerHTML = `<button class="kc-btn today" type="button">Today</button><span class="kc-nav"><button class="kc-btn prev" type="button" aria-label="Previous">‹</button><button class="kc-btn next" type="button" aria-label="Next">›</button></span><span class="kc-title" role="heading" aria-level="2" aria-live="polite">${esc(head())}</span><span class="kc-sp"></span><span class="kc-seg" role="group" aria-label="View">${VIEWS.map(([v, n]) => `<button type="button" data-v="${v}" aria-pressed="${S.view === v}">${n}</button>`).join('')}</span><button class="kc-btn meet" type="button" title="Schedule a meeting: find a time that suits everyone">+ Meeting</button><button class="kc-btn pri add" type="button">+ New</button>`;
+      bar.innerHTML = `<button class="kc-btn today" type="button">Today</button><span class="kc-nav"><button class="kc-btn prev" type="button" aria-label="Previous">‹</button><button class="kc-btn next" type="button" aria-label="Next">›</button></span><span class="kc-title" role="heading" aria-level="2" aria-live="polite">${esc(head())}</span><span class="kc-sp"></span><span class="kc-seg" role="group" aria-label="View">${VIEWS.map(([v, n]) => `<button type="button" data-v="${v}" aria-pressed="${S.view === v}">${n}</button>`).join('')}</span><button class="kc-btn exp" type="button" title="Download all events as an .ics file (Google Calendar, Apple Calendar, Outlook)">Export</button><button class="kc-btn meet" type="button" title="Schedule a meeting: find a time that suits everyone">+ Meeting</button><button class="kc-btn pri add" type="button">+ New</button>`;
       bar.querySelector('.today').onclick = () => goto(Date.now());
       bar.querySelector('.prev').onclick = () => move(-1); bar.querySelector('.next').onclick = () => move(1);
       bar.querySelectorAll('.kc-seg button').forEach(b => b.onclick = () => setView(b.dataset.v));
+      bar.querySelector('.exp').onclick = () => { const b = new Blob([toICS(S.events)], { type: 'text/calendar;charset=utf-8' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'kempt-calendar.ics'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
       bar.querySelector('.meet').onclick = () => edit(null, S.view === 'month' || S.view === 'year' || S.view === 'schedule' ? at(sod(S.cur), 9, 0) : at(sod(S.cur), Math.max(8, new Date().getHours() + 1), 0), null, false, { k: 'm', tab: 'find' });
       bar.querySelector('.add').onclick = () => edit(null, S.view === 'month' || S.view === 'year' || S.view === 'schedule' ? at(sod(S.cur), 9, 0) : at(sod(S.cur), Math.max(8, new Date().getHours() + 1), 0));
       return bar;
@@ -197,8 +238,56 @@
       const tt = o.kind === 'task' ? (o.task.done ? '☑ ' : '☐ ') + o.ev.t : o.ev.t;
       b.innerHTML = (timeText(o) ? `<span class="tm">${esc(timeText(o))}</span>` : '') + `<span class="tt">${esc(tt)}</span>`;
       b.title = (o.kind === 'task' ? (o.task && o.task.rep ? 'Repeating task (click: done, moves to the next date; Shift+click: open checklist): ' : 'Task (click: tick off; Shift+click: open checklist): ') : '') + o.ev.t + (o.ad ? ' (all day)' : o.kind === 'task' ? ' · ' + T().format(o.s) : ' · ' + T().format(o.s) + ' – ' + T().format(o.e));
-      b.onclick = e => { e.stopPropagation(); open(o, e); };
+      b.onclick = e => { e.stopPropagation(); if (Date.now() - (S.dragAt || 0) < 120) return; open(o, e); };
+      dragify(b, o);
       return b;
+    }
+
+    // ---- drag to move (mouse or pen): month cells, week/day columns (15-minute steps) and the all-day row.
+    // A repeating event moves only the occurrence you dragged: its day is skipped and a single copy is made at the new time.
+    function moveOcc(o, tgt) {
+      const ev = o.ev; if (!ev || o.kind !== 'ev') return; const dur = Math.max(0, o.e - o.s); let s, e;
+      if (o.ad) { s = sod(tgt.day); e = addDays(s, Math.max(1, Math.round(dur / DAY))); } else { s = at(tgt.day, tgt.h, tgt.m); e = s + dur; }
+      if (s === o.s) return;
+      const now = Date.now(), copy = JSON.parse(JSON.stringify(ev));
+      if (ev.r) { copy.ex = Array.from(new Set([...(copy.ex || []), o.key || dkey(o.s)])); copy.u = now; commit(copy); const one = JSON.parse(JSON.stringify(ev)); one.id = uid(); delete one.r; delete one.ex; one.s = s; one.e = e; one.u = now; commit(one); }
+      else { copy.s = s; copy.e = e; copy.u = now; commit(copy); }
+    }
+    function dragify(node, o) {
+      if (o.kind !== 'ev') return;
+      node.addEventListener('pointerdown', e0 => {
+        if (e0.button !== 0 || e0.pointerType === 'touch' || S.dlg) return;
+        const seg = node.closest('.kc-cell, .kc-allday > div'), back = seg && seg._day != null ? Math.max(0, Math.round((sod(seg._day) - sod(o.s)) / DAY)) : 0, x0 = e0.clientX, y0 = e0.clientY, grab = e0.clientY - node.getBoundingClientRect().top, hh = node.getBoundingClientRect().height, sd = new Date(o.s);
+        let on = false, tgt = null, mark = null, ghost = null;
+        const clear = () => { if (mark) { mark.classList.remove('kc-drop'); mark = null; } if (ghost) { ghost.remove(); ghost = null; } };
+        const where = (x, y) => {
+          const el = document.elementFromPoint(x, y); if (!el || !el.closest) return null;
+          const cell = el.closest('.kc-cell');
+          if (cell && cell._day != null) return { el: cell, day: addDays(cell._day, -back), h: sd.getHours(), m: sd.getMinutes() };
+          const adc = el.closest('.kc-allday > div');
+          if (adc && adc._day != null) return o.ad ? { el: adc, day: addDays(adc._day, -back) } : null;
+          const col = el.closest('.kc-col');
+          if (col && col._day != null && !o.ad) {
+            const r = col.getBoundingClientRect(); let mins = Math.round((y - r.top - grab) / col._px * 4) * 15; mins = Math.max(0, Math.min(24 * 60 - 15, mins));
+            return { el: col, day: col._day, h: Math.floor(mins / 60), m: mins % 60, mins, hh };
+          }
+          return null;
+        };
+        const mv = e => {
+          if (!on) { if (Math.hypot(e.clientX - x0, e.clientY - y0) < 6) return; on = true; node.classList.add('kc-drag'); document.body.style.userSelect = 'none'; }
+          tgt = where(e.clientX, e.clientY); clear();
+          if (!tgt) return;
+          if (tgt.mins != null) { ghost = document.createElement('div'); ghost.className = 'kc-ghost'; ghost.style.top = tgt.mins / 60 * tgt.el._px + 'px'; ghost.style.height = Math.max(20, tgt.hh) + 'px'; ghost.textContent = T().format(at(tgt.day, tgt.h, tgt.m)); tgt.el.appendChild(ghost); }
+          else { mark = tgt.el; mark.classList.add('kc-drop'); }
+        };
+        const end = (e, ok) => {
+          window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', cancel); window.removeEventListener('keydown', key, true);
+          document.body.style.userSelect = ''; clear(); node.classList.remove('kc-drag');
+          if (on) { S.dragAt = Date.now(); if (ok && tgt) moveOcc(o, tgt); }
+        };
+        const up = e => end(e, true), cancel = e => end(e, false), key = e => { if (e.key === 'Escape') { e.stopPropagation(); end(e, false); } };
+        window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', cancel); window.addEventListener('keydown', key, true);
+      });
     }
     function open(o, e) {
       if (o.kind === 'task') { if (typeof opts.onTask === 'function') opts.onTask(o.task, e && (e.shiftKey || e.altKey) ? 'open' : 'toggle'); draw(); return; }
@@ -221,7 +310,7 @@
         const row = document.createElement('div'); row.className = 'kc-week';
         for (let i = 0; i < 7; i++) {
           const day = addDays(start, w * 7 + i), key = dkey(day), dd = new Date(day), cell = document.createElement('div');
-          cell.className = 'kc-cell' + (dd.getMonth() !== d.getMonth() ? ' out' : '') + (key === today ? ' today' : '') + ([0, 6].includes(dd.getDay()) ? ' we' : ''); cell.tabIndex = 0;
+          cell._day = day; cell.className = 'kc-cell' + (dd.getMonth() !== d.getMonth() ? ' out' : '') + (key === today ? ' today' : '') + ([0, 6].includes(dd.getDay()) ? ' we' : ''); cell.tabIndex = 0;
           cell.setAttribute('aria-label', nf({ dateStyle: 'full' }).format(day));
           const label = dd.getDate() === 1 ? nf({ day: 'numeric', month: 'short' }).format(day) : String(dd.getDate());
           cell.innerHTML = `<span class="kc-num">${esc(label)}</span>`;
@@ -246,7 +335,7 @@
       wrap.innerHTML = headHtml + `<div class="kc-gut" style="height:${24 * PX}px">${Array.from({ length: 23 }, (_, h) => `<span style="top:${(h + 1) * PX}px">${esc(tfmt().format(at(start, h + 1, 0)))}</span>`).join('')}</div><div class="kc-cols" style="grid-template-columns:${cols};height:${24 * PX}px">${days.map(() => '<div class="kc-col"></div>').join('')}</div>`;
       const adCells = wrap.querySelectorAll('.kc-allday > div'), colEls = wrap.querySelectorAll('.kc-col');
       days.forEach((d, i) => {
-        const col = colEls[i], key = dkey(d); if (key === today) col.classList.add('today');
+        const col = colEls[i], key = dkey(d); col._day = d; col._px = PX; adCells[i]._day = d; if (key === today) col.classList.add('today');
         for (let h = 1; h < 24; h++) { const l = document.createElement('div'); l.className = 'kc-hl'; l.style.top = h * PX + 'px'; col.appendChild(l); const hh = document.createElement('div'); hh.className = 'kc-hl half'; hh.style.top = (h - 0.5) * PX + 'px'; col.appendChild(hh); }
         col.onclick = e => { const r = col.getBoundingClientRect(), mins = Math.floor((e.clientY - r.top) / PX * 2) * 30; edit(null, at(d, Math.min(23, Math.floor(mins / 60)), mins % 60)); };
         adCells[i].onclick = () => edit(null, at(d, 0, 0), null, true);
@@ -263,7 +352,7 @@
           b.style.cssText = `top:${top}px;height:${h}px;left:calc(${t.l / nl * 100}% + 2px);width:calc(${100 / nl}% - 5px)`;
           b.innerHTML = `<b>${o.kind === 'task' ? (o.task.done ? '☑ ' : '☐ ') : ''}${esc(o.ev.t)}</b>${h > 34 ? `<span class="tm">${esc(T().format(o.s))}${o.e > o.s ? ' – ' + esc(T().format(o.e)) : ''}</span>` : ''}`;
           b.title = o.ev.t + ' · ' + T().format(o.s) + (o.e > o.s ? ' – ' + T().format(o.e) : '');
-          b.onclick = e => { e.stopPropagation(); open(o, e); }; col.appendChild(b);
+          b.onclick = e => { e.stopPropagation(); if (Date.now() - (S.dragAt || 0) < 120) return; open(o, e); }; dragify(b, o); col.appendChild(b);
         }
         if (key === today) { const nw = document.createElement('div'); nw.className = 'kc-now'; nw.style.top = (Date.now() - d) / HOUR * PX + 'px'; col.appendChild(nw); }
       });
@@ -415,7 +504,7 @@
     };
   }
 
-  const api = { mount, occurrences, VERSION: '1' };
+  const api = { mount, occurrences, toICS, VERSION: '1' };
   root.KemptCalendar = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -128,6 +128,10 @@ mark.hl0 { background:var(--t0); } mark.hl1 { background:var(--t1); } mark.hl2 {
 mark.hl3 { background:var(--t3); } mark.hl4 { background:var(--t4); } mark.hl5 { background:var(--t5); }
 .line.cur mark { outline:1px solid var(--fg-dim); }
 mark.wh { background:var(--wh); }
+mark.sl { background:var(--sel); color:inherit; }
+.vs.cs, .vs.cs * { user-select:none; -webkit-user-select:none; }
+mark.cm { background:#ff9f1c; color:#111; outline:2px solid #ff9f1c; border-radius:2px; box-shadow:0 0 0 1px #111 inset; }
+.line.cur mark.cm { outline:2px solid #ff9f1c; }
 .ce { position:absolute; inset:0; display:flex; background:var(--bg); }
 .ce-g { flex:none; overflow:hidden; background:var(--bg); border-right:1px solid var(--border); position:relative; user-select:none; }
 .ce-gi { position:absolute; top:0; right:10px; text-align:right; color:var(--gutter); line-height:20px; white-space:pre; }
@@ -1212,7 +1216,7 @@ function decorate(text, marks) {
   }
   return out;
 }
-const findMarks = ranges => (ranges || []).map(r => ({ s: r[0], e: r[1], c: 'hl' + (r[2] % 6), tag: 'mark' }));
+const findMarks = (ranges, cur) => (ranges || []).map((r, k) => ({ s: r[0], e: r[1], c: 'hl' + (r[2] % 6) + (cur && k === 0 ? ' cm' : ''), tag: 'mark' }));
 function wordMarks(text, word) {
   if (!word) return [];
   const out = []; let i = 0; const w = word;
@@ -1821,7 +1825,7 @@ class CodeEditor {
 
 class DocTab {
   constructor(info, minified, opt) {
-    this.opt = opt || {}; this.info = info; this.kind = 'doc'; this.icon = FI.ic(info && (info.name || info.path) || '', 14); this.spec = null; this.job = null; this.curLine = -1; this.word = ''; this.hoff = 0; this.maxLen = 0; this.matchTotal = 0;
+    this.opt = opt || {}; this.info = info; this.kind = 'doc'; this.icon = FI.ic(info && (info.name || info.path) || '', 14); this.spec = null; this.job = null; this.curLine = -1; this.curMatch = -1; this.csel = null; this.anchor = null; this.word = ''; this.hoff = 0; this.maxLen = 0; this.matchTotal = 0;
     this.panel = el('div', 'panel');
     this.panel.innerHTML = `
       <div class="toolbar">
@@ -1862,8 +1866,9 @@ class DocTab {
     q('.b-cmp-disk').onclick = guard(() => actions.compareDisk(this)); q('.b-cmp').onclick = guard(() => actions.compareWith(this));
     q('.hr').oninput = e => { this.hoff = +e.target.value * this.charW(); this.applyH(); };
     this.scroller.root.addEventListener('keydown', e => this.keydown(e));
-    this.scroller.root.addEventListener('mousedown', e => this.rowClick(e));
+    this.scroller.root.addEventListener('mousedown', e => { this.rowClick(e); this.selDown(e); });
     this.scroller.root.addEventListener('dblclick', () => this.wordSelect());
+    this.scroller.root.addEventListener('copy', e => { if (this.csel && this._cselText != null) { e.preventDefault(); e.clipboardData.setData('text/plain', this._cselText); } });
     this.scroller.root.addEventListener('click', e => { if (e.detail === 1) setTimeout(() => this.plainClick(), 0); });
     this.banner = q('.b-banner');
     this.mode = 'text'; this.tv = new TableView(this); q('.tv-slot').replaceWith(this.tv.root);
@@ -1952,6 +1957,7 @@ class DocTab {
   async copyText() {
     if (this.mode === 'table') return this.tv.copySel ? this.tv.copySel() : this.copyAll();
     if (this.mode === 'edit' && this.ce) { await this.commitEdit(false); const t = this.ce.ta, a = t.selectionStart, b = t.selectionEnd; if (b > a) { const txt = t.value.slice(a, b); try { await navigator.clipboard.writeText(txt); } catch (e) { document.execCommand('copy'); } return toast(`Copied ${fmtNum(txt.length)} characters`, 'ok', 2000); } }
+    if (this.mode === 'text' && this.csel) return this.copySel();
     return this.copyAll();
   }
   async copyAll() {
@@ -2032,10 +2038,12 @@ class DocTab {
     // class-only changes (current line) never rewrite the DOM, so text selection survives clicks
     const cls = 'vs-row line' + (i === this.curLine ? ' cur' : '') + (l ? '' : ' loading');
     if (r._c !== cls) { r.className = cls; r._c = cls; }
-    const sig = i + ':' + this.cache.gen + ':' + (l ? (this.cache.fresh(i) ? 2 : 1) : 0) + ':' + this.word + ':' + t;
+    const isCm = i === this.curMatch, sl = this.selSpan(i, l ? l.t.length : 0);
+    const sig = i + ':' + this.cache.gen + ':' + (l ? (this.cache.fresh(i) ? 2 : 1) : 0) + ':' + this.word + ':' + t + ':' + (isCm ? 1 : 0) + ':' + (sl ? sl.join('-') : '');
     if (r._s === sig) return; r._s = sig;
     if (!l) { r.innerHTML = `<span class="ln" style="width:${w * 8 + 22}px">${i + 1}</span><span class="tx"><span class="in">…</span></span>`; r._h = null; return; }
-    let text = l.t; const marks = baseMarks(text, this.info.kind, this.info.name).concat(wordMarks(text, this.word), findMarks(l.m));
+    let text = l.t; const marks = baseMarks(text, this.info.kind, this.info.name).concat(wordMarks(text, this.word), findMarks(l.m, isCm));
+    if (sl) marks.push({ s: sl[0], e: sl[1], c: 'sl', tag: 'mark' });
     let html = decorate(text, marks);
     if (l.x) html += `<span class="more">  … (+${fmtNum(l.x - 8000)} more bytes not shown — use Format to break long lines)</span>`;
     const out = `<span class="ln" style="width:${w * 8 + 22}px">${i + 1}</span><span class="tx"><span class="in">${html || ' '}</span></span>`;
@@ -2069,6 +2077,83 @@ class DocTab {
     const i = Math.floor(this.scroller.top) + this.scroller.pool.indexOf(row);
     if (i >= 0 && i < this.info.lines) { this.curLine = i; this.scroller.render(); this.updateStatus(); }
   }
+  /* ---- selection that survives scrolling: (line, column) anchor + focus, drawn as marks; turned into a normal text selection when both ends are on screen */
+  selSpan(i, len) {
+    const c = this.csel; if (!c) return null;
+    let a = c.a, f = c.f; if (a.l > f.l || (a.l === f.l && a.c > f.c)) [a, f] = [f, a];
+    if (i < a.l || i > f.l) return null;
+    const s0 = i === a.l ? a.c : 0, e0 = i === f.l ? f.c : Math.max(len, 1);
+    return e0 > s0 ? [s0, e0] : null;
+  }
+  /** (line, column) under the pointer; above/below the rows it clamps to the first/last visible line */
+  selPos(x, y) {
+    const sc = this.scroller, rr = sc.rows.getBoundingClientRect();
+    let r = Math.floor((y - rr.top) / sc.rowH); const top = Math.floor(sc.top);
+    let l = Math.max(0, Math.min(this.info.lines - 1, top + Math.max(0, r)));
+    const row = sc.pool[Math.max(0, Math.min(sc.pool.length - 1, l - top))]; if (!row) return null;
+    if (y < rr.top) return { l, c: 0 };
+    const tx = row.querySelector('.tx'); if (!tx) return { l, c: 0 };
+    const tb = tx.getBoundingClientRect(), cx = Math.min(Math.max(x, tb.left + 1), tb.right - 1), cy = row.getBoundingClientRect().top + sc.rowH / 2;
+    let node = null, off = 0;
+    if (document.caretPositionFromPoint) { const cp = document.caretPositionFromPoint(cx, cy); if (cp) { node = cp.offsetNode; off = cp.offset; } }
+    else if (document.caretRangeFromPoint) { const cr = document.caretRangeFromPoint(cx, cy); if (cr) { node = cr.startContainer; off = cr.startOffset; } }
+    if (!node || !tx.contains(node)) return { l, c: x > tb.left ? (tx.textContent || '').length : 0 };
+    const pre = document.createRange(); pre.selectNodeContents(tx); pre.setEnd(node, off);
+    const n = (this.cache.get(l) || { t: '' }).t.length;
+    return { l, c: Math.min(pre.toString().length, n) };
+  }
+  selDown(e) {
+    if (e.button !== 0 || e.target.closest('.vs-bar') || this.allSel && false) return;
+    const p = this.selPos(e.clientX, e.clientY); if (!p) return;
+    const had = !!this.csel;
+    if (e.shiftKey && this.anchor) { e.preventDefault(); this.csel = { a: this.anchor, f: p }; }
+    else { this.anchor = p; this.csel = null; if (had) this.scroller.render(); }
+    this.scroller.root.focus({ preventScroll: true });
+    const x0 = e.clientX, y0 = e.clientY; let moved = !!(e.shiftKey && this.csel), lx = x0, ly = y0, timer = 0;
+    const upd = () => { const q = this.selPos(lx, ly); if (q) { this.csel = { a: this.anchor, f: q }; this.scroller.render(); } };
+    const tick = () => {
+      const rr = this.scroller.rows.getBoundingClientRect(); let d = 0;
+      if (ly < rr.top) d = -Math.min(40, 0.5 + (rr.top - ly) / 12); else if (ly > rr.bottom) d = Math.min(40, 0.5 + (ly - rr.bottom) / 12);
+      if (d) { this.scroller.scrollBy(d); upd(); }
+    };
+    const mv = ev => {
+      lx = ev.clientX; ly = ev.clientY;
+      if (!moved && Math.hypot(lx - x0, ly - y0) < 4) return;
+      if (!moved) { moved = true; this.scroller.root.classList.add('cs'); getSelection().removeAllRanges(); if (!timer) timer = setInterval(tick, 40); }
+      upd();
+    };
+    const up = () => {
+      removeEventListener('mousemove', mv, true); removeEventListener('mouseup', up, true); clearInterval(timer);
+      this.scroller.root.classList.remove('cs');
+      if (moved || this.csel) this.selDone();
+    };
+    addEventListener('mousemove', mv, true); addEventListener('mouseup', up, true);
+    if (this.csel) { this.scroller.root.classList.add('cs'); this.scroller.render(); if (!timer) timer = setInterval(tick, 40); }
+  }
+  /** after a drag / shift-click: a normal browser selection when it fits on screen, else the marks stay and Copy fetches the lines */
+  selDone() {
+    const c = this.csel; this._cselText = null; if (!c) return;
+    let a = c.a, f = c.f; if (a.l > f.l || (a.l === f.l && a.c > f.c)) [a, f] = [f, a];
+    const sc = this.scroller, top = Math.floor(sc.top), vis = sc.pool.filter(r => r.style.display !== 'none').length;
+    this.curLine = c.f.l; this.updateStatus();
+    if (a.l >= top && f.l < top + vis && f.l - top < sc.pool.length) {
+      this.csel = null; sc.render();
+      const pos = (l, col) => { const tx = sc.pool[l - top].querySelector('.tx'), w = document.createTreeWalker(tx, NodeFilter.SHOW_TEXT); let n, acc = 0, last = null; while ((n = w.nextNode())) { last = n; if (col <= acc + n.nodeValue.length) return [n, col - acc]; acc += n.nodeValue.length; } return last ? [last, last.nodeValue.length] : [tx, 0]; };
+      try { const [n1, o1] = pos(a.l, a.c), [n2, o2] = pos(f.l, f.c), rg = document.createRange(); rg.setStart(n1, o1); rg.setEnd(n2, o2); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rg); } catch (e) { /* ignore */ }
+      return;
+    }
+    const n = f.l - a.l + 1; setStatus(null, `${fmtNum(n)} lines selected · Ctrl+C copies them`);
+    if (n <= 20000) this.selText().then(t => { if (this.csel === c) this._cselText = t; }).catch(() => { });
+  }
+  async selText() {
+    const c = this.csel; if (!c) return '';
+    let a = c.a, f = c.f; if (a.l > f.l || (a.l === f.l && a.c > f.c)) [a, f] = [f, a];
+    const out = [];
+    for (let l = a.l; l <= f.l; l += 500) { const r = await api('lines', { id: this.info.id, from: l, count: Math.min(500, f.l - l + 1), spec: null }); for (const x of r.lines) out.push(x.t); }
+    out[out.length - 1] = out[out.length - 1].slice(0, f.c); out[0] = out[0].slice(a.c);
+    return out.join('\n');
+  }
+  async copySel() { const t = this._cselText != null ? this._cselText : await this.selText(); try { await navigator.clipboard.writeText(t); } catch (e) { /* ignore */ } toast(`Copied ${fmtNum(t.split('\n').length)} lines`, 'ok', 2000); }
   /** a plain click (nothing selected afterwards) removes the word highlight; doing it on mouse-down would redraw every row in the middle of a new drag-selection */
   plainClick() { if (this.word && getSelection().isCollapsed) { this.word = ''; this.scroller.render(); } }
   wordSelect() {
@@ -2110,7 +2195,7 @@ class DocTab {
   async setSpec(spec) {
     this._typed = Date.now();
     this.spec = spec; this.cache.refresh(); this.scroller.render();
-    if (!spec) { this.job = null; this.find.setCount(''); this.paintRuler(); return; }
+    if (!spec) { this.job = null; this.curMatch = -1; this.find.setCount(''); this.paintRuler(); this.scroller.render(); return; }
     await this.startSearch(true);
   }
   async startSearch(jump) {
@@ -2146,7 +2231,7 @@ class DocTab {
     const r = await api('search/step', { job: this.job, from: from != null ? from : (this.curLine >= 0 ? this.curLine : Math.floor(this.scroller.top) - 1), dir });
     if (r.none) { this.find.setCount('No results', true); return; }
     if (r.pending) { toast('Still searching… try again in a moment'); return; }
-    const f0 = Math.floor(this.scroller.top);
+    const f0 = Math.floor(this.scroller.top); this.curMatch = r.line;
     if (stay && r.line >= f0 && r.line < f0 + this.scroller.vis()) { this.curLine = r.line; this.scroller.render(); this.updateStatus(); }   // already visible: do not move the view
     else { this.jump(r.line); if (stay) this.fade(); }
     this.find.setCount(`${fmtNum(r.index + 1)} of ${fmtNum(r.total)}`);
@@ -2243,6 +2328,7 @@ class DocTab {
     if (e.altKey && !c && k === 'z') { this.toggleWrap(); return true; }
     if (e.altKey && !c && k === 't' && !$('.b-tbl', this.panel).hidden) { guard(() => this.setMode(this.mode === 'table' ? 'text' : 'table'))(); return true; }
     if (this.mode === 'text' && !inText0 && c && !e.shiftKey && k === 'a') { this.allSel = true; this.scroller.root.classList.add('allsel'); setStatus(null, `all ${fmtNum(this.info.lines)} lines selected · Ctrl+C copies them`); return true; }
+    if (this.mode === 'text' && !inText0 && c && !e.shiftKey && k === 'c' && this.csel) { guard(() => this.copySel())(); return true; }
     if (this.mode === 'text' && !inText0 && c && !e.shiftKey && k === 'c' && this.allSel) { guard(() => this.copyAll())(); return true; }
     if (c && k === 'f') { this.openFind(false).catch(fail); return true; }
     if (c && k === 'h') { this.openFind(true).catch(fail); return true; }

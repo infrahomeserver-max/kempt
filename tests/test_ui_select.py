@@ -70,4 +70,59 @@ with sync_playwright() as pw:
     ofs = [i for i, c in enumerate(cnts) if " of " in (c or "")]
     check("find: the counter never falls back from '1 of n' to a progress text", not ofs or all(" of " in (c or "") for c in cnts[ofs[0]:]), cnts)
     browser.close(); g.stop()
+
+# ---- viewer: drag past the edge, shift+click, shift+drag, and the current Find match
+os.environ["UI_EDITABLE"] = ""
+with sync_playwright() as pw:
+    browser = pw.chromium.launch(); g = Gui([f]); errs = []
+    ctx = browser.new_context(viewport={"width": 1300, "height": 800}); ctx.grant_permissions(["clipboard-read", "clipboard-write"])
+    pg = ctx.new_page(); pg.set_default_timeout(20000); pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.goto(g.url); pg.wait_for_timeout(2500)
+    clip = lambda: pg.evaluate("navigator.clipboard.readText()")
+    nl = lambda t: t.count("\n") + 1 if t else 0
+    rows = pg.locator(".vs-row .tx"); b5 = rows.nth(5).bounding_box(); b12 = rows.nth(12).bounding_box()
+    pg.mouse.click(b5["x"] + 100, b5["y"] + 8); pg.wait_for_timeout(200)
+    pg.keyboard.down("Shift"); pg.mouse.click(b12["x"] + 300, b12["y"] + 8); pg.keyboard.up("Shift"); pg.wait_for_timeout(300)
+    s = pg.evaluate("getSelection().toString()")
+    check("viewer: shift+click extends the selection", nl(s) == 8 and "abc5 " in s, repr(s[:60]))
+    pg.keyboard.press("Control+c"); pg.wait_for_timeout(300)
+    # drag beyond the bottom edge scrolls and keeps selecting
+    vp = pg.locator(".vsroot").first.bounding_box()
+    pg.mouse.click(b5["x"] + 100, b5["y"] + 8); pg.wait_for_timeout(200)
+    pg.mouse.move(b5["x"] + 100, b5["y"] + 8); pg.mouse.down()
+    pg.mouse.move(b5["x"] + 200, vp["y"] + vp["height"] - 5, steps=10)
+    pg.mouse.move(b5["x"] + 200, vp["y"] + vp["height"] + 40, steps=5); pg.wait_for_timeout(1200)
+    first = int(pg.evaluate("document.querySelector('.vs-row .ln').textContent"))
+    check("viewer: dragging past the bottom edge scrolls the view", first > 20, first)
+    check("viewer: the dragged range is highlighted while scrolling", pg.locator(".vs-row mark.sl").count() > 5, pg.locator(".vs-row mark.sl").count())
+    pg.mouse.up(); pg.wait_for_timeout(500); pg.keyboard.press("Control+c"); pg.wait_for_timeout(600)
+    t = clip()
+    check("viewer: copy gives everything from the start line past the screen", nl(t) > 40 and "abc5 " in t.split("\n")[0] and "request_id=abc5 " in t, (nl(t), t[:50]))
+    # click, scroll away, shift+click
+    pg.keyboard.press("Control+Home"); pg.wait_for_timeout(500); b5 = rows.nth(5).bounding_box(); b12 = rows.nth(12).bounding_box()
+    pg.mouse.click(b5["x"] + 100, b5["y"] + 8); pg.wait_for_timeout(200)
+    pg.mouse.move(600, 400); pg.mouse.wheel(0, 3000); pg.wait_for_timeout(600)
+    r = pg.locator(".vs-row .tx").nth(8).bounding_box()
+    pg.keyboard.down("Shift"); pg.mouse.click(r["x"] + 300, r["y"] + 8); pg.keyboard.up("Shift"); pg.wait_for_timeout(500)
+    pg.keyboard.press("Control+c"); pg.wait_for_timeout(600); t = clip()
+    check("viewer: shift+click after scrolling selects from the old click", nl(t) > 100 and "abc5 " in t.split("\n")[0], (nl(t), t[:50]))
+    # shift+drag extends an existing selection
+    pg.keyboard.press("Control+Home"); pg.wait_for_timeout(500); b5 = rows.nth(5).bounding_box(); b12 = rows.nth(12).bounding_box()
+    pg.mouse.click(b5["x"] + 100, b5["y"] + 8); pg.wait_for_timeout(300)
+    pg.keyboard.down("Shift"); pg.mouse.move(b5["x"] + 100, b5["y"] + 100); pg.mouse.down(); pg.mouse.move(b12["x"] + 200, b12["y"] + 8, steps=8); pg.mouse.up(); pg.keyboard.up("Shift"); pg.wait_for_timeout(300)
+    s = pg.evaluate("getSelection().toString()")
+    check("viewer: shift+drag extends from the first click", "abc5 " in s and nl(s) >= 7, repr(s[:60]))
+    # Find: the current match has its own colour and moves with next/prev
+    pg.keyboard.press("Control+f"); pg.wait_for_timeout(300); pg.keyboard.type("took=12ms"); pg.wait_for_timeout(1200)
+    pg.keyboard.press("Enter"); pg.wait_for_timeout(600)
+    n1 = pg.evaluate("new Set([...document.querySelectorAll('.vs-row mark.cm')].map(m => m.closest('.vs-row').querySelector('.ln').textContent)).size"); l1 = pg.evaluate("document.querySelector('.vs-row mark.cm') && document.querySelector('.vs-row mark.cm').closest('.vs-row').querySelector('.ln').textContent")
+    pg.keyboard.press("Enter"); pg.wait_for_timeout(600)
+    l2 = pg.evaluate("document.querySelector('.vs-row mark.cm') && document.querySelector('.vs-row mark.cm').closest('.vs-row').querySelector('.ln').textContent")
+    check("find: exactly one match is drawn in the current-match colour", n1 == 1, n1)
+    check("find: next moves the current-match colour to the next line", l1 and l2 and int(l2) == int(l1) + 1, (l1, l2))
+    pg.keyboard.press("Shift+Enter"); pg.wait_for_timeout(600)
+    l3 = pg.evaluate("document.querySelector('.vs-row mark.cm') && document.querySelector('.vs-row mark.cm').closest('.vs-row').querySelector('.ln').textContent")
+    check("find: previous moves it back", l3 == l1, (l1, l3))
+    check("viewer: no page errors", not errs, errs[:2])
+    browser.close(); g.stop()
 print(f"\n{PASS} passed, {FAIL} failed"); sys.exit(1 if FAIL else 0)

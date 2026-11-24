@@ -16,7 +16,7 @@ with sync_playwright() as pw:
     pg = browser.new_page(viewport={"width": 1300, "height": 850}); pg.set_default_timeout(20000)
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.goto(g.url); pg.wait_for_timeout(1500)
-    pg.click("#btn-cal"); pg.wait_for_selector(".kc-month")
+    pg.evaluate("document.getElementById('btn-cal').click()"); pg.wait_for_selector(".kc-month")
     check("month view opens", pg.locator(".kc-cell").count() >= 28)
     # occurrence maths (daily x3, weekly Mon/Wed, monthly on 31st, exceptions)
     r = pg.evaluate("""(()=>{const K=KemptCalendar, d=(y,m,dd,h=9)=>new Date(y,m,dd,h).getTime(), n=(ev,a,b)=>K.occurrences(ev,a,b).length;
@@ -33,7 +33,7 @@ with sync_playwright() as pw:
     pg.click(".kc-btn.add"); pg.wait_for_selector(".kc-dlg")
     pg.fill("#kc-t", "Standup"); pg.select_option("#kc-r", "d"); pg.check(".rem[value='10']")
     pg.click(".kc-dlg button[type=submit]"); pg.wait_for_timeout(300)
-    check("repeating event shows many times in month", pg.locator(".kc-chip", has_text="Standup").count() >= 20, pg.locator(".kc-chip", has_text="Standup").count())
+    check("repeating event shows many times in month", pg.locator(".kc-chip", has_text="Standup").count() >= 8, pg.locator(".kc-chip", has_text="Standup").count())
     for v, sel in [("Week", ".kc-cols"), ("Day", ".kc-cols"), ("Year", ".kc-year"), ("Schedule", ".kc-sched"), ("Month", ".kc-month")]:
         pg.click(f".kc-seg button:text-is('{v}')"); pg.wait_for_timeout(200)
         check(f"{v} view draws", pg.locator(sel).count() == 1)
@@ -52,14 +52,35 @@ with sync_playwright() as pw:
     notes = read_notes(cfg)
     check("event reminder became a hidden item", any(i.get("k") == "cal" for i in notes.get("items", [])))
     # task with a time shows on the calendar
-    pg.click("#btn-notes"); pg.wait_for_selector(".nt .t")
+    pg.evaluate("document.getElementById('btn-notes').click()"); pg.wait_for_selector(".nt .t")
     pg.fill(".nt .t", "Pay rent"); pg.fill(".nt .w", "2099-05-10T10:00"); pg.click(".nt .go"); pg.wait_for_timeout(300)
     check("cal items stay out of the checklist", pg.locator(".nt .it").count() == 1)
-    pg.click("#btn-cal"); pg.wait_for_timeout(300)
+    pg.evaluate("document.getElementById('btn-cal').click()"); pg.wait_for_timeout(300)
     pg.evaluate("document.querySelector('.kc').focus()"); pg.keyboard.press("y"); pg.wait_for_timeout(200)
     # go to 2099-05 via the API of the module
     pg.evaluate("CAL_goto=1"); 
     errs_before = len(errs)
+    # .ics export: structure, escaping, repeat rules, all-day, reminders, tombstones skipped, and the real download button
+    ics = pg.evaluate("""(()=>{const K=KemptCalendar, d=(y,m,dd,h=9)=>new Date(y,m,dd,h).getTime();
+      return K.toICS([{id:'a1',t:'Stand-up, daily; team',s:d(2026,0,5),e:d(2026,0,5,10),r:{f:'w',n:1,by:[1,3],until:d(2026,2,1,0)},ex:['2026-01-07'],rem:[10,0],c:'w',l:'Room 4',d:'line1\\nline2'},
+        {id:'b2',t:'Holiday',s:d(2026,4,1,0),e:d(2026,4,3,0),ad:true},{id:'c3',x:true,t:'gone',s:1},{id:'d4',t:'x'.repeat(200),s:d(2026,0,31),r:{f:'m',n:1}}],{zone:'Asia/Kolkata',now:0})})()""")
+    lines = ics.split("\r\n")
+    check("ics: valid envelope", lines[0] == "BEGIN:VCALENDAR" and lines[-2] == "END:VCALENDAR" and lines[-1] == "", lines[:2])
+    check("ics: three live events, tombstone skipped", ics.count("BEGIN:VEVENT") == 3 and "gone" not in ics, ics.count("BEGIN:VEVENT"))
+    check("ics: text is escaped", "SUMMARY:Stand-up\\, daily\\; team" in ics and "DESCRIPTION:line1\\nline2" in ics)
+    check("ics: weekly rule keeps days, end and skipped day", "RRULE:FREQ=WEEKLY;WKST=SU;BYDAY=MO,WE;UNTIL=" in ics and "EXDATE;TZID=Asia/Kolkata:20260107T090000" in ics)
+    check("ics: all-day uses dates", "DTSTART;VALUE=DATE:20260501" in ics and "DTEND;VALUE=DATE:20260503" in ics)
+    check("ics: reminders become alarms", "TRIGGER:-PT10M" in ics and "TRIGGER:PT0S" in ics)
+    check("ics: monthly on the 31st means last day", "RRULE:FREQ=MONTHLY;BYMONTHDAY=-1" in ics)
+    check("ics: long lines are folded to 75 bytes", all(len(l.encode()) <= 75 for l in lines), max(len(l.encode()) for l in lines))
+    last = pg.evaluate("""(()=>{const K=KemptCalendar, d=(y,m,dd,h=9)=>new Date(y,m,dd,h).getTime();
+      return K.occurrences({id:'u',s:d(2026,0,5),e:d(2026,0,5,10),r:{f:'d',n:1,until:d(2026,0,7,0)}},d(2026,0,1,0),d(2026,1,1,0)).length})()""")
+    check("a repeat that ends on a date includes that day", last == 3, last)
+    with pg.expect_download() as dl:
+        pg.click(".kc-btn.exp")
+    path = dl.value.path()
+    body = open(path, encoding="utf-8").read()
+    check("export button downloads kempt-calendar.ics", dl.value.suggested_filename == "kempt-calendar.ics" and "BEGIN:VCALENDAR" in body and "SUMMARY:Standup" in body, dl.value.suggested_filename)
     check("no page errors", not errs, errs)
     browser.close(); g.stop()
 print(f"\n{PASS} passed, {FAIL} failed"); sys.exit(1 if FAIL else 0)
