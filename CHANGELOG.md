@@ -6,6 +6,7 @@ versioning: [SemVer](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `install-deb.sh` release asset: one-line clean install of the newest `.deb` (amd64 / arm64), verified against `SHA256SUMS`, with `--purge` to start from a first-run state. The release job now checks the checksums and unpacks every `.deb` before publishing.
 - More settings: accent colour, code font, 12/24-hour clock, working hours for meetings, checklist sort and ticked items, wrapped-line pane, hidden files in Open, and **Reset preferences**. About shows the version; Help → Formats shows which formatters are installed.
 - One **Tools** menu in the top bar (Clock, Calendar, Checklist); the second Compare button is gone (use the toolbar's Compare with…).
 - Pictures (PNG, JPG, GIF, WebP, BMP, SVG, ICO, AVIF) and **PDF** open in a viewer tab; Word (.docx), OpenDocument (.odt, .odp, .ods) and PowerPoint (.pptx) open as read-only text.
@@ -17,6 +18,8 @@ versioning: [SemVer](https://semver.org/).
 - Help has a Formats tab listing every language Kempt can format.
 - Notes and the checklist are stored encrypted (AES-256-GCM); the key is a separate owner-only file. `kempt notes-export` prints them as JSON.
 - Notes need some text to be kept. The checklist no longer has its own calendar: it lists what is coming up, and Calendar opens from its button.
+- Calendar: **drag an event** to another day (month view) or another day and time in 15-minute steps (week and day views); all-day events move by whole days. Dragging one occurrence of a repeating event moves only that one; Esc cancels a drag.
+- Calendar: **Export** in the toolbar downloads every event as one `.ics` file (titles, places, notes, all-day, repeat rules, skipped days and reminders) that Google Calendar, Apple Calendar and Outlook import.
 - Calendar: choose the first day of the week (Settings), meetings in their own colour, and a **Find a time** tab inside every event that marks free times for all your zones. The meeting finder is gone from the clock.
 - Company holidays: add row above the list; choose the date format in Settings.
 - Find: a pasted phrase is searched as one phrase; **Ctrl+E** adds the selected word to Find.
@@ -35,6 +38,11 @@ versioning: [SemVer](https://semver.org/).
 - Open dialog: folders are amber and bold, files plain. No stray scrollbar in the tab bar.
 - Meeting finder: neighbouring free times are joined into one block; the rare options are folded away.
 - Help lists the terminal commands.
+
+### Fixed
+- Log viewer: dragging a selection past the top or bottom edge now scrolls and keeps selecting; Shift+click and Shift+drag extend the selection even after scrolling away from the starting point; Ctrl+C / Copy copies the whole range.
+- Find: Next / Previous now paint the current match in a distinct orange so you can tell which hit is selected.
+- A repeating calendar event that ends **on a date** now includes that last day (timed events used to stop one day early).
 
 ## [0.1.0] - 2026-11-09
 
