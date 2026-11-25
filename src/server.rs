@@ -467,6 +467,33 @@ impl App {
 
 // ───────────────────────────── API ─────────────────────────────
 
+/// Pretty-print pasted JSON or XML (JSON that is not strictly valid is repaired first). Anything else comes back unchanged.
+/// Returns the text, its kind ("json", "xml" or "text") and the repairs made.
+fn beautify_text(text: &[u8], indent: usize) -> std::result::Result<(Vec<u8>, &'static str, Value), ApiError> {
+    use std::io::BufReader;
+    let head = text.iter().copied().find(|b| !b.is_ascii_whitespace());
+    let mut out: Vec<u8> = Vec::new();
+    match head {
+        Some(b'{') | Some(b'[') => {
+            if crate::jsonfmt::format(text, &mut out, Some(indent)).is_ok() {
+                return Ok((out, "json", json!({})));
+            }
+            out.clear();
+            let rep = crate::jsonfix::fix_deep(text, &mut out, Some(indent)).map_err(|e| ApiError { status: 400, msg: format!("not valid JSON: {e}") })?;
+            Ok((out, "json", report_json(&rep)))
+        }
+        Some(b'<') => {
+            if crate::xmlfmt::format(BufReader::new(text), &mut out, Some(indent)).is_ok() {
+                return Ok((out, "xml", json!({})));
+            }
+            out.clear();
+            let rep = crate::xmlfmt::format_opts(BufReader::new(text), &mut out, Some(indent), true).map_err(|e| ApiError { status: 400, msg: format!("not valid XML: {e}") })?;
+            Ok((out, "xml", report_json(&rep)))
+        }
+        _ => Ok((text.to_vec(), "text", json!({}))),
+    }
+}
+
 fn report_json(r: &crate::jsonfix::Report) -> Value {
     Value::Object(r.iter().map(|(k, v)| (k.to_string(), json!(v))).collect())
 }
@@ -883,6 +910,43 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
                 }
             }
             Ok(json!({"ok": true}))
+        }
+
+        // ---- paste & compare: text typed or pasted in the page, never written to a file
+        "text/format" => {
+            let t = gs(p, "text").unwrap_or("");
+            let (out, kind, fixed) = beautify_text(t.as_bytes(), indent_of(p))?;
+            Ok(json!({"text": String::from_utf8_lossy(&out), "kind": kind, "fixed": fixed}))
+        }
+        "diff/text" => {
+            let beautify = gb(p, "beautify").unwrap_or(false);
+            let indent = indent_of(p);
+            let mut notes: Vec<String> = Vec::new();
+            let mut sides: Vec<Arc<Doc>> = Vec::new();
+            for (k, label) in [("left", "left"), ("right", "right")] {
+                let raw = gs(p, k).unwrap_or("").as_bytes().to_vec();
+                let (data, kind) = if beautify {
+                    match beautify_text(&raw, indent) {
+                        Ok((o, kind, _)) => (o, kind),
+                        Err(e) => {
+                            notes.push(format!("{label}: {}", e.msg));
+                            let head = raw.iter().copied().find(|b| !b.is_ascii_whitespace());
+                            (raw, if matches!(head, Some(b'{') | Some(b'[')) { "json" } else if head == Some(b'<') { "xml" } else { "text" })
+                        }
+                    }
+                } else {
+                    let head = raw.iter().copied().find(|b| !b.is_ascii_whitespace());
+                    (raw, if matches!(head, Some(b'{') | Some(b'[')) { "json" } else if head == Some(b'<') { "xml" } else { "text" })
+                };
+                let ext = match kind { "json" => "json", "xml" => "xml", _ => "txt" };
+                let doc = Arc::new(Doc::untitled(app.id(), &format!("{label}.{ext}"), &data)?);
+                app.docs.lock().unwrap().insert(doc.id, doc.clone());
+                sides.push(doc);
+            }
+            let r = sides.pop().unwrap();
+            let l = sides.pop().unwrap();
+            let (sid, state) = app.new_diff(l, r);
+            Ok(json!({"sid": sid, "state": state, "notes": notes}))
         }
 
         // ---- compare

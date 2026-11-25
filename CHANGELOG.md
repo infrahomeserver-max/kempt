@@ -5,10 +5,15 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-25
+
+### Added
+- `install.sh` release asset: one-line install or clean reinstall of the newest `.deb` (amd64 / arm64) with a live download progress bar (percent, size, speed, ETA), verified against `SHA256SUMS`, `--purge` to start from a first-run state, `--version vX.Y.Z` to pin. The release job now checks the checksums and unpacks every `.deb` before publishing.
+- **Paste & compare** (Tools menu, Alt+P): paste text into two panels, **Beautify** JSON or XML on either side (broken JSON is repaired), and **Compare** them in the usual diff tab, with no file saved anywhere. Ctrl+Enter compares; Swap, Copy, Clear and Paste buttons on each side.
+
 ## [0.2.0] - 2026-11-24
 
 ### Added
-- `install-deb.sh` release asset: one-line clean install of the newest `.deb` (amd64 / arm64), verified against `SHA256SUMS`, with `--purge` to start from a first-run state. The release job now checks the checksums and unpacks every `.deb` before publishing.
 - More settings: accent colour, code font, 12/24-hour clock, working hours for meetings, checklist sort and ticked items, wrapped-line pane, hidden files in Open, and **Reset preferences**. About shows the version; Help → Formats shows which formatters are installed.
 - One **Tools** menu in the top bar (Clock, Calendar, Checklist); the second Compare button is gone (use the toolbar's Compare with…).
 - Pictures (PNG, JPG, GIF, WebP, BMP, SVG, ICO, AVIF) and **PDF** open in a viewer tab; Word (.docx), OpenDocument (.odt, .odp, .ods) and PowerPoint (.pptx) open as read-only text.

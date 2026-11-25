@@ -15,7 +15,7 @@ make ordinary editors struggle: 250 MB logs, gigabyte-sized JSON, one-line minif
 - **Dark, light and colour-blind-safe themes**, all inside a Settings dialog.
 - **Private.** Everything runs on your computer. Nothing is uploaded. Kempt never goes online unless you switch on *Settings → General → Check for updates* (off by default), which makes one request a day to GitHub's release page.
 
-> **Version 0.2.0** · MIT licence · Linux, macOS, Windows · no account, no cloud, no telemetry
+> **Version 0.2.1** · MIT licence · Linux, macOS, Windows · no account, no cloud, no telemetry
 
 ## Contents
 
@@ -42,14 +42,14 @@ Get the files from the project's **Releases** page on GitHub (the right-hand sid
 
 | You use | Download this file |
 |---|---|
-| Ubuntu, Debian, Mint, Pop!_OS on a normal PC | `kempt_0.2.0-1_amd64.deb` |
-| Ubuntu / Debian on ARM (Raspberry Pi 4/5 64-bit, ARM servers) | `kempt_0.2.0-1_arm64.deb` |
-| Fedora, RHEL, openSUSE, Arch, other Linux (PC) | `kempt-0.2.0-linux-x86_64.tar.gz` |
-| Other Linux on ARM | `kempt-0.2.0-linux-aarch64.tar.gz` |
-| Mac with Apple chip (M1, M2, M3, M4) | `kempt-0.2.0-macos-arm64.tar.gz` |
-| Mac with Intel chip | `kempt-0.2.0-macos-x86_64.tar.gz` |
-| Windows 10 / 11 | `kempt-0.2.0-windows-x86_64.zip` |
-| Build it yourself | `kempt-0.2.0-src.tar.gz` |
+| Ubuntu, Debian, Mint, Pop!_OS on a normal PC | `kempt_0.2.1-1_amd64.deb` |
+| Ubuntu / Debian on ARM (Raspberry Pi 4/5 64-bit, ARM servers) | `kempt_0.2.1-1_arm64.deb` |
+| Fedora, RHEL, openSUSE, Arch, other Linux (PC) | `kempt-0.2.1-linux-x86_64.tar.gz` |
+| Other Linux on ARM | `kempt-0.2.1-linux-aarch64.tar.gz` |
+| Mac with Apple chip (M1, M2, M3, M4) | `kempt-0.2.1-macos-arm64.tar.gz` |
+| Mac with Intel chip | `kempt-0.2.1-macos-x86_64.tar.gz` |
+| Windows 10 / 11 | `kempt-0.2.1-windows-x86_64.zip` |
+| Build it yourself | `kempt-0.2.1-src.tar.gz` |
 
 Not sure about your CPU? Linux/macOS: run `uname -m` (`x86_64` = PC/Intel, `aarch64` or `arm64` = ARM). Windows: Settings → System → About.
 
@@ -59,11 +59,11 @@ Not sure about your CPU? Linux/macOS: run `uname -m` (`x86_64` = PC/Intel, `aarc
 # Linux
 sha256sum --ignore-missing -c SHA256SUMS
 # macOS
-shasum -a 256 -c SHA256SUMS 2>/dev/null | grep kempt-0.2.0
+shasum -a 256 -c SHA256SUMS 2>/dev/null | grep kempt-0.2.1
 ```
 ```powershell
 # Windows PowerShell: compare this value with the line for your file in SHA256SUMS
-Get-FileHash .\kempt-0.2.0-windows-x86_64.zip -Algorithm SHA256
+Get-FileHash .\kempt-0.2.1-windows-x86_64.zip -Algorithm SHA256
 ```
 You want `OK` (Linux/macOS) or identical text (Windows). If it differs, download again and do not install it.
 
@@ -77,25 +77,26 @@ Needs Ubuntu 22.04 or newer, Debian 12 or newer (any release with glibc 2.34+).
 
 ```bash
 cd ~/Downloads
-sudo apt install ./kempt_0.2.0-1_amd64.deb      # arm64 machines: ./kempt_0.2.0-1_arm64.deb
-kempt --version                                 # should print: kempt 0.2.0
+sudo apt install ./kempt_0.2.1-1_amd64.deb      # arm64 machines: ./kempt_0.2.1-1_arm64.deb
+kempt --version                                 # should print: kempt 0.2.1
 kempt gui                                       # starts Kempt in your browser
 ```
 - Keep the `./` in front of the file name; without it `apt` looks for a package in the online lists instead of your file.
 - It installs `/usr/bin/kempt`, an application-menu entry ("Kempt"), an icon and the documentation. You can also double-click the `.deb` in the file manager and press *Install*.
 - Remove it: `sudo apt remove kempt`.
-- One-line install or clean reinstall of the newest release (checks the download against `SHA256SUMS` first; `--purge` also deletes your Kempt settings and notes, `--version v0.2.0` picks a release):
+- One-line install or clean reinstall of the newest release, with a live download progress bar. It checks the download against `SHA256SUMS` and test-unpacks the package before touching the installed copy. `--purge` also deletes your Kempt settings and notes, `--version v0.2.1` picks a release:
   ```bash
-  curl -fsSL https://github.com/infrahomeserver-max/kempt/releases/latest/download/install-deb.sh | bash -s -- --purge
+  curl -fsSL https://github.com/infrahomeserver-max/kempt/releases/latest/download/install.sh | bash
+  curl -fsSL https://github.com/infrahomeserver-max/kempt/releases/latest/download/install.sh | bash -s -- --purge     # clean reinstall
   ```
-  To read the script before running it: `curl -fsSLO https://github.com/infrahomeserver-max/kempt/releases/latest/download/install-deb.sh`, then `bash install-deb.sh`.
+  To read the script before running it: `curl -fsSLO https://github.com/infrahomeserver-max/kempt/releases/latest/download/install.sh`, then `bash install.sh`.
 
 ### 2.2 Other Linux (Fedora, RHEL, openSUSE, Arch)
 
 ```bash
 cd ~/Downloads
-tar xzf kempt-0.2.0-linux-x86_64.tar.gz         # or ...-linux-aarch64.tar.gz
-cd kempt-0.2.0-linux-x86_64
+tar xzf kempt-0.2.1-linux-x86_64.tar.gz         # or ...-linux-aarch64.tar.gz
+cd kempt-0.2.1-linux-x86_64
 ./install.sh --dry-run                          # optional: show what it found and what it would do
 ./install.sh                                    # installs for you only, into ~/.local (no sudo)
 ```
@@ -111,8 +112,8 @@ Needs macOS 11 (Big Sur) or newer.
 
 ```bash
 cd ~/Downloads
-tar xzf kempt-0.2.0-macos-arm64.tar.gz          # Intel Mac: kempt-0.2.0-macos-x86_64.tar.gz
-cd kempt-0.2.0-macos-arm64
+tar xzf kempt-0.2.1-macos-arm64.tar.gz          # Intel Mac: kempt-0.2.1-macos-x86_64.tar.gz
+cd kempt-0.2.1-macos-arm64
 ./install.sh
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 kempt --version
@@ -134,7 +135,7 @@ Windows SmartScreen may warn "Windows protected your PC" because the program is 
 Needs Rust 1.85+ and a C compiler (`build-essential` on Ubuntu, Xcode command-line tools on macOS).
 
 ```bash
-git clone https://github.com/infrahomeserver-max/kempt.git && cd kempt      # or unpack kempt-0.2.0-src.tar.gz
+git clone https://github.com/infrahomeserver-max/kempt.git && cd kempt      # or unpack kempt-0.2.1-src.tar.gz
 cargo build --release                                          # produces target/release/kempt
 ./target/release/kempt --version
 ./install.sh                                                   # optional: install it (Linux / macOS)
@@ -202,7 +203,7 @@ Your personal data (settings, notes, reminders) is a few small files in the conf
 
 | OS | Versions | CPU | Package | Install |
 |---|---|---|---|---|
-| **Ubuntu** | 22.04 LTS, 24.04 LTS and newer | x86_64, arm64 | `.deb`, tarball | `sudo apt install ./kempt_0.2.0-1_amd64.deb` |
+| **Ubuntu** | 22.04 LTS, 24.04 LTS and newer | x86_64, arm64 | `.deb`, tarball | `sudo apt install ./kempt_0.2.1-1_amd64.deb` |
 | **Debian / Linux Mint / Pop!_OS** | Debian 12+, Mint 21+ | x86_64, arm64 | `.deb`, tarball | same as Ubuntu |
 | **Fedora / RHEL / Rocky / Alma / openSUSE / Arch** | Fedora 36+, RHEL-family 9+, current openSUSE and Arch | x86_64, arm64 | tarball | `./install.sh` |
 | **macOS** | 11 Big Sur and newer | Apple Silicon, Intel | tarball | `./install.sh` (creates `Kempt.app`) |
@@ -455,9 +456,13 @@ Alt and Ctrl+Shift alternatives above. Kempt runs in your browser, so these are 
 
 ---
 
+## Paste & compare (no file needed)
+
+**Tools → Paste & compare** (or **Alt+P**) opens two empty panels. Paste anything into either one: **Beautify** indents JSON or XML (JSON with single quotes, comments, trailing commas or other damage is repaired first), and **Compare** shows the two sides in the normal diff tab with changed lines marked and the copy-across buttons. Nothing is written to a file; close the tab and the text is gone. **Ctrl+Enter** compares, **Beautify before comparing** (on by default) removes formatting-only differences, and each side has Paste, Copy and Clear.
+
 ## World clock
 
-The **Tools** menu in the top bar (Clock, Calendar, Checklist; or **Alt+K**) opens a **World clock** tab: this computer's zone and UTC by default. Type a city, a zone id, an abbreviation or an offset to add one (`pst`, `cst`, `cst6cdt`, `central`, `-6`, `kolkata`); each suggestion shows the city, abbreviation, offset and whether it observes daylight saving, for example *Chicago · CST · UTC-6*. The same search is used in the daylight-saving, clock-change-alert and meeting-finder boxes. Drag the ⋮⋮ handle to reorder, × to remove. Each zone has a 24-hour strip (three tones only: night, day, working hours 9–17, tinted by season: spring greens, summer golds, autumn rust and plum, winter blues; the season is set in Settings → Appearance and defaults to *Auto*, which follows the shown date using northern-hemisphere seasons, and has light and dark versions); click or drag on any strip, or use the arrow keys, and one marker moves across every zone. A date-and-time box (type it or use the calendar) jumps every zone to that moment; the **in …** menu beside it says which zone you are typing in (the chosen zone's row gets a blue edge, and changing the menu re-reads the same moment in the new zone), **Now** returns to live time, and 12 h / 24 h is a toggle. Zones are remembered. It uses the browser's built-in time-zone data and your computer's clock, so it works offline and adds no code to the server; its one-minute timer only runs while the tab is visible.
+The **Tools** menu in the top bar (Clock, Calendar, Paste & compare, Checklist; or **Alt+K**) opens a **World clock** tab: this computer's zone and UTC by default. Type a city, a zone id, an abbreviation or an offset to add one (`pst`, `cst`, `cst6cdt`, `central`, `-6`, `kolkata`); each suggestion shows the city, abbreviation, offset and whether it observes daylight saving, for example *Chicago · CST · UTC-6*. The same search is used in the daylight-saving, clock-change-alert and meeting-finder boxes. Drag the ⋮⋮ handle to reorder, × to remove. Each zone has a 24-hour strip (three tones only: night, day, working hours 9–17, tinted by season: spring greens, summer golds, autumn rust and plum, winter blues; the season is set in Settings → Appearance and defaults to *Auto*, which follows the shown date using northern-hemisphere seasons, and has light and dark versions); click or drag on any strip, or use the arrow keys, and one marker moves across every zone. A date-and-time box (type it or use the calendar) jumps every zone to that moment; the **in …** menu beside it says which zone you are typing in (the chosen zone's row gets a blue edge, and changing the menu re-reads the same moment in the new zone), **Now** returns to live time, and 12 h / 24 h is a toggle. Zones are remembered. It uses the browser's built-in time-zone data and your computer's clock, so it works offline and adds no code to the server; its one-minute timer only runs while the tab is visible.
 
 **Holidays.** Under the clock, pick a country (India, United States, United Kingdom, Germany, France, Australia) to see its next ten public holidays; a ★ with the holiday's name appears on any zone row whose date falls on one. The built-in rules cover fixed dates, weekday rules (e.g. US Thanksgiving) and Easter-based days, including observed/substitute days for the US, UK and Australia. Holidays that follow the moon (Diwali, Eid, Holi, Chinese New Year…) change every year and cannot be worked out offline, so add them under "Your own dates" (tick *every year* to repeat). State, regional and company holidays are not included; check official calendars.
 

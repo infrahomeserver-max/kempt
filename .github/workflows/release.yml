@@ -63,7 +63,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { path: dist, merge-multiple: true }   # each build job uploads differently named files, so nothing overwrites anything
       - name: Installer script
-        run: bash -n packaging/install-deb.sh && cp packaging/install-deb.sh dist/install-deb.sh
+        run: bash -n packaging/install.sh && cp packaging/install.sh dist/install.sh
       - name: Checksums (files only)
         run: cd dist && ls -l && sha256sum *.tar.gz *.zip *.deb > SHA256SUMS && cat SHA256SUMS
       - name: Verify packages before publishing
@@ -77,7 +77,7 @@ jobs:
             dist/*.tar.gz
             dist/*.zip
             dist/*.deb
-            dist/install-deb.sh
+            dist/install.sh
             dist/SHA256SUMS
 
   # Optional: publishes the signed apt repository (GitHub Pages branch gh-pages, folder apt/) and updates the Homebrew tap.

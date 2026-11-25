@@ -128,6 +128,17 @@ mark.hl0 { background:var(--t0); } mark.hl1 { background:var(--t1); } mark.hl2 {
 mark.hl3 { background:var(--t3); } mark.hl4 { background:var(--t4); } mark.hl5 { background:var(--t5); }
 .line.cur mark { outline:1px solid var(--fg-dim); }
 mark.wh { background:var(--wh); }
+.pc { display:flex; flex-direction:column; flex:1; min-height:0; padding:10px 12px; gap:8px; }
+.pc .bar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.pc .bar .sp { flex:1; }
+.pc .bar select { height:28px; }
+.pc .cols { display:grid; grid-template-columns:1fr 1fr; gap:10px; flex:1; min-height:0; }
+.pc .pane { display:flex; flex-direction:column; min-width:0; min-height:0; border:1px solid var(--border); border-radius:6px; background:var(--bg); }
+.pc .ph { display:flex; align-items:center; gap:6px; padding:5px 8px; background:var(--bg2); border-bottom:1px solid var(--border); border-radius:6px 6px 0 0; font-weight:600; }
+.pc .ph .st { flex:1; font-weight:400; color:var(--fg-dim); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pc textarea { flex:1; min-height:0; width:100%; border:0; outline:0; background:transparent; color:var(--fg); padding:8px 10px; font:13px/1.5 var(--mono); resize:none; white-space:pre; overflow:auto; tab-size:2; }
+.pc .hint { color:var(--fg-dim); font-size:12px; margin:0; }
+@media (max-width:760px) { .pc .cols { grid-template-columns:1fr; grid-template-rows:1fr 1fr; } }
 mark.sl { background:var(--sel); color:inherit; }
 .vs.cs, .vs.cs * { user-select:none; -webkit-user-select:none; }
 mark.cm { background:#ff9f1c; color:#111; outline:2px solid #ff9f1c; border-radius:2px; box-shadow:0 0 0 1px #111 inset; }
@@ -738,6 +749,7 @@ input[type=checkbox], input[type=radio], input[type=range] { accent-color:var(--
       <div class="tools"><button id="btn-tools" class="icon" title="World clock, calendar, checklist" aria-label="Tools" aria-haspopup="menu" aria-expanded="false"><i data-ic="apps"></i><span class="lbl">Tools</span><em class="nb" hidden></em></button><div class="tmenu" role="menu" hidden>
       <button id="btn-clock" role="menuitem" title="World clock: time in several zones (Alt+K)" aria-label="World clock"><i data-ic="clock"></i><span class="tl">World clock</span><kbd class="tk" data-k="clock"></kbd></button>
       <button id="btn-cal" role="menuitem" title="Calendar (Alt+L)" aria-label="Calendar"><i data-ic="cal"></i><span class="tl">Calendar</span><kbd class="tk" data-k="cal"></kbd></button>
+      <button id="btn-paste" role="menuitem" title="Paste text to beautify JSON/XML and compare, no file needed (Alt+P)" aria-label="Paste and compare"><i data-ic="columns"></i><span class="tl">Paste &amp; compare</span><kbd class="tk" data-k="paste"></kbd></button>
       <button id="btn-notes" role="menuitem" title="Checklist &amp; notes with reminders (Alt+J)" aria-label="Checklist and notes"><i data-ic="notes"></i><span class="tl">Checklist &amp; notes</span><kbd class="tk" data-k="notes"></kbd><em class="nb" hidden></em></button>
       </div></div>
       <span class="vsep"></span>
@@ -874,7 +886,7 @@ const KEYS = {
     ['find', 'Find', 'Find', 'Ctrl+F'], ['replace', 'Find', 'Replace', 'Ctrl+H'], ['addsel', 'Find', 'Add selected word to Find', 'Ctrl+E'], ['next', 'Find', 'Next match', 'F3'], ['goto', 'Find', 'Go to line', 'Ctrl+G'],
     ['open', 'File', 'Open', 'Ctrl+O'], ['new', 'File', 'New file', 'Alt+N'], ['save', 'File', 'Save', 'Ctrl+S'], ['saveas', 'File', 'Save as', 'Ctrl+Shift+S'], ['format', 'File', 'Format', 'Ctrl+Shift+F'],
     ['view', 'View', 'Rendered view', 'Alt+V'], ['table', 'View', 'Table view', 'Alt+T'],
-    ['notes', 'Panels', 'Checklist', 'Alt+J'], ['cal', 'Panels', 'Calendar', 'Alt+L'], ['clock', 'Panels', 'World clock', 'Alt+K'], ['help', 'Panels', 'Help', 'F1'],
+    ['notes', 'Panels', 'Checklist', 'Alt+J'], ['cal', 'Panels', 'Calendar', 'Alt+L'], ['clock', 'Panels', 'World clock', 'Alt+K'], ['paste', 'Panels', 'Paste & compare', 'Alt+P'], ['help', 'Panels', 'Help', 'F1'],
     ['wrap', 'View', 'Wrap current line', 'Alt+Z'], ['tabn', 'Tabs', 'Next tab', 'Ctrl+PageDown'], ['tabp', 'Tabs', 'Previous tab', 'Ctrl+PageUp'], ['tabx', 'Tabs', 'Close tab', 'Alt+W'],
   ],
   def: id => (KEYS.ACT.find(a => a[0] === id) || [])[3],
@@ -1482,14 +1494,14 @@ const Tabs = {
   renderBar() {
     const bar = $('#tabs'); bar.innerHTML = '';
     for (const t of this.list) {
-      const d = el('div', 'tab' + (t === this.active ? ' active' : '') + (['notes', 'cal', 'clock'].includes(t.kind) ? ' tool' : '')); d.title = t.tooltip ? t.tooltip() : t.title();
+      const d = el('div', 'tab' + (t === this.active ? ' active' : '') + (['notes', 'cal', 'clock', 'paste'].includes(t.kind) ? ' tool' : '')); d.title = t.tooltip ? t.tooltip() : t.title();
       d.innerHTML = `<span class="ico">${t.icon}</span><span class="tt">${esc(t.title())}</span>${t.dirty && t.dirty() ? '<span class="dot" title="Unsaved changes">●</span>' : ''}<button class="x" title="Close tab" aria-label="Close tab">${ic('x', 12)}</button>`;
       d.onclick = e => { if (e.target.closest('.x')) this.close(t); else this.activate(t); };
       d.onauxclick = e => { if (e.button === 1) this.close(t); };
       bar.appendChild(d);
     }
-    for (const [id, kind] of [['#btn-clock', 'clock'], ['#btn-cal', 'cal'], ['#btn-notes', 'notes']]) { const b = $(id), t = this.list.find(x => x.kind === kind); if (b) { b.classList.toggle('on', !!t && t === this.active); b.classList.toggle('open', !!t && t !== this.active); b.setAttribute('aria-pressed', String(!!t && t === this.active)); } }
-    const tb = $('#btn-tools'); if (tb) { tb.classList.toggle('on', !!this.active && ['clock', 'cal', 'notes'].includes(this.active.kind)); tb.classList.toggle('open', this.list.some(x => ['clock', 'cal', 'notes'].includes(x.kind)) && !tb.classList.contains('on')); }
+    for (const [id, kind] of [['#btn-clock', 'clock'], ['#btn-cal', 'cal'], ['#btn-paste', 'paste'], ['#btn-notes', 'notes']]) { const b = $(id), t = this.list.find(x => x.kind === kind); if (b) { b.classList.toggle('on', !!t && t === this.active); b.classList.toggle('open', !!t && t !== this.active); b.setAttribute('aria-pressed', String(!!t && t === this.active)); } }
+    const tb = $('#btn-tools'); if (tb) { tb.classList.toggle('on', !!this.active && ['clock', 'cal', 'notes', 'paste'].includes(this.active.kind)); tb.classList.toggle('open', this.list.some(x => ['clock', 'cal', 'notes'].includes(x.kind)) && !tb.classList.contains('on')); }
   },
   updateWelcome() {
     let w = $('#welcome');
@@ -3142,6 +3154,7 @@ const actions = {
   notes() { const t = Tabs.list.find(x => x.kind === 'notes'); if (t) Tabs.activate(t); else Tabs.add(new NotesTab()); },
   calendar() { const t = Tabs.list.find(x => x.kind === 'cal'); if (t) Tabs.activate(t); else Tabs.add(new CalendarTab()); },
   clock() { const t = Tabs.list.find(x => x.kind === 'clock'); if (t) Tabs.activate(t); else Tabs.add(new ClockTab()); },
+  paste() { const t = Tabs.list.find(x => x.kind === 'paste'); if (t) Tabs.activate(t); else Tabs.add(new PasteTab()); },
   async compare(prefL, prefR) {
     const cur = Tabs.active && Tabs.active.kind === 'doc' ? Tabs.active.info.path || '' : '';
     const res = await modal('Compare two files', `
@@ -3222,6 +3235,7 @@ $('#btn-help').onclick = () => actions.help();
   tb.onclick = e => { e.stopPropagation(); tm.hidden = !tm.hidden; tb.setAttribute('aria-expanded', String(!tm.hidden)); if (!tm.hidden) fillKeys(); };
   document.addEventListener('mousedown', e => { if (!tm.hidden && !tm.contains(e.target) && e.target !== tb && !tb.contains(e.target)) shut(); }); tm.addEventListener('click', shut); document.addEventListener('keydown', e => { if (e.key === 'Escape' && !tm.hidden) shut(); }); }
 $('#btn-clock').onclick = () => actions.clock();
+$('#btn-paste').onclick = () => actions.paste();
 $('#btn-notes').onclick = () => actions.notes();
 $('#btn-cal').onclick = () => actions.calendar();
 
@@ -3232,6 +3246,7 @@ document.addEventListener('keydown', e => {
   if (e.altKey && !c && k === 'j') { e.preventDefault(); actions.notes(); return; }
   if (e.altKey && !c && k === 'l') { e.preventDefault(); actions.calendar(); return; }
   if (e.altKey && !c && k === 'k') { e.preventDefault(); actions.clock(); return; }
+  if (e.altKey && !c && k === 'p') { e.preventDefault(); actions.paste(); return; }
   if (e.altKey && !c && k === 'n') { e.preventDefault(); guard(() => actions.newFile())(); return; }
   if (c && k === 'o') { e.preventDefault(); guard(() => actions.open())(); return; }
   if (e.key === 'F1') { e.preventDefault(); actions.help(); return; }
@@ -3600,6 +3615,65 @@ class MediaTab {
   tooltip() { return this.path; }
   onShow() { const sb = document.getElementById('sb-path'); if (sb) sb.textContent = this.path; }
 }
+/* ---- Paste & compare: two panels for pasted text; Beautify (JSON/XML, repairs broken JSON) and Compare, nothing is written to a file ---- */
+class PasteTab {
+  constructor() {
+    this.kind = 'paste'; this.icon = ic('columns', 14);
+    this.panel = el('div', 'panel');
+    const pane = (k, label) => `<div class="pane" data-s="${k}"><div class="ph"><span>${label}</span><span class="st"></span>
+      <button class="flat b-fmt" title="Beautify this side: indent JSON or XML (broken JSON is repaired)">Beautify</button>
+      <button class="flat b-pst" title="Replace this side with the clipboard text">Paste</button>
+      <button class="flat b-cpy" title="Copy this side">Copy</button>
+      <button class="flat b-clr" title="Empty this side">Clear</button></div>
+      <textarea spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="${label} text" placeholder="Paste ${label.toLowerCase()} text here (JSON, XML, a log, any text)"></textarea></div>`;
+    this.panel.innerHTML = `<div class="pc">
+      <div class="bar"><button class="primary b-cmp" title="Compare the two sides (Ctrl+Enter)">${ic('columns')} Compare</button>
+        <button class="flat b-both" title="Beautify both sides">Beautify both</button><button class="flat b-swap" title="Swap left and right">Swap</button>
+        <label style="display:flex;align-items:center;gap:5px" title="Indent JSON and XML before comparing so that only real differences show"><input type="checkbox" class="o-pre" checked> Beautify before comparing</label>
+        <span class="sp"></span><label style="display:flex;align-items:center;gap:5px">Indent <select class="o-ind"><option value="2">2 spaces</option><option value="4">4 spaces</option><option value="tab">Tab</option></select></label></div>
+      <div class="cols">${pane('left', 'Left')}${pane('right', 'Right')}</div>
+      <p class="hint">Nothing is saved: pasted text stays in this page. Ctrl+Enter compares; the result opens in its own tab where you can copy changes across.</p></div>`;
+    const q = x => $(x, this.panel); this.ta = { left: $('[data-s=left] textarea', this.panel), right: $('[data-s=right] textarea', this.panel) };
+    this.ind = prefs.get('pasteIndent', '2'); q('.o-ind').value = this.ind; q('.o-ind').onchange = e => { this.ind = e.target.value; prefs.set('pasteIndent', this.ind); };
+    q('.o-pre').checked = !!prefs.get('pastePre', true); q('.o-pre').onchange = e => prefs.set('pastePre', e.target.checked);
+    for (const k of ['left', 'right']) {
+      const pn = $(`[data-s=${k}]`, this.panel), ta = this.ta[k];
+      ta.addEventListener('input', () => this.stat(k)); ta.addEventListener('paste', () => setTimeout(() => this.stat(k), 0));
+      ta.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); guard(() => this.compare())(); } });
+      $('.b-fmt', pn).onclick = guard(() => this.beautify(k));
+      $('.b-pst', pn).onclick = guard(async () => { let t = ''; try { t = await navigator.clipboard.readText(); } catch (e) { toast('The browser blocked reading the clipboard. Click in the box and press Ctrl+V instead.', 'info'); return; } ta.value = t; this.stat(k); if (t) ta.focus(); });
+      $('.b-cpy', pn).onclick = guard(async () => { try { await navigator.clipboard.writeText(ta.value); toast('Copied', 'ok', 1200); } catch (e) { ta.select(); document.execCommand('copy'); } });
+      $('.b-clr', pn).onclick = () => { ta.value = ''; this.stat(k); ta.focus(); };
+    }
+    q('.b-both').onclick = guard(async () => { await this.beautify('left'); await this.beautify('right'); });
+    q('.b-swap').onclick = () => { const t = this.ta.left.value; this.ta.left.value = this.ta.right.value; this.ta.right.value = t; this.stat('left'); this.stat('right'); };
+    q('.b-cmp').onclick = guard(() => this.compare());
+    this.stat('left'); this.stat('right');
+  }
+  title() { return 'Paste & compare'; }
+  onShow() { const e = !this.ta.left.value ? this.ta.left : this.ta.right; e.focus(); }
+  indent() { return this.ind === 'tab' ? 'tab' : Number(this.ind) || 2; }
+  stat(k) {
+    const v = this.ta[k].value, st = $(`[data-s=${k}] .st`, this.panel); if (!v) { st.textContent = ''; return; }
+    const h = v.trimStart()[0], kind = h === '{' || h === '[' ? 'JSON' : h === '<' ? 'XML' : 'Text';
+    st.textContent = `${kind} · ${fmtNum(v.split('\n').length)} lines · ${fmtNum(v.length)} chars`;
+  }
+  async beautify(k) {
+    const ta = this.ta[k]; if (!ta.value.trim()) return;
+    const r = await api('text/format', { text: ta.value, indent: this.indent() }).catch(e => { toast((k === 'left' ? 'Left: ' : 'Right: ') + (e.message || e), 'err', 6000); return null; });
+    if (!r) return; ta.value = r.text; this.stat(k);
+    const fx = Object.entries(r.fixed || {}).map(([a, n]) => `${a}${n > 1 ? ' ×' + n : ''}`);
+    if (r.kind === 'text') toast('Not JSON or XML, so there is nothing to indent.', 'info', 2500); else if (fx.length) toast('Repaired: ' + fx.join(', '), 'info', 5000);
+  }
+  async compare() {
+    const l = this.ta.left.value, r = this.ta.right.value;
+    if (!l.trim() && !r.trim()) return toast('Paste text on both sides first.', 'info');
+    const res = await api('diff/text', { left: l, right: r, beautify: this.panel.querySelector('.o-pre').checked, indent: this.indent() }).catch(e => { fail(e); return null; }); if (!res) return;
+    Tabs.add(new DiffTab(res.sid, res.state));
+    if (res.notes && res.notes.length) toast('Compared as plain text — ' + res.notes.join('; '), 'info', 6000);
+  }
+}
+
 class ClockTab {
   constructor() {
     this.kind = 'clock'; this.icon = ic('clock', 14); this.ref = null; this.timer = 0;
@@ -4125,7 +4199,7 @@ Pick.start();
   Notes.load().then(async () => { try { await CAL.load(); await CAL.script(); CAL.sync(); } catch (_) { } }); setTimeout(() => Update.auto(), 4000);
   { const qs = new URLSearchParams(location.search);   // opened from the tray menu or by a second `kempt gui file`
     for (const f of qs.getAll('open')) actions.openPath(f);
-    const v = qs.get('view'); if (v === 'notes') actions.notes(); else if (v === 'clock') actions.clock(); else if (v === 'calendar') actions.calendar();
+    const v = qs.get('view'); if (v === 'notes') actions.notes(); else if (v === 'clock') actions.clock(); else if (v === 'calendar') actions.calendar(); else if (v === 'paste') actions.paste();
     if (qs.has('open') || qs.has('view')) history.replaceState(null, '', location.pathname + '?t=' + encodeURIComponent(qs.get('t') || '')); }
 })();
 </script>

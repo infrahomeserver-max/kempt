@@ -21,7 +21,7 @@ with sync_playwright() as pw:
     pg.on("pageerror", lambda e: errs.append(str(e))); pg.goto(g.url); pg.wait_for_selector(".panel.show"); pg.wait_for_timeout(800)
     check("one Tools dropdown, no topbar Compare", pg.locator("#btn-tools").count() == 1 and pg.locator("#btn-compare").count() == 0)
     pg.evaluate("document.getElementById('btn-tools').click()"); pg.wait_for_timeout(150)
-    check("Tools menu lists clock, calendar, checklist", pg.locator(".tmenu button").count() == 3)
+    check("Tools menu lists clock, calendar, paste & compare, checklist", pg.locator(".tmenu button").count() == 4)
     check("Table disabled for prose", pg.evaluate("document.querySelector('.b-tbl').disabled"))
     check("Fix disabled for prose", pg.evaluate("document.querySelector('.b-fix').disabled"))
     pg.evaluate(f"actions.openPath({os.path.join(d,'t.txt')!r})"); pg.wait_for_timeout(900)
