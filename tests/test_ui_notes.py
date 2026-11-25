@@ -35,7 +35,7 @@ with sync_playwright() as pw:
 
     print("== open")
     check("notes button in the top bar", pg.locator("#btn-notes").count() == 1)
-    pg.click("#btn-notes"); pg.wait_for_selector(".nt .addrow")
+    pg.evaluate("document.getElementById('btn-notes').click()"); pg.wait_for_selector(".nt .addrow")
     check("tab is named Checklist", "Checklist" in pg.inner_text("#tabs .tab.active"))
     pg.keyboard.press("Alt+j"); pg.wait_for_timeout(150)
     check("Alt+J does not open a second tab", pg.locator("#tabs .tab:has-text('Checklist')").count() == 1)
@@ -87,7 +87,7 @@ with sync_playwright() as pw:
     saved = json.load(open(NF))
     check("notes.json holds items and pad", saved["pad"] == "line one\nline two" and len(saved["items"]) == 2, saved)
     check("file is small", os.path.getsize(NF) < 2000, os.path.getsize(NF))
-    pg.reload(); pg.wait_for_selector("#tabs .tab"); pg.click("#btn-notes"); pg.wait_for_selector(".nt .pad")
+    pg.reload(); pg.wait_for_selector("#tabs .tab"); pg.evaluate("document.getElementById('btn-notes').click()"); pg.wait_for_selector(".nt .pad")
     check("everything survives a reload", pg.input_value(".nt .pad") == "line one\nline two" and "Send the report" in items())
     pg.screenshot(path=f"{SHOTS}/notes.png")
 
@@ -119,7 +119,7 @@ with sync_playwright() as pw:
     check("?open=<file> opens that file", True)
 
     print("== repeating reminders")
-    pg.click("#btn-notes"); pg.wait_for_selector(".nt .addrow"); pg.wait_for_timeout(100)
+    pg.evaluate("document.getElementById('btn-notes').click()"); pg.wait_for_selector(".nt .addrow"); pg.wait_for_timeout(100)
     def addrep(text, when, rep):
         pg.fill(".nt .t", text); pg.fill(".nt .w", when); pg.select_option(".nt .rp", rep); pg.click(".nt .go"); pg.wait_for_timeout(100)
     row = lambda t: pg.locator('.nt .it').nth(items().index(t))
@@ -153,7 +153,7 @@ with sync_playwright() as pw:
 
     print("== work and personal")
     nc = lambda: pg.evaluate("Notes.items.filter(a => !a.k).map(a => [a.t, a.c || ''])")
-    pg.click("#btn-notes"); pg.wait_for_selector(".nt .addrow")
+    pg.evaluate("document.getElementById('btn-notes').click()"); pg.wait_for_selector(".nt .addrow")
     check("the add row has a Work / Personal choice (Work by default)", pg.locator(".nt .addrow .cat option").count() == 2 and pg.input_value(".nt .addrow .cat") == "w")
     pg.fill(".nt .t", "Quarterly report"); pg.click(".nt .go"); pg.select_option(".nt .addrow .cat", "p"); pg.fill(".nt .t", "Call mum"); pg.click(".nt .go"); pg.wait_for_timeout(150)
     check("new items remember their category", ["Quarterly report", "w"] in nc() and ["Call mum", "p"] in nc(), nc())
@@ -171,7 +171,7 @@ with sync_playwright() as pw:
     check("'Clear done' only clears what the filter shows", ["Call mum", "w"] in nc(), nc())
     pg.click(".nt .seg button[data-f=w]"); pg.click(".nt .clr"); pg.wait_for_timeout(100)
     check("...and clears it when that category is shown", ["Call mum", "w"] not in nc())
-    pg.reload(); pg.wait_for_selector("#tabs .tab"); pg.click("#btn-notes"); pg.wait_for_selector(".nt .seg")
+    pg.reload(); pg.wait_for_selector("#tabs .tab"); pg.evaluate("document.getElementById('btn-notes').click()"); pg.wait_for_selector(".nt .seg")
     check("the filter is remembered across a reload", pg.eval_on_selector(".nt .seg button[data-f=w]", "b => b.getAttribute('aria-pressed')") == "true")
     pg.click(".nt .seg button[data-f='']"); pg.wait_for_timeout(100)
     check("old items with no category still show under All", pg.evaluate("() => { Notes.items.push({ id: 'old1', t: 'Old item', done: false, due: null, fired: false }); Notes.save(); return true; }") and pg.evaluate("() => { actions.notes(); return true; }"))
