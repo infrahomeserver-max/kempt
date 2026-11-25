@@ -362,6 +362,24 @@ impl Doc {
         }
     }
 
+    /// give the document a new name: a file on disk is renamed in its own folder (never over another file); an unsaved one just changes its name
+    pub fn rename(&self, new: &str) -> Result<()> {
+        let _g = self.ops.lock().unwrap();
+        if let Some(p) = self.path() {
+            let to = p.with_file_name(new);
+            if to != p {
+                if to.exists() {
+                    bail!("{new} already exists in that folder");
+                }
+                std::fs::rename(&p, &to).with_context(|| format!("cannot rename {} to {new}", p.display()))?;
+                *self.path.lock().unwrap() = Some(to);
+            }
+        }
+        *self.name.lock().unwrap() = new.to_string();
+        self.version.fetch_add(1, Ordering::AcqRel);
+        Ok(())
+    }
+
     pub fn save(&self, to: Option<PathBuf>) -> Result<PathBuf> {
         let _g = self.ops.lock().unwrap();
         let target = match (&to, self.path()) {
@@ -540,6 +558,26 @@ mod tests {
     }
     fn text(d: &Doc) -> String {
         String::from_utf8(d.current().bytes().to_vec()).unwrap()
+    }
+
+    #[test]
+    fn rename_in_memory_and_on_disk() {
+        let d = doc(b"{}", "untitled.txt");
+        d.rename("data.json").unwrap();
+        assert_eq!(d.info().name, "data.json");
+        assert_eq!(d.info().kind, "json");
+        assert!(d.path().is_none());
+        // a saved file is renamed in its own folder and never over another file
+        let dir = tempfile::tempdir().unwrap();
+        let a = dir.path().join("a.json");
+        d.save(Some(a.clone())).unwrap();
+        std::fs::write(dir.path().join("taken.json"), "x").unwrap();
+        assert!(d.rename("taken.json").is_err());
+        assert!(a.exists());
+        d.rename("b.json").unwrap();
+        assert!(!a.exists() && dir.path().join("b.json").exists());
+        assert_eq!(d.path().unwrap().file_name().unwrap(), "b.json");
+        assert_eq!(d.info().name, "b.json");
     }
 
     #[test]

@@ -78,7 +78,8 @@ with sync_playwright() as pw:
         check(f"{W}: find box keeps its size while keywords are typed", abs(w1 - w2) < 1, (w1, w2))
         check(f"{W}: keyword chips stay inside the window", pg.locator(".panel.show .find .chips .chip").count() == 3 and inside(".panel.show .find .chips"))
         pg.keyboard.press("Escape")
-        for btn, sel in (("#btn-new", ".modal"), ("#btn-open", ".modal"), ("#btn-settings", ".modal")):
+        pg.click("#btn-new"); pg.wait_for_selector(".panel.show .b-saveas")
+        for btn, sel in ((".panel.show .b-saveas", ".modal"), ("#btn-open", ".modal"), ("#btn-settings", ".modal")):
             pg.click(btn); pg.wait_for_selector(sel)
             box = pg.eval_on_selector(sel, "e => { const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom, innerWidth, innerHeight]; }")
             check(f"{W}: {btn} dialog fits in the window", box[0] >= 0 and box[1] >= 0 and box[2] <= box[4] and box[3] <= box[5], box)

@@ -5,6 +5,15 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- **New** (Alt+N) opens an empty `untitled.txt` at once, with no dialog. The folder, file name and extension chips are asked when you first save it (Ctrl+S); an existing name asks before it is replaced.
+- Tabs of files show the unsaved dot once (it was shown twice).
+- Closing one dialog no longer takes the keyboard focus away from the next one that opens (Esc and Enter work in it).
+
+### Added
+- Typing JSON or XML into an unsaved `untitled.txt` names it `.json` / `.xml` by itself, so it is coloured and Format and Fix work. Renaming a tab or choosing another extension in Save now also changes the editor's colours (they used to stay plain).
+- **Rename a tab**: double-click its name or press F2. An unsaved file just changes its name (the extension changes its colours and tools); a file on disk is renamed in its folder and never over another file.
+
 ## [0.2.1] - 2026-11-25
 
 ### Added

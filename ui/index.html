@@ -80,6 +80,7 @@ kbd { font:11px var(--mono); font-variant-ligatures:none; background:var(--bg3);
 .tab.active { background:var(--bg); color:var(--fg); box-shadow:inset 0 2px 0 var(--accent); }
 .tab .tt { overflow:hidden; text-overflow:ellipsis; }
 .tab .dot { color:var(--warn); }
+.tab .tt-edit { width:150px; font:inherit; padding:1px 5px; margin:0; height:22px; background:var(--bg); color:var(--fg); border:1px solid var(--accent); border-radius:4px; outline:none; }
 .tab .x { border:none; background:transparent; padding:0 5px; border-radius:3px; color:var(--fg-dim); }
 .tab .x:hover { background:var(--bg-hover); color:var(--fg); }
 .tab .ico { opacity:.7; }
@@ -743,7 +744,7 @@ input[type=checkbox], input[type=radio], input[type=range] { accent-color:var(--
     <div class="brand"><svg viewBox="0 0 128 128" width="20" height="20" aria-hidden="true"><rect x="6" y="6" width="116" height="116" rx="24" fill="var(--accent)"/><g fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M52 38 L30 64 L52 90"/><path d="M76 38 L98 64 L76 90"/></g></svg><span>Kempt</span></div>
     <div id="tabs"></div>
     <div class="topright">
-      <button id="btn-new" title="New file: choose a name and extension (Alt+N)" aria-label="New file"><i data-ic="filenew"></i><span class="lbl">New</span></button>
+      <button id="btn-new" title="New file: opens an empty file at once; you choose the name and folder when you save it (Alt+N)" aria-label="New file"><i data-ic="filenew"></i><span class="lbl">New</span></button>
       <button id="btn-open" title="Open a file (Ctrl+O)" aria-label="Open a file"><i data-ic="folder"></i><span class="lbl">Open</span></button>
       <span class="vsep"></span>
       <div class="tools"><button id="btn-tools" class="icon" title="World clock, calendar, checklist" aria-label="Tools" aria-haspopup="menu" aria-expanded="false"><i data-ic="apps"></i><span class="lbl">Tools</span><em class="nb" hidden></em></button><div class="tmenu" role="menu" hidden>
@@ -1406,6 +1407,7 @@ class FindWidget {
 /** after a dialog closes, hand the keyboard back to whatever had it (or to the active view) */
 function restoreFocus(prev) {
   setTimeout(() => {
+    const ms = $('#modals'); if (ms && ms.children.length && !(prev && prev.closest && prev.closest('#modals'))) return;   // another dialog opened meanwhile: keep its focus
     if (prev && prev.isConnected && typeof prev.focus === 'function' && prev !== document.body) prev.focus({ preventScroll: true });
     else { const t = Tabs.active; if (t && t.focusMain) t.focusMain(); else if (t && t.scroller) t.scroller.root.focus({ preventScroll: true }); }
   }, 0);
@@ -1428,6 +1430,27 @@ const confirmBox = (title, msg, ok = 'OK') => modal(title, `<p style="white-spac
 async function promptBox(title, label, val = '') {
   const r = await modal(title, `<label>${esc(label)}</label><input type="text" class="pv" value="${esc(val)}" spellcheck="false">`, [{ label: 'Cancel', value: null }, { label: 'OK', primary: true, value: m => $('.pv', m).value }]);
   return r;
+}
+
+/** the "Save" dialog: folder + file name + extension chips. Returns the full path, or null. */
+async function saveDialog(name, dir) {
+  const exts = ['txt', 'md', 'json', 'xml', 'csv', 'html', 'js', 'py', 'sh', 'log', 'yaml', 'sql'];
+  let d = dir || '', n = name || 'untitled.txt';
+  for (;;) {
+    const res = await modal('Save file', `
+      <label>Folder</label><div style="display:flex;gap:6px"><input type="text" id="nf-dir" style="flex:1" value="${esc(d)}" placeholder="folder to save it in (empty = home)" spellcheck="false"><button class="flat" id="nf-browse" title="Choose a folder">${ic('folder')}<span class="lbl">Browse…</span></button></div>
+      <label>File name with extension</label><input type="text" id="nf-name" value="${esc(n)}" spellcheck="false" autocomplete="off">
+      <div class="chips" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">${exts.map(x => `<button class="flat nf-ext" data-x="${x}" title="Use .${x}">.${x}</button>`).join('')}</div>
+      <p style="color:var(--fg-dim);font-size:12px">The extension decides the colours and the tools (JSON and XML get Format and Fix, CSV gets the table view).</p>`,
+      [{ label: 'Cancel', value: null }, { label: 'Save', primary: true, value: m => [$('#nf-dir', m).value.trim(), $('#nf-name', m).value.trim()] }]);
+    if (!res) return null;
+    [d, n] = res;
+    if (!n || n === '.' || n === '..' || /[\/\\\0]/.test(n) || n.length > 200) { toast('Type a file name such as notes.txt (no slashes).', 'err'); continue; }
+    let list = null; try { list = await api('fs', { path: d }); } catch (e) { toast('That folder does not exist: ' + (d || '~'), 'err'); continue; }
+    if (list.entries.some(x => x.n === n)) { const ok = await confirmBox('Replace file', `${n} already exists in that folder.\nReplace it?`, 'Replace'); if (!ok) continue; }
+    prefs.set('dir', list.path);
+    return (list.path.endsWith('/') || list.path.endsWith('\\') ? list.path : list.path + (list.path.includes('\\') && !list.path.includes('/') ? '\\' : '/')) + n;
+  }
 }
 
 /** file picker. mode: 'open' | 'save'. returns a path or null */
@@ -1495,13 +1518,23 @@ const Tabs = {
     const bar = $('#tabs'); bar.innerHTML = '';
     for (const t of this.list) {
       const d = el('div', 'tab' + (t === this.active ? ' active' : '') + (['notes', 'cal', 'clock', 'paste'].includes(t.kind) ? ' tool' : '')); d.title = t.tooltip ? t.tooltip() : t.title();
-      d.innerHTML = `<span class="ico">${t.icon}</span><span class="tt">${esc(t.title())}</span>${t.dirty && t.dirty() ? '<span class="dot" title="Unsaved changes">●</span>' : ''}<button class="x" title="Close tab" aria-label="Close tab">${ic('x', 12)}</button>`;
+      d.innerHTML = `<span class="ico">${t.icon}</span><span class="tt">${esc(t.kind === 'doc' ? t.info.name : t.title())}</span>${t.dirty && t.dirty() ? '<span class="dot" title="Unsaved changes">●</span>' : ''}<button class="x" title="Close tab" aria-label="Close tab">${ic('x', 12)}</button>`;
       d.onclick = e => { if (e.target.closest('.x')) this.close(t); else this.activate(t); };
       d.onauxclick = e => { if (e.button === 1) this.close(t); };
+      if (t.kind === 'doc') { d.ondblclick = e => { if (!e.target.closest('.x')) { e.preventDefault(); this.startRename(t); } }; d.title += '\nDouble-click (or F2) to rename'; }
       bar.appendChild(d);
     }
     for (const [id, kind] of [['#btn-clock', 'clock'], ['#btn-cal', 'cal'], ['#btn-paste', 'paste'], ['#btn-notes', 'notes']]) { const b = $(id), t = this.list.find(x => x.kind === kind); if (b) { b.classList.toggle('on', !!t && t === this.active); b.classList.toggle('open', !!t && t !== this.active); b.setAttribute('aria-pressed', String(!!t && t === this.active)); } }
     const tb = $('#btn-tools'); if (tb) { tb.classList.toggle('on', !!this.active && ['clock', 'cal', 'notes', 'paste'].includes(this.active.kind)); tb.classList.toggle('open', this.list.some(x => ['clock', 'cal', 'notes'].includes(x.kind)) && !tb.classList.contains('on')); }
+  },
+  startRename(t) {
+    const i = this.list.indexOf(t), tab = $('#tabs').children[i], span = tab && $('.tt', tab); if (!span) return;
+    const inp = el('input', 'tt-edit'); inp.value = t.info.name; inp.spellcheck = false; inp.setAttribute('aria-label', 'Rename file');
+    span.replaceWith(inp); inp.focus(); const dot = t.info.name.lastIndexOf('.'); inp.setSelectionRange(0, dot > 0 ? dot : inp.value.length);
+    let done = false;
+    const fin = async ok => { if (done) return; done = true; const v = inp.value.trim(); this.renderBar(); if (ok && v && v !== t.info.name) { try { await t.rename(v); } catch (e) { fail(e); } } };
+    inp.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); fin(true); } else if (e.key === 'Escape') { e.preventDefault(); fin(false); } };
+    inp.onblur = () => fin(true); inp.onclick = inp.ondblclick = inp.onmousedown = e => e.stopPropagation();
   },
   updateWelcome() {
     let w = $('#welcome');
@@ -1925,7 +1958,7 @@ class DocTab {
     if (!this.ce) this.ce = new CodeEditor(this.cp, {
       lang: Syn.lang(this.info.name, this.info.kind),
       unit: () => { const v = prefs.indent; return v === 'tab' ? '\t' : ' '.repeat(+v || 2); },
-      onChange: first => { if (first) { this.refreshInfo(); Tabs.renderBar(); } clearTimeout(this._ct); this._ct = setTimeout(() => this.commitEdit(false).catch(fail), 900); },
+      onChange: first => { if (first) { this.refreshInfo(); Tabs.renderBar(); } clearTimeout(this._ak); this._ak = setTimeout(() => this.autoKind().catch(() => {}), 800); clearTimeout(this._ct); this._ct = setTimeout(() => this.commitEdit(false).catch(fail), 900); },
       onCursor: (ln, col) => { this.curLine = ln; this.updateStatus(); },
     });
     this.ce.setLang(Syn.lang(this.info.name, this.info.kind)); this.ce.setValue(text);
@@ -2325,14 +2358,38 @@ class DocTab {
   }
   async saveAs() {
     await this.ready();
-    const p = await promptBox('Save as', 'Full path of the new file', this.info.path || (prefs.get('dir', '') || '~') + '/' + this.info.name);
+    const cur = this.info.path || '', cut = Math.max(cur.lastIndexOf('/'), cur.lastIndexOf('\\'));
+    const p = await saveDialog(this.info.name, cur ? cur.slice(0, cut) : prefs.get('dir', ''));
     if (!p) return;
-    const r = await api('doc/save', { id: this.info.id, path: p }); this.info = r.info; toast('Saved ' + r.path, 'ok'); rememberRecent(r.path); this.refreshInfo(); Tabs.renderBar();
+    const r = await api('doc/save', { id: this.info.id, path: p }); this.info = r.info; toast('Saved ' + r.path, 'ok'); rememberRecent(r.path); this.nameChanged(); this.refreshInfo(); Tabs.renderBar();
+  }
+  /** the file name (so the extension) changed: colours, tools and the viewer follow it */
+  nameChanged() {
+    if (this.ce) this.ce.setLang(Syn.lang(this.info.name, this.info.kind));
+    if (this.cache) this.cache.clear();
+    if (this.scroller && this.scroller.render) this.scroller.render();
+  }
+  /** an unsaved untitled.txt that is clearly JSON or XML becomes untitled.json / .xml, so it is coloured and Format works */
+  async autoKind() {
+    if (this.info.path || !this.ce || !/^untitled(-\d+)?\.txt$/.test(this.info.name)) return;
+    const t = this.ce.value.trim(); let ext = null;
+    if (/^[\[{]/.test(t)) { try { JSON.parse(t); ext = 'json'; } catch (e) { /* still typing */ } }
+    else if (/^<\?xml|^<[a-zA-Z][\w:.-]*[\s>/]/.test(t) && />$/.test(t) && /<\/|\/>/.test(t)) ext = 'xml';
+    if (!ext) return;
+    await this.rename(this.info.name.replace(/\.txt$/, '.' + ext), true);
+  }
+  /** rename this tab: an unsaved file just changes its name, a file on disk is renamed in its folder */
+  async rename(name, auto = false) {
+    await this.ready();
+    const r = await api('doc/rename', { id: this.info.id, name }); this.info = r.info; if (r.path) rememberRecent(r.path, false);
+    this.nameChanged(); this.refreshInfo(); Tabs.renderBar(); if (Tabs.active === this) { document.title = this.title() + ' — Kempt'; this.updateStatus(); }
+    toast(auto ? `Looks like ${r.info.kind.toUpperCase()}: named it ${r.info.name}` : 'Renamed to ' + r.info.name, auto ? 'info' : 'ok');
   }
   // global shortcuts routed here
   shortcut(e) {
     const k = e.key.toLowerCase(), c = e.ctrlKey || e.metaKey;
     const inText0 = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+    if (e.key === 'F2' && !c && !e.altKey && !e.shiftKey) { Tabs.startRename(this); return true; }
     if (c && e.shiftKey && k === 's') { guard(() => this.saveAs())(); return true; }
     if (c && e.shiftKey && k === 'f') { if (!$('.b-fmt', this.panel).disabled) guard(() => this.doFormat())(); return true; }
     if (c && e.shiftKey && k === 'c' && this.mode !== 'table') { guard(() => this.copyText())(); return true; }
@@ -3137,19 +3194,11 @@ const actions = {
     }
   },
   async newFile() {
-    const exts = ['txt', 'md', 'json', 'xml', 'csv', 'html', 'js', 'py', 'sh', 'log', 'yaml', 'sql'];
-    const res = await modal('New file', `
-      <label>Folder</label><div style="display:flex;gap:6px"><input type="text" id="nf-dir" style="flex:1" value="${esc(prefs.get('dir', ''))}" placeholder="folder to create it in (empty = home)" spellcheck="false"><button class="flat" id="nf-browse" title="Choose a folder">${ic('folder')}<span class="lbl">Browse…</span></button></div>
-      <label>File name with extension</label><input type="text" id="nf-name" value="untitled.txt" spellcheck="false" autocomplete="off">
-      <div class="chips" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">${exts.map(x => `<button class="flat nf-ext" data-x="${x}" title="Use .${x}">.${x}</button>`).join('')}</div>
-      <p style="color:var(--fg-dim);font-size:12px">The extension decides the colours and the tools (JSON and XML get Format and Fix, CSV gets the table view). “Start without saving” keeps it in memory: nothing is written until you press Ctrl+S and choose where. “Create file now” writes an empty file in the folder above first.</p>`,
-      [{ label: 'Cancel', value: null }, { label: 'Create file now', value: m => [$('#nf-dir', m).value.trim(), $('#nf-name', m).value.trim(), false] }, { label: 'Start without saving', primary: true, value: m => [$('#nf-dir', m).value.trim(), $('#nf-name', m).value.trim(), true] }]);
-    if (!res) return;
-    const memory = res[2];
-    const r = await api('file/new', { dir: res[0], name: res[1], memory }).catch(e => { fail(e); return null; }); if (!r) return;
-    if (res[0]) prefs.set('dir', res[0]);
-    const t = new DocTab(r.info, false, { edit: true }); Tabs.add(t);
-    if (memory) toast('New file is only in memory. Press Ctrl+S when you want to save it.', 'info'); else { rememberRecent(r.info.path); toast('Created ' + r.path, 'ok'); }
+    // no questions: an empty untitled file opens at once; the folder and name are asked when you save it
+    const used = new Set(Tabs.list.filter(t => t.kind === 'doc').map(t => t.info.name));
+    let name = 'untitled.txt'; for (let i = 2; used.has(name); i++) name = `untitled-${i}.txt`;
+    const r = await api('file/new', { dir: '', name, memory: true }).catch(e => { fail(e); return null; }); if (!r) return;
+    Tabs.add(new DocTab(r.info, false, { edit: true }));
   },
   notes() { const t = Tabs.list.find(x => x.kind === 'notes'); if (t) Tabs.activate(t); else Tabs.add(new NotesTab()); },
   calendar() { const t = Tabs.list.find(x => x.kind === 'cal'); if (t) Tabs.activate(t); else Tabs.add(new CalendarTab()); },

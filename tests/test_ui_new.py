@@ -25,12 +25,11 @@ with sync_playwright() as pw:
     check("folder icon and file icon have different colours", col[0] and col[1] and col[0] != col[1], col)
     check("folders are marked and listed first", pg.locator(".pick-item").first.get_attribute("class").find("dir") >= 0)
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
-    # new file kept in memory
-    pg.click("#btn-new"); pg.wait_for_timeout(400)
-    pg.fill("#nf-name", "idea.md")
-    pg.get_by_role("button", name="Start without saving").click(); pg.wait_for_timeout(900)
-    check("new file opens as a tab with the unsaved dot", "idea.md" in pg.inner_text("#tabs") and pg.locator("#tabs .dot").count() == 1, pg.inner_text("#tabs"))
-    check("nothing was written to disk", not any(n.startswith("idea") for n in os.listdir(os.path.expanduser("~"))) and not os.path.exists(os.path.join(os.getcwd(), "idea.md")))
+    # new file: opens at once, kept in memory
+    pg.click("#btn-new"); pg.wait_for_timeout(900)
+    check("New opens an untitled tab at once, no dialog, with the unsaved dot", "untitled.txt" in pg.inner_text("#tabs") and pg.locator(".modal").count() == 0 and pg.locator("#tabs .dot").count() == 1, pg.inner_text("#tabs"))
+    check("the tab shows the name once, not twice", pg.inner_text("#tabs").count("untitled.txt") == 1 and "●" not in pg.locator("#tabs .tt").first.inner_text())
+    check("nothing was written to disk", not any(n.startswith("untitled") for n in os.listdir(os.path.expanduser("~"))) and not os.path.exists(os.path.join(os.getcwd(), "untitled.txt")))
     check("no page errors", not errs, errs)
     browser.close(); g.stop()
 print(f"\n{PASS} passed, {FAIL} failed"); sys.exit(1 if FAIL else 0)

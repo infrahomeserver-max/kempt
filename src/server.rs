@@ -892,6 +892,17 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
             let d = app.doc(p)?;
             Ok(json!({"ok": d.redo(), "info": info_json(&d.info())}))
         }
+        // rename the tab: an unsaved file only changes its name, a file on disk is renamed in its folder
+        "doc/rename" => {
+            let d = app.doc(p)?;
+            let name = gs(p, "name").unwrap_or("").trim().to_string();
+            if name.is_empty() || name == "." || name == ".." || name.contains(['/', '\\', '\0']) || name.len() > 200 {
+                return bad("type a file name such as notes.txt (no slashes)");
+            }
+            d.rename(&name)?;
+            Ok(json!({"info": info_json(&d.info()), "path": d.path().map(|x| x.display().to_string()).unwrap_or_default()}))
+        }
+
         "doc/save" => {
             let d = app.doc(p)?;
             let to = gs(p, "path").filter(|s| !s.trim().is_empty()).map(|s| expand(s.trim()));
