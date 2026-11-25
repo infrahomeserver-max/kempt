@@ -270,6 +270,7 @@ button.primary kbd { background:rgba(255,255,255,.18); border-color:rgba(255,255
 #topbar { background:var(--bg2); border-bottom:1px solid var(--border); min-height:40px; }
 .brand { gap:9px; padding:0 16px 0 14px; font-weight:650; font-size:14.5px; letter-spacing:-.1px; border-right:1px solid var(--border); }
 .brand svg { border-radius:5px; }
+.logo { border-radius:5px; display:block; } .logo-l { display:none; } [data-theme="light"] .logo-l { display:block; } [data-theme="light"] .logo-d { display:none; }
 #tabs { align-items:flex-end; padding:6px 6px 0; gap:2px; }
 .tab { height:34px; padding:0 6px 0 11px; gap:7px; border:1px solid transparent; border-bottom:none; border-radius:8px 8px 0 0; font-weight:500; }
 .tab:hover { background:var(--bg3); }
@@ -357,6 +358,7 @@ button.danger:hover:not(:disabled) { background:var(--danger); border-color:var(
 /* welcome */
 .welcome { max-width:620px; padding:32px; }
 .welcome svg { border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
+.welcome .logo { margin:0 auto 6px; border-radius:20px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
 .welcome h1 { font-size:30px; font-weight:650; letter-spacing:-.5px; margin:16px 0 8px; }
 .welcome .tag { color:var(--fg-dim); font-size:14px; line-height:1.55; margin:0 auto 22px; max-width:480px; }
 .welcome .cta { display:flex; gap:10px; justify-content:center; margin:0 0 28px; }
@@ -741,7 +743,7 @@ input[type=checkbox], input[type=radio], input[type=range] { accent-color:var(--
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><svg viewBox="0 0 128 128" width="20" height="20" aria-hidden="true"><rect x="6" y="6" width="116" height="116" rx="24" fill="var(--accent)"/><g fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M52 38 L30 64 L52 90"/><path d="M76 38 L98 64 L76 90"/></g></svg><span>Kempt</span></div>
+    <div class="brand"><img class="logo logo-d" src="/logo-dark.png" width="22" height="22" alt=""><img class="logo logo-l" src="/logo-light.png" width="22" height="22" alt=""><span>Kempt</span></div>
     <div id="tabs"></div>
     <div class="topright">
       <button id="btn-new" title="New file: opens an empty file at once; you choose the name and folder when you save it (Alt+N)" aria-label="New file"><i data-ic="filenew"></i><span class="lbl">New</span></button>
@@ -1542,7 +1544,7 @@ const Tabs = {
     if (w) return;
     w = el('div', 'panel show'); w.id = 'welcome';
     const recent = prefs.get('recent', []);
-    w.innerHTML = `<div class="welcome"><svg viewBox="0 0 128 128" width="56" height="56" aria-hidden="true"><rect x="6" y="6" width="116" height="116" rx="24" fill="var(--accent)"/><g fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M52 38 L30 64 L52 90"/><path d="M76 38 L98 64 L76 90"/></g></svg>
+    w.innerHTML = `<div class="welcome"><img class="logo logo-d" src="/logo-dark.png" width="84" height="84" alt=""><img class="logo logo-l" src="/logo-light.png" width="84" height="84" alt="">
       <h1>Kempt</h1>
       <p class="tag">Open huge JSON, XML and log files instantly. Find with several keywords, replace, fix broken JSON/XML, and compare two files side by side.</p>
       <p class="cta"><button class="primary lg" id="w-open">${ic('folder', 18)}Open a file<kbd>Ctrl+O</kbd></button> <button class="lg" id="w-cmp">${ic('columns', 18)}Compare two files</button></p>

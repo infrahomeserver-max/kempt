@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="docs/logo-light.png">
+    <img src="docs/logo-dark.png" alt="Kempt logo" width="120">
+  </picture>
+</p>
+
 # Kempt
 
 **Open, search, fix, format and compare big JSON, XML and log files.**

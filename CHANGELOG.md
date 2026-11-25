@@ -6,6 +6,7 @@ versioning: [SemVer](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- **New logo**: a K with circuit lines. It is used for the browser tab icon, the app header and welcome screen (a light-tile version is shown in the light theme), the tray icon, the Linux, Windows (`.ico`) and macOS (`.icns`) icons and the README header.
 - **New** (Alt+N) opens an empty `untitled.txt` at once, with no dialog. The folder, file name and extension chips are asked when you first save it (Ctrl+S); an existing name asks before it is replaced.
 - Tabs of files show the unsaved dot once (it was shown twice).
 - Closing one dialog no longer takes the keyboard focus away from the next one that opens (Esc and Enter work in it).

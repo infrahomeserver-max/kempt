@@ -18,6 +18,7 @@ use tiny_http::{Header, Method, Response, Server};
 const INDEX_HTML: &str = include_str!("../ui/index.html");
 const FAVICON_SVG: &str = include_str!("../packaging/kempt.svg");
 const FAVICON_PNG: &[u8] = include_bytes!("../packaging/kempt.png");
+const LOGO_LIGHT: &[u8] = include_bytes!("../docs/logo-light.png");
 const MAX_LINE_BYTES: usize = 8000;
 
 // ───────────────────────────── errors / helpers ─────────────────────────────
@@ -1217,10 +1218,12 @@ fn handle(app: &Arc<App>, mut req: tiny_http::Request) {
         return;
     }
 
-    if *req.method() == Method::Get && matches!(path.as_str(), "/favicon.svg" | "/favicon.png" | "/favicon.ico") {
+    if *req.method() == Method::Get && matches!(path.as_str(), "/favicon.svg" | "/favicon.png" | "/favicon.ico" | "/logo-dark.png" | "/logo-light.png") {
         // the tab icon: no token needed (browsers fetch it without one), nothing sensitive in it
         let r = if path == "/favicon.svg" {
             Response::from_data(FAVICON_SVG.as_bytes().to_vec()).with_header(hdr("Content-Type", "image/svg+xml"))
+        } else if path == "/logo-light.png" {
+            Response::from_data(LOGO_LIGHT.to_vec()).with_header(hdr("Content-Type", "image/png"))
         } else {
             Response::from_data(FAVICON_PNG.to_vec()).with_header(hdr("Content-Type", "image/png"))
         };

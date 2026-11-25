@@ -376,8 +376,14 @@ pub fn spawn_detached() -> Result<()> {
 
 // ---------------------------------------------------------------- tray icon (Linux: StatusNotifierItem)
 
-/// 32x32 ARGB (network order) icon: a blue rounded square with white `< >`, drawn here so no image file is needed.
+/// the Kempt logo as a 32x32 ARGB (network order) tray icon, built into the program
+const TRAY32: &[u8] = include_bytes!("../packaging/tray32.argb");
+
+/// 32x32 ARGB (network order) icon: the logo; other sizes get a blue rounded square with white `< >`, drawn here so no image file is needed.
 pub fn icon_argb(size: i32) -> Vec<u8> {
+    if size == 32 {
+        return TRAY32.to_vec();
+    }
     let s = size as f32;
     let seg = |px: f32, py: f32, a: (f32, f32), b: (f32, f32)| {
         let (dx, dy) = (b.0 - a.0, b.1 - a.1);
