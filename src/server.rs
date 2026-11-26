@@ -10,7 +10,7 @@ use serde_json::{Map, Value, json};
 use std::collections::HashMap;
 use std::io::Read;
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tiny_http::{Header, Method, Response, Server};
@@ -64,7 +64,39 @@ fn indent_of(p: &Value) -> usize {
 
 fn info_json(i: &DocInfo) -> Value {
     json!({"id": i.id, "name": i.name, "path": i.path, "lines": i.lines, "size": i.size, "dirty": i.dirty,
-           "can_undo": i.can_undo, "can_redo": i.can_redo, "version": i.version, "kind": i.kind})
+           "can_undo": i.can_undo, "can_redo": i.can_redo, "version": i.version, "kind": i.kind, "dropped": i.path.as_deref().is_some_and(is_dropped)})
+}
+
+/// where files dragged into the window are copied (the browser does not tell us where the original is)
+fn drops_dir() -> PathBuf {
+    crate::plat::config_dir().join("drops")
+}
+
+fn is_dropped(path: &str) -> bool {
+    !path.is_empty() && std::path::Path::new(path).starts_with(drops_dir())
+}
+
+/// remove copies of dragged-in files left from an earlier run (older than a day)
+fn clean_drops() {
+    let Ok(rd) = std::fs::read_dir(drops_dir()) else { return };
+    for e in rd.flatten() {
+        let old = e.metadata().and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).is_some_and(|d| d.as_secs() > 86_400);
+        if old {
+            let _ = std::fs::remove_dir_all(e.path());
+        }
+    }
+}
+
+/// a safe file name for a dragged-in file: no folders, no odd characters, never empty
+fn safe_name(n: &str) -> String {
+    let base = n.rsplit(['/', '\\']).next().unwrap_or("");
+    let mut o: String = base.chars().map(|c| if c.is_control() || "<>:\"|?*".contains(c) { '_' } else { c }).collect();
+    o = o.trim().trim_matches('.').to_string();
+    if o.chars().count() > 120 {
+        let ext = o.rsplit_once('.').map(|(_, e)| e.chars().take(12).collect::<String>()).unwrap_or_default();
+        o = o.chars().take(100).collect::<String>() + if ext.is_empty() { String::new() } else { format!(".{ext}") }.as_str();
+    }
+    if o.is_empty() { "dropped.txt".into() } else { o }
 }
 
 /// lossy text of a line, clipped to a sane length. Returns (text, original byte length if clipped)
@@ -335,6 +367,11 @@ pub struct App {
     calendar: crate::state::Store,
     wake: (Mutex<bool>, std::sync::Condvar),
     own_window: bool,
+    /// files a second `kempt gui <file>` handed to the window that is already open (the page long-polls `inbox`)
+    inbox: (Mutex<Vec<Value>>, std::sync::Condvar),
+    pollers: AtomicUsize,
+    /// windows that are listening: id -> until when they count as open (a window that closes says goodbye)
+    pages: Mutex<HashMap<String, Instant>>,
 }
 
 fn expand(p: &str) -> PathBuf {
@@ -511,6 +548,47 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
     crate::jsonfmt::set_expand(gb(p, "expand").unwrap_or(false));
     match name {
         "startup" => Ok(json!({"tabs": *app.startup.lock().unwrap()})),
+        // the open window asks for files handed over by a second `kempt gui <file>`; the request waits (up to 20 s) until some arrive
+        "inbox" => {
+            let cid: String = gs(p, "cid").unwrap_or("").chars().take(40).collect();
+            if p["bye"] == true {
+                app.pages.lock().unwrap().remove(&cid);
+                return Ok(json!({"items": []}));
+            }
+            let wait = p["wait"].as_u64().unwrap_or(0).min(15);
+            {
+                let mut g = app.pages.lock().unwrap();
+                g.retain(|_, t| *t > Instant::now());
+                g.insert(cid.clone(), Instant::now() + Duration::from_secs(wait + 4));
+            }
+            let (m, cv) = &app.inbox;
+            let mine = app.pollers.fetch_add(1, Ordering::AcqRel) < 3;   // a few windows at most; the rest just look and leave
+            let mut q = m.lock().unwrap();
+            if mine && q.is_empty() && wait > 0 {
+                let (g, _) = cv.wait_timeout_while(q, Duration::from_secs(wait), |q| q.is_empty()).unwrap();
+                q = g;
+            }
+            let items: Vec<Value> = std::mem::take(&mut *q);
+            drop(q);
+            app.pollers.fetch_sub(1, Ordering::AcqRel);
+            if let Some(t) = app.pages.lock().unwrap().get_mut(&cid) {
+                *t = Instant::now() + Duration::from_secs(4);
+            }
+            Ok(json!({"items": items}))
+        }
+        "gui/open" => {
+            let alive = app.pages.lock().unwrap().values().any(|t| *t > Instant::now());
+            let files: Vec<PathBuf> = p["files"].as_array().map(|a| a.iter().filter_map(|v| v.as_str()).map(|x| PathBuf::from(x)).collect()).unwrap_or_default();
+            let view = gs(p, "view").map(str::to_string);
+            if !alive || (files.is_empty() && view.is_none()) {
+                return Ok(json!({"delivered": false}));
+            }
+            let tabs = build_tabs(app, &files, p["tabs"].as_bool().unwrap_or(false))?;
+            let (m, cv) = &app.inbox;
+            m.lock().unwrap().push(json!({"tabs": tabs, "view": view}));
+            cv.notify_all();
+            Ok(json!({"delivered": true}))
+        }
 
         "fs" => {
             let raw = gs(p, "path").unwrap_or("");
@@ -1189,6 +1267,46 @@ fn query_param(url: &str, key: &str) -> Option<String> {
     })
 }
 
+/// a file dragged into the window: the browser cannot say where it came from, so it is sent here and copied into Kempt's own folder
+fn handle_upload(app: &Arc<App>, mut req: tiny_http::Request, url: &str) {
+    const MAX: u64 = 10 << 30;
+    let Some(len) = req.body_length().map(|n| n as u64) else { return respond_json(req, 411, &json!({"error": "the file size is missing"})) };
+    if len > MAX {
+        return respond_json(req, 413, &json!({"error": "that file is larger than 10 GB"}));
+    }
+    let name = safe_name(&pct_decode(&query_param(url, "name").unwrap_or_default()));
+    let dir = drops_dir().join(&random_token()[..16]);
+    let path = dir.join(&name);
+    let copied = (|| -> std::io::Result<u64> {
+        std::fs::create_dir_all(&dir)?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(drops_dir(), std::fs::Permissions::from_mode(0o700));
+        }
+        let mut f = std::fs::File::create_new(&path)?;
+        std::io::copy(&mut req.as_reader().take(MAX), &mut f)
+    })();
+    match copied {
+        Ok(n) if n == len => {}
+        Ok(_) => {
+            let _ = std::fs::remove_dir_all(&dir);
+            return respond_json(req, 400, &json!({"error": "the file was cut short while it was copied"}));
+        }
+        Err(e) => {
+            let _ = std::fs::remove_dir_all(&dir);
+            return respond_json(req, 500, &json!({"error": format!("cannot copy the file: {e}")}));
+        }
+    }
+    match build_tabs(app, &[path], true) {
+        Ok(tabs) => respond_json(req, 200, &json!({"tabs": tabs})),
+        Err(e) => {
+            let _ = std::fs::remove_dir_all(&dir);
+            respond_json(req, e.status, &json!({"error": e.msg}))
+        }
+    }
+}
+
 fn handle(app: &Arc<App>, mut req: tiny_http::Request) {
     // DNS-rebinding protection: only accept our own loopback host names
     let host_ok = header_value(&req, "Host").is_some_and(|h| h == format!("127.0.0.1:{}", app.port) || h == format!("localhost:{}", app.port));
@@ -1280,6 +1398,9 @@ fn handle(app: &Arc<App>, mut req: tiny_http::Request) {
     if !header_value(&req, "X-Token").is_some_and(|t| same_secret(&t, &app.token)) {
         return respond_json(req, 403, &json!({"error": "missing or wrong token"}));
     }
+    if name == "upload" {
+        return handle_upload(app, req, &url);
+    }
     let mut body = String::new();
     if req.as_reader().take(12 << 20).read_to_string(&mut body).is_err() {
         return respond_json(req, 400, &json!({"error": "bad request body"}));
@@ -1360,10 +1481,47 @@ pub struct GuiOpts {
 }
 
 /// Start the server (blocking). Prints the URL; opens the browser unless `no_open`.
+/// the tabs for files given to `kempt gui` (an Excel workbook becomes one table tab per sheet; exactly two files are compared unless `as_tabs`)
+fn build_tabs(app: &Arc<App>, files: &[PathBuf], as_tabs: bool) -> std::result::Result<Vec<Value>, ApiError> {
+    let is_book = |f: &std::path::Path| {
+        let l = f.display().to_string().to_ascii_lowercase();
+        [".xlsx", ".xlsm", ".xltx", ".xltm", ".xlsb"].iter().any(|e| l.ends_with(e))
+    };
+    let mut opened: Vec<Arc<Doc>> = Vec::new();
+    let mut tabs = Vec::new();
+    let any_book = files.iter().any(|f| is_book(f));
+    for f in files {
+        if is_book(f) {
+            let r = app.open_book(&f.display().to_string())?;
+            tabs.push(json!({"kind": "doc", "info": r["info"], "minified": false}));
+            for i in r["also"].as_array().cloned().unwrap_or_default() {
+                tabs.push(json!({"kind": "doc", "info": i, "minified": false}));
+            }
+        } else {
+            opened.push(app.open_path(&f.display().to_string())?);
+        }
+    }
+    if opened.len() == 2 && !as_tabs && !any_book {
+        let (sid, state) = app.new_diff(opened[0].clone(), opened[1].clone());
+        tabs.push(json!({"kind": "diff", "sid": sid, "state": state}));
+    } else {
+        for d in &opened {
+            let i = d.info();
+            tabs.push(json!({"kind": "doc", "info": info_json(&i), "minified": looks_minified(&i)}));
+        }
+    }
+    Ok(tabs)
+}
+
 pub fn run(o: GuiOpts) -> Result<()> {
     // one Kempt per user: a second `kempt gui` just opens the running one (with the files you gave)
     if let Some(i) = crate::service::running_instance() {
         if !o.background {
+            let abs: Vec<String> = o.files.iter().map(|f| crate::plat::canonical(f).unwrap_or_else(|_| f.clone()).display().to_string()).collect();
+            if !o.no_open && (!abs.is_empty() || o.view.is_some()) && crate::service::hand_over(&i, &abs, o.as_tabs, o.view.as_deref()) {
+                println!("Kempt is already open; added to it.");
+                return Ok(());
+            }
             let mut url = format!("http://127.0.0.1:{}/?t={}", i.port, i.token);
             for f in &o.files {
                 let abs = crate::plat::canonical(f).unwrap_or_else(|_| f.clone());
@@ -1400,37 +1558,14 @@ pub fn run(o: GuiOpts) -> Result<()> {
         calendar: crate::state::Store::calendar(),
         wake: (Mutex::new(false), std::sync::Condvar::new()),
         own_window: o.app_window || crate::state::Store::new().get()["appwin"] == true,
+        inbox: (Mutex::new(Vec::new()), std::sync::Condvar::new()),
+        pollers: AtomicUsize::new(0),
+        pages: Mutex::new(HashMap::new()),
     });
+    clean_drops();
 
     // files given on the command line (an Excel workbook becomes one table tab per sheet)
-    let is_book = |f: &std::path::Path| {
-        let l = f.display().to_string().to_ascii_lowercase();
-        [".xlsx", ".xlsm", ".xltx", ".xltm", ".xlsb"].iter().any(|e| l.ends_with(e))
-    };
-    let mut opened: Vec<Arc<Doc>> = Vec::new();
-    let mut tabs = Vec::new();
-    let any_book = o.files.iter().any(|f| is_book(f));
-    for f in &o.files {
-        if is_book(f) {
-            let r = app.open_book(&f.display().to_string()).map_err(|e| anyhow::anyhow!("{}", e.msg))?;
-            tabs.push(json!({"kind": "doc", "info": r["info"], "minified": false}));
-            for i in r["also"].as_array().cloned().unwrap_or_default() {
-                tabs.push(json!({"kind": "doc", "info": i, "minified": false}));
-            }
-        } else {
-            let d = app.open_path(&f.display().to_string()).map_err(|e| anyhow::anyhow!("{}", e.msg))?;
-            opened.push(d);
-        }
-    }
-    if opened.len() == 2 && !o.as_tabs && !any_book {
-        let (sid, state) = app.new_diff(opened[0].clone(), opened[1].clone());
-        tabs.push(json!({"kind": "diff", "sid": sid, "state": state}));
-    } else {
-        for d in &opened {
-            let i = d.info();
-            tabs.push(json!({"kind": "doc", "info": info_json(&i), "minified": looks_minified(&i)}));
-        }
-    }
+    let tabs = build_tabs(&app, &o.files, o.as_tabs).map_err(|e| anyhow::anyhow!("{}", e.msg))?;
     *app.startup.lock().unwrap() = tabs;
 
     let url = format!("http://127.0.0.1:{port}/?t={}", app.token);

@@ -88,6 +88,7 @@ jobs:
           python3 tests/test_calendar.py
           python3 tests/test_calendar_drag.py
           python3 tests/test_paste.py
+          python3 tests/test_handover.py
           python3 tests/test_clock_new.py
           python3 tests/test_notes_new.py
           python3 tests/test_ui_v2.py

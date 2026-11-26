@@ -5,6 +5,10 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **Open more files in the same window.** Double-clicking (or running `kempt gui`) on a second file now adds it as a new tab in the Kempt window that is already open, instead of a new browser tab, so two files can be compared. If no window is open, a browser tab opens as before.
+- **Drag & drop**: drag files into the Kempt window to open each in a new tab. When the browser does not reveal the file's location, a copy is opened; Save then asks where to put it.
+
 ## [0.2.2] - 2026-11-25
 
 ### Changed

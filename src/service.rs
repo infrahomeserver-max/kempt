@@ -68,6 +68,20 @@ pub fn stop_running() -> Result<bool> {
     Ok(true)
 }
 
+/// Give files (or a tool name) to the Kempt window that is already open, so they appear there as new tabs.
+/// False when there is no open window (nobody is looking) or anything fails: the caller then opens a new browser tab as before.
+pub fn hand_over(i: &Instance, files: &[String], as_tabs: bool, view: Option<&str>) -> bool {
+    let Ok(mut s) = TcpStream::connect_timeout(&SocketAddr::from(([127, 0, 0, 1], i.port)), Duration::from_secs(1)) else { return false };
+    let _ = s.set_read_timeout(Some(Duration::from_secs(60)));
+    let body = serde_json::json!({"files": files, "tabs": as_tabs, "view": view}).to_string();
+    if write!(s, "POST /api/gui/open HTTP/1.0\r\nHost: 127.0.0.1:{}\r\nX-Token: {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}", i.port, i.token, body.len(), body).is_err() {
+        return false;
+    }
+    let mut out = String::new();
+    let _ = s.read_to_string(&mut out);
+    out.split("\r\n\r\n").nth(1).and_then(|b| serde_json::from_str::<serde_json::Value>(b).ok()).is_some_and(|v| v["delivered"] == true)
+}
+
 pub fn pct(s: &str) -> String {
     let mut o = String::new();
     for b in s.bytes() {

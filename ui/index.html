@@ -358,6 +358,10 @@ button.danger:hover:not(:disabled) { background:var(--danger); border-color:var(
 /* welcome */
 .welcome { max-width:620px; padding:32px; }
 .welcome svg { border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
+.welcome .dim-hint { color:var(--fg-dim); font-size:12px; margin:-6px 0 14px; }
+.dropzone { position:fixed; inset:0; z-index:9000; display:none; align-items:center; justify-content:center; background:rgba(30,110,230,.14); border:3px dashed var(--accent); pointer-events:none; }
+.dropzone.on { display:flex; }
+.dropzone div { background:var(--bg2); color:var(--fg); border:1px solid var(--border); border-radius:12px; padding:18px 28px; font-size:16px; font-weight:600; box-shadow:var(--shadow); }
 .welcome .logo { margin:0 auto 6px; border-radius:20px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
 .welcome h1 { font-size:30px; font-weight:650; letter-spacing:-.5px; margin:16px 0 8px; }
 .welcome .tag { color:var(--fg-dim); font-size:14px; line-height:1.55; margin:0 auto 22px; max-width:480px; }
@@ -1523,7 +1527,7 @@ const Tabs = {
       d.innerHTML = `<span class="ico">${t.icon}</span><span class="tt">${esc(t.kind === 'doc' ? t.info.name : t.title())}</span>${t.dirty && t.dirty() ? '<span class="dot" title="Unsaved changes">●</span>' : ''}<button class="x" title="Close tab" aria-label="Close tab">${ic('x', 12)}</button>`;
       d.onclick = e => { if (e.target.closest('.x')) this.close(t); else this.activate(t); };
       d.onauxclick = e => { if (e.button === 1) this.close(t); };
-      if (t.kind === 'doc') { d.ondblclick = e => { if (!e.target.closest('.x')) { e.preventDefault(); this.startRename(t); } }; d.title += '\nDouble-click (or F2) to rename'; }
+      if (t.kind === 'doc') { d.ondblclick = e => { if (!e.target.closest('.x')) { e.preventDefault(); this.startRename(t); } }; d.title += '\nDouble-click (or F2) to rename' + (t.info.dropped ? '\nA copy of a file dragged into Kempt: Save asks where to put it' : ''); }
       bar.appendChild(d);
     }
     for (const [id, kind] of [['#btn-clock', 'clock'], ['#btn-cal', 'cal'], ['#btn-paste', 'paste'], ['#btn-notes', 'notes']]) { const b = $(id), t = this.list.find(x => x.kind === kind); if (b) { b.classList.toggle('on', !!t && t === this.active); b.classList.toggle('open', !!t && t !== this.active); b.setAttribute('aria-pressed', String(!!t && t === this.active)); } }
@@ -1548,6 +1552,7 @@ const Tabs = {
       <h1>Kempt</h1>
       <p class="tag">Open huge JSON, XML and log files instantly. Find with several keywords, replace, fix broken JSON/XML, and compare two files side by side.</p>
       <p class="cta"><button class="primary lg" id="w-open">${ic('folder', 18)}Open a file<kbd>Ctrl+O</kbd></button> <button class="lg" id="w-cmp">${ic('columns', 18)}Compare two files</button></p>
+      <p class="dim-hint">or drag files into this window</p>
       <div class="recent">${recent.length ? '<div class="rh">Recent files</div>' : ''}${recent.map(p => `<a data-p="${esc(p)}" title="${esc(p)}">${FI.ic(p, 14)}<span>${esc(p)}</span></a>`).join('')}</div></div>`;
     $('#main').appendChild(w);
     $('#w-open', w).onclick = () => actions.open(); $('#w-cmp', w).onclick = () => actions.compare();
@@ -2355,12 +2360,12 @@ class DocTab {
   }
   async save() {
     await this.ready();
-    if (!this.info.path) return this.saveAs();
+    if (!this.info.path || this.info.dropped) return this.saveAs();   // a dragged-in file is a copy: choose where to save it
     const r = await api('doc/save', { id: this.info.id }); this.info = r.info; toast('Saved ' + r.path, 'ok'); rememberRecent(r.path); this.refreshInfo(); Tabs.renderBar();
   }
   async saveAs() {
     await this.ready();
-    const cur = this.info.path || '', cut = Math.max(cur.lastIndexOf('/'), cur.lastIndexOf('\\'));
+    const cur = this.info.dropped ? '' : (this.info.path || ''), cut = Math.max(cur.lastIndexOf('/'), cur.lastIndexOf('\\'));
     const p = await saveDialog(this.info.name, cur ? cur.slice(0, cut) : prefs.get('dir', ''));
     if (!p) return;
     const r = await api('doc/save', { id: this.info.id, path: p }); this.info = r.info; toast('Saved ' + r.path, 'ok'); rememberRecent(r.path); this.nameChanged(); this.refreshInfo(); Tabs.renderBar();
@@ -4234,23 +4239,79 @@ const FIND = {
     if (!txt) { out.hidden = true; return; } const body = txt.replace(/\n$/, ''), lines = body.split('\n').length; out.hidden = false; out.textContent = `${lines.toLocaleString()} line${lines === 1 ? '' : 's'} selected · ${txt.length.toLocaleString()} chars`; };
   document.addEventListener('selectionchange', () => { clearTimeout(tm); tm = setTimeout(show, 60); }); document.addEventListener('keyup', () => { clearTimeout(tm); tm = setTimeout(show, 60); }); document.addEventListener('mouseup', () => { clearTimeout(tm); tm = setTimeout(show, 60); }); }
 /* ───────────── startup ───────────── */
+/** show tabs the server built: at startup, for a second `kempt gui <file>`, or for a file dragged into the window */
+function applyTabs(list) {
+  for (const t of list || []) {
+    if (t.kind === 'doc') { Tabs.add(new DocTab(t.info, !!t.minified)); if (!t.info.dropped) rememberRecent(t.info.path, false); }
+    else if (t.kind === 'diff') Tabs.add(new DiffTab(t.sid, t.state));
+  }
+}
+function openView(v) { if (v === 'notes') actions.notes(); else if (v === 'clock') actions.clock(); else if (v === 'calendar') actions.calendar(); else if (v === 'paste') actions.paste(); }
+
+/** a second `kempt gui <file>` (double-clicking another file) hands it to this window; the request waits on the server until something arrives */
+const CID = Math.random().toString(36).slice(2) + Date.now().toString(36);
+addEventListener('pagehide', () => { try { fetch('/api/inbox', { method: 'POST', keepalive: true, headers: { 'X-Token': TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ bye: true, cid: CID }) }); } catch (_) { } });
+async function inboxLoop() {
+  for (;;) {
+    try {
+      const r = await api('inbox', { wait: 15, cid: CID });
+      for (const it of r.items || []) {
+        applyTabs(it.tabs); if (it.view) openView(it.view);
+        const n = (it.tabs || []).length; if (n) toast(n === 1 && it.tabs[0].kind === 'doc' ? 'Opened ' + it.tabs[0].info.name : n === 1 ? 'Opened the comparison' : `Opened ${n} tabs`, 'ok');
+      }
+      if ((r.items || []).length) { try { window.focus(); } catch (_) { } }
+    } catch (e) { await new Promise(res => setTimeout(res, 3000)); }
+  }
+}
+
+/** drag files into the window: each opens as a new tab. Paths are used when the browser gives them (file:// links); otherwise the file is copied to Kempt (the browser hides where it lives) */
+const DROP = (() => {
+  const zone = el('div', 'dropzone'); zone.innerHTML = '<div>Drop to open in a new tab</div>'; document.body.appendChild(zone);
+  const hasFiles = e => e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files');
+  const paths = dt => {
+    const out = [];
+    for (const u of (dt.getData('text/uri-list') || dt.getData('text/plain') || '').split(/\r?\n/).map(x => x.trim()).filter(x => x && !x.startsWith('#'))) {
+      if (!/^file:\/\//i.test(u)) return [];
+      try { let p = decodeURIComponent(new URL(u).pathname); if (/^\/[A-Za-z]:\//.test(p)) p = p.slice(1); out.push(p); } catch (_) { return []; }
+    }
+    return out;
+  };
+  const upload = file => new Promise(done => {
+    const prev = $('#sb-left').textContent, x = new XMLHttpRequest();
+    x.open('POST', '/api/upload?name=' + encodeURIComponent(file.name)); x.setRequestHeader('X-Token', TOKEN); x.responseType = 'json';
+    x.upload.onprogress = e => { if (e.lengthComputable && file.size > 2e6) setStatus('Opening ' + file.name + ' … ' + Math.floor(e.loaded * 100 / Math.max(1, e.total)) + '%'); };
+    x.onload = () => { setStatus(prev); const r = x.response; if (x.status === 200 && r) applyTabs(r.tabs); else fail(new Error((r && r.error) || 'Could not open ' + file.name)); done(); };
+    x.onerror = () => { setStatus(prev); fail(new Error('Cannot reach the kempt server — is it still running?')); done(); };
+    x.send(file);
+  });
+  addEventListener('dragenter', e => { if (hasFiles(e)) { e.preventDefault(); zone.classList.add('on'); } });
+  addEventListener('dragover', e => { if (hasFiles(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; zone.classList.add('on'); } });
+  addEventListener('dragleave', e => { if (hasFiles(e) && !e.relatedTarget) zone.classList.remove('on'); });
+  addEventListener('drop', async e => {
+    if (!hasFiles(e)) return;
+    e.preventDefault(); zone.classList.remove('on');
+    const dt = e.dataTransfer, ps = paths(dt), files = [...dt.files], dirs = [...dt.items].map(i => { const n = i.webkitGetAsEntry && i.webkitGetAsEntry(); return !!(n && n.isDirectory); });
+    try {
+      if (ps.length) { for (const p of ps) await actions.openPath(p); return; }
+      for (let i = 0; i < files.length; i++) { if (dirs[i]) toast(files[i].name + ' is a folder: drop the files inside it instead.', 'err'); else await upload(files[i]); }
+    } catch (err) { fail(err); }
+  });
+  return { upload };
+})();
+
 Pick.start();
 (async () => {
   Tabs.updateWelcome();
   try {
     // measure column widths only after the embedded fonts are ready (give up after 1.5 s)
     await Promise.race([Promise.all(['400 13px Inter', '600 13px Inter', '400 12.5px "JetBrains Mono"', '700 12.5px "JetBrains Mono"'].map(f => document.fonts.load(f))), new Promise(r => setTimeout(r, 1500))]).catch(() => {});
-    const s = await api('startup');
-    for (const t of s.tabs) {
-      if (t.kind === 'doc') { const d = new DocTab(t.info, !!t.minified); Tabs.add(d); rememberRecent(t.info.path, false); }
-      else if (t.kind === 'diff') { Tabs.add(new DiffTab(t.sid, t.state)); }
-    }
+    const s = await api('startup'); applyTabs(s.tabs);
   } catch (e) { fail(e); }
-  fillIcons();
+  fillIcons(); inboxLoop();
   Notes.load().then(async () => { try { await CAL.load(); await CAL.script(); CAL.sync(); } catch (_) { } }); setTimeout(() => Update.auto(), 4000);
   { const qs = new URLSearchParams(location.search);   // opened from the tray menu or by a second `kempt gui file`
     for (const f of qs.getAll('open')) actions.openPath(f);
-    const v = qs.get('view'); if (v === 'notes') actions.notes(); else if (v === 'clock') actions.clock(); else if (v === 'calendar') actions.calendar(); else if (v === 'paste') actions.paste();
+    openView(qs.get('view'));
     if (qs.has('open') || qs.has('view')) history.replaceState(null, '', location.pathname + '?t=' + encodeURIComponent(qs.get('t') || '')); }
 })();
 </script>
