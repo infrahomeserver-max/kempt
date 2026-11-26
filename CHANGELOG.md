@@ -5,6 +5,8 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-11-27
+
 ### Added
 - **Compare open tabs**: Ctrl+click (or Shift+click) two or more file tabs to select them, then press Compare in the bar that appears (with more than two, the first is compared with each of the others). Right-click a tab for "Compare with…", listing the other open files. Unsaved edits are included.
 - **Same word highlighted everywhere**: select a word (double-click) in the viewer, editor, table, compare or notes and every other place it appears on screen is highlighted.
