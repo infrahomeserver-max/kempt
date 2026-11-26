@@ -17,7 +17,7 @@
 /* ───────────── themes: plain, conventional colours (neutral greys, standard blue accent, green = added, red = removed) ───────────── */
 :root, [data-theme="dark"] {
   --bg:#1e1e1e; --bg2:#252526; --bg3:#2d2d2d; --bg-hover:#3a3a3a; --fg:#d4d4d4; --fg-dim:#8b8b8b; --border:#3c3c3c;
-  --accent:#2f7fe0; --accent-fg:#ffffff; --link:#6cb6ff; --sel:#3a6db5; --curline:#282828; --curmatch:#3a3a3a;
+  --accent:#2f7fe0; --accent-fg:#ffffff; --link:#6cb6ff; --sel:#264466; --curline:#282828; --curmatch:#3a3a3a;
   --gutter:#6e6e6e; --danger:#f85149; --ok:#3fb950; --warn:#d29922;
   --t0:rgba(250,204,21,.48); --t1:rgba(56,189,248,.45); --t2:rgba(74,222,128,.42); --t3:rgba(232,121,249,.45); --t4:rgba(251,146,60,.50); --t5:rgba(148,163,184,.50);
   --add-bg:rgba(46,160,67,.20); --add-strong:rgba(46,160,67,.50); --del-bg:rgba(248,81,73,.18); --del-strong:rgba(248,81,73,.50);
@@ -29,7 +29,7 @@
 }
 [data-theme="light"] {
   --bg:#fbfcfe; --bg2:#f0f3f8; --bg3:#e4e9f1; --bg-hover:#d9e0ec; --fg:#1b2430; --fg-dim:#5a6678; --border:#cbd3df;
-  --accent:#1b6fd8; --accent-fg:#ffffff; --link:#1b6fd8; --sel:#9cc2f7; --curline:#eef3fb; --curmatch:#d2e3fa;
+  --accent:#1b6fd8; --accent-fg:#ffffff; --link:#1b6fd8; --sel:#c9defa; --curline:#eef3fb; --curmatch:#d2e3fa;
   --gutter:#8c959f; --danger:#cf222e; --ok:#1a7f37; --warn:#9a6700;
   --t0:rgba(250,204,21,.60); --t1:rgba(14,165,233,.30); --t2:rgba(34,197,94,.32); --t3:rgba(217,70,239,.28); --t4:rgba(249,115,22,.34); --t5:rgba(100,116,139,.32);
   --add-bg:rgba(46,160,67,.15); --add-strong:rgba(46,160,67,.38); --del-bg:rgba(248,81,73,.13); --del-strong:rgba(248,81,73,.34);
@@ -42,7 +42,7 @@
 /* blue / orange diff colours: distinguishable with red-green colour blindness */
 [data-theme="colorblind"] {
   --bg:#1e1e1e; --bg2:#252526; --bg3:#2d2d2d; --bg-hover:#3a3a3a; --fg:#d4d4d4; --fg-dim:#8b8b8b; --border:#3c3c3c;
-  --accent:#2f7fe0; --accent-fg:#ffffff; --link:#6cb6ff; --sel:#3a6db5; --curline:#282828; --curmatch:#3a3a3a;
+  --accent:#2f7fe0; --accent-fg:#ffffff; --link:#6cb6ff; --sel:#264466; --curline:#282828; --curmatch:#3a3a3a;
   --gutter:#6e6e6e; --danger:#f0a030; --ok:#56b4e9; --warn:#f0e442;
   --t0:rgba(240,228,66,.45); --t1:rgba(86,180,233,.50); --t2:rgba(0,158,115,.50); --t3:rgba(204,121,167,.55); --t4:rgba(230,159,0,.50); --t5:rgba(0,114,178,.55);
   --add-bg:rgba(59,155,239,.20); --add-strong:rgba(59,155,239,.50); --del-bg:rgba(240,160,48,.22); --del-strong:rgba(240,160,48,.55);
@@ -153,7 +153,7 @@ mark.cm { background:#ff9f1c; color:#111; outline:2px solid #ff9f1c; border-radi
 .ce-hl, .ce-ta { position:absolute; left:10px; top:0; margin:0; padding:0; border:0; font:inherit; line-height:20px; white-space:pre; tab-size:4; letter-spacing:0; }
 .ce-hl { right:0; pointer-events:none; color:var(--fg); }
 .ce-ta { background:transparent; color:transparent; caret-color:var(--fg); resize:none; outline:none; overflow:hidden; top:8px; width:calc(100% - 10px); height:calc(100% - 8px); }
-.ce-ta::selection { background:var(--sel); color:transparent; }
+.ce-ta::selection { background:color-mix(in srgb, var(--accent) 38%, transparent); color:transparent; }
 .ce-in { padding-top:0; }
 .cell-edit { width:100%; font:inherit; color:var(--fg); background:var(--bg); border:1px solid var(--accent); border-radius:3px; padding:0 4px; margin:0; outline:none; height:18px; }
 .ce-pane { position:relative; flex:1; min-height:0; }
@@ -262,7 +262,7 @@ input[type=text]:focus, select:focus { border-color:var(--accent); }
 select { padding-right:4px; }
 kbd { border-radius:4px; border-bottom-width:2px; padding:0 5px; color:var(--fg-dim); font-size:10.5px; }
 button.primary kbd { background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.3); color:inherit; }
-::selection { background:color-mix(in srgb, var(--accent) 60%, transparent); }
+::selection { background:color-mix(in srgb, var(--accent) 35%, transparent); }
 ::highlight(kword) { background:rgba(255,159,28,.45); color:inherit; }
 .tab.mk { background:color-mix(in srgb, var(--accent) 22%, var(--bg2)); box-shadow:inset 0 2px 0 var(--accent); }
 .tab .mkn { background:var(--accent); color:var(--accent-fg); border-radius:9px; font-size:10.5px; min-width:16px; height:16px; line-height:16px; text-align:center; font-weight:700; }
