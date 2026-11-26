@@ -6,6 +6,9 @@ versioning: [SemVer](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Compare open tabs**: Ctrl+click (or Shift+click) two or more file tabs to select them, then press Compare in the bar that appears (with more than two, the first is compared with each of the others). Right-click a tab for "Compare with…", listing the other open files. Unsaved edits are included.
+- **Same word highlighted everywhere**: select a word (double-click) in the viewer, editor, table, compare or notes and every other place it appears on screen is highlighted.
+- The selection colour is stronger and easier to see in both themes.
 - **Open more files in the same window.** Double-clicking (or running `kempt gui`) on a second file now adds it as a new tab in the Kempt window that is already open, instead of a new browser tab, so two files can be compared. If no window is open, a browser tab opens as before.
 - **Drag & drop**: drag files into the Kempt window to open each in a new tab. When the browser does not reveal the file's location, a copy is opened; Save then asks where to put it.
 

@@ -17,7 +17,7 @@
 /* ───────────── themes: plain, conventional colours (neutral greys, standard blue accent, green = added, red = removed) ───────────── */
 :root, [data-theme="dark"] {
   --bg:#1e1e1e; --bg2:#252526; --bg3:#2d2d2d; --bg-hover:#3a3a3a; --fg:#d4d4d4; --fg-dim:#8b8b8b; --border:#3c3c3c;
-  --accent:#2f7fe0; --accent-fg:#ffffff; --link:#6cb6ff; --sel:#264466; --curline:#282828; --curmatch:#3a3a3a;
+  --accent:#2f7fe0; --accent-fg:#ffffff; --link:#6cb6ff; --sel:#3a6db5; --curline:#282828; --curmatch:#3a3a3a;
   --gutter:#6e6e6e; --danger:#f85149; --ok:#3fb950; --warn:#d29922;
   --t0:rgba(250,204,21,.48); --t1:rgba(56,189,248,.45); --t2:rgba(74,222,128,.42); --t3:rgba(232,121,249,.45); --t4:rgba(251,146,60,.50); --t5:rgba(148,163,184,.50);
   --add-bg:rgba(46,160,67,.20); --add-strong:rgba(46,160,67,.50); --del-bg:rgba(248,81,73,.18); --del-strong:rgba(248,81,73,.50);
@@ -29,7 +29,7 @@
 }
 [data-theme="light"] {
   --bg:#fbfcfe; --bg2:#f0f3f8; --bg3:#e4e9f1; --bg-hover:#d9e0ec; --fg:#1b2430; --fg-dim:#5a6678; --border:#cbd3df;
-  --accent:#1b6fd8; --accent-fg:#ffffff; --link:#1b6fd8; --sel:#c9defa; --curline:#eef3fb; --curmatch:#d2e3fa;
+  --accent:#1b6fd8; --accent-fg:#ffffff; --link:#1b6fd8; --sel:#9cc2f7; --curline:#eef3fb; --curmatch:#d2e3fa;
   --gutter:#8c959f; --danger:#cf222e; --ok:#1a7f37; --warn:#9a6700;
   --t0:rgba(250,204,21,.60); --t1:rgba(14,165,233,.30); --t2:rgba(34,197,94,.32); --t3:rgba(217,70,239,.28); --t4:rgba(249,115,22,.34); --t5:rgba(100,116,139,.32);
   --add-bg:rgba(46,160,67,.15); --add-strong:rgba(46,160,67,.38); --del-bg:rgba(248,81,73,.13); --del-strong:rgba(248,81,73,.34);
@@ -42,7 +42,7 @@
 /* blue / orange diff colours: distinguishable with red-green colour blindness */
 [data-theme="colorblind"] {
   --bg:#1e1e1e; --bg2:#252526; --bg3:#2d2d2d; --bg-hover:#3a3a3a; --fg:#d4d4d4; --fg-dim:#8b8b8b; --border:#3c3c3c;
-  --accent:#2f7fe0; --accent-fg:#ffffff; --link:#6cb6ff; --sel:#264466; --curline:#282828; --curmatch:#3a3a3a;
+  --accent:#2f7fe0; --accent-fg:#ffffff; --link:#6cb6ff; --sel:#3a6db5; --curline:#282828; --curmatch:#3a3a3a;
   --gutter:#6e6e6e; --danger:#f0a030; --ok:#56b4e9; --warn:#f0e442;
   --t0:rgba(240,228,66,.45); --t1:rgba(86,180,233,.50); --t2:rgba(0,158,115,.50); --t3:rgba(204,121,167,.55); --t4:rgba(230,159,0,.50); --t5:rgba(0,114,178,.55);
   --add-bg:rgba(59,155,239,.20); --add-strong:rgba(59,155,239,.50); --del-bg:rgba(240,160,48,.22); --del-strong:rgba(240,160,48,.55);
@@ -262,7 +262,17 @@ input[type=text]:focus, select:focus { border-color:var(--accent); }
 select { padding-right:4px; }
 kbd { border-radius:4px; border-bottom-width:2px; padding:0 5px; color:var(--fg-dim); font-size:10.5px; }
 button.primary kbd { background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.3); color:inherit; }
-::selection { background:color-mix(in srgb, var(--accent) 35%, transparent); }
+::selection { background:color-mix(in srgb, var(--accent) 60%, transparent); }
+::highlight(kword) { background:rgba(255,159,28,.45); color:inherit; }
+.tab.mk { background:color-mix(in srgb, var(--accent) 22%, var(--bg2)); box-shadow:inset 0 2px 0 var(--accent); }
+.tab .mkn { background:var(--accent); color:var(--accent-fg); border-radius:9px; font-size:10.5px; min-width:16px; height:16px; line-height:16px; text-align:center; font-weight:700; }
+#cmpbar { position:fixed; left:50%; bottom:34px; transform:translateX(-50%); z-index:8000; display:flex; align-items:center; gap:10px; background:var(--bg2); border:1px solid var(--accent); border-radius:10px; padding:8px 12px; box-shadow:var(--shadow); }
+#cmpbar[hidden] { display:none; }
+.ctxm { position:fixed; z-index:9500; min-width:190px; max-width:340px; background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:4px; box-shadow:var(--shadow); font-size:13px; }
+.ctxm button { display:block; width:100%; text-align:left; border:0; background:transparent; padding:6px 10px; border-radius:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ctxm button:hover { background:var(--bg-hover); }
+.ctxm .sep { height:1px; background:var(--border); margin:4px 2px; }
+.ctxm .hd { color:var(--fg-dim); font-size:11px; padding:4px 10px 2px; }
 * { scrollbar-width:thin; scrollbar-color:var(--bg-hover) transparent; }
 ::-webkit-scrollbar { width:10px; height:10px; } ::-webkit-scrollbar-thumb { background:var(--bg-hover); border-radius:5px; border:2px solid transparent; background-clip:content-box; } ::-webkit-scrollbar-track { background:transparent; }
 
@@ -1505,7 +1515,7 @@ function pickFile(startPath, title = 'Open file', withText = false, folder = fal
 
 /* ───────────── tab manager ───────────── */
 const Tabs = {
-  list: [], active: null, seq: 0,
+  list: [], active: null, seq: 0, marks: [],
   add(tab) { tab.key = ++this.seq; this.list.push(tab); $('#main').appendChild(tab.panel); this.activate(tab); this.renderBar(); },
   activate(tab) {
     if (this.active && this.active !== tab) { this.active.panel.classList.remove('show'); this.active.onHide && this.active.onHide(); }
@@ -1519,19 +1529,42 @@ const Tabs = {
     const i = this.list.indexOf(tab); this.list.splice(i, 1); tab.panel.remove(); tab.dispose && tab.dispose();
     if (this.active === tab) { this.active = null; const next = this.list[Math.min(i, this.list.length - 1)]; if (next) this.activate(next); else { this.renderBar(); this.updateWelcome(); document.title = 'Kempt'; setStatus('Ready', ''); } }
     else this.renderBar();
+    this.markBar();
   },
   renderBar() {
     const bar = $('#tabs'); bar.innerHTML = '';
     for (const t of this.list) {
       const d = el('div', 'tab' + (t === this.active ? ' active' : '') + (['notes', 'cal', 'clock', 'paste'].includes(t.kind) ? ' tool' : '')); d.title = t.tooltip ? t.tooltip() : t.title();
       d.innerHTML = `<span class="ico">${t.icon}</span><span class="tt">${esc(t.kind === 'doc' ? t.info.name : t.title())}</span>${t.dirty && t.dirty() ? '<span class="dot" title="Unsaved changes">●</span>' : ''}<button class="x" title="Close tab" aria-label="Close tab">${ic('x', 12)}</button>`;
-      d.onclick = e => { if (e.target.closest('.x')) this.close(t); else this.activate(t); };
+      const mi = this.marks.indexOf(t); if (mi >= 0) { d.classList.add('mk'); d.insertAdjacentHTML('afterbegin', `<span class="mkn" title="Selected for compare">${mi + 1}</span>`); }
+      d.onclick = e => { if (e.target.closest('.x')) this.close(t); else if ((e.ctrlKey || e.metaKey || e.shiftKey) && t.kind === 'doc') this.toggleMark(t); else this.activate(t); };
+      d.oncontextmenu = e => { if (t.kind === 'doc') { e.preventDefault(); this.tabMenu(t, e.clientX, e.clientY); } };
       d.onauxclick = e => { if (e.button === 1) this.close(t); };
       if (t.kind === 'doc') { d.ondblclick = e => { if (!e.target.closest('.x')) { e.preventDefault(); this.startRename(t); } }; d.title += '\nDouble-click (or F2) to rename' + (t.info.dropped ? '\nA copy of a file dragged into Kempt: Save asks where to put it' : ''); }
       bar.appendChild(d);
     }
     for (const [id, kind] of [['#btn-clock', 'clock'], ['#btn-cal', 'cal'], ['#btn-paste', 'paste'], ['#btn-notes', 'notes']]) { const b = $(id), t = this.list.find(x => x.kind === kind); if (b) { b.classList.toggle('on', !!t && t === this.active); b.classList.toggle('open', !!t && t !== this.active); b.setAttribute('aria-pressed', String(!!t && t === this.active)); } }
     const tb = $('#btn-tools'); if (tb) { tb.classList.toggle('on', !!this.active && ['clock', 'cal', 'notes', 'paste'].includes(this.active.kind)); tb.classList.toggle('open', this.list.some(x => ['clock', 'cal', 'notes'].includes(x.kind)) && !tb.classList.contains('on')); }
+  },
+  toggleMark(t) { const i = this.marks.indexOf(t); if (i >= 0) this.marks.splice(i, 1); else this.marks.push(t); this.renderBar(); this.markBar(); },
+  clearMarks() { this.marks = []; this.renderBar(); this.markBar(); },
+  markBar() {
+    this.marks = this.marks.filter(t => this.list.includes(t));
+    let b = $('#cmpbar'); if (!b) { b = el('div'); b.id = 'cmpbar'; document.body.appendChild(b); }
+    const n = this.marks.length; b.hidden = n === 0; if (!n) return;
+    b.innerHTML = `<span>${n} tab${n === 1 ? '' : 's'} selected</span><button class="primary" id="cb-go" ${n < 2 ? 'disabled' : ''}>${n > 2 ? 'Compare first with the other ' + (n - 1) : 'Compare'}</button><button id="cb-x">Clear</button><small style="color:var(--fg-dim)">${n < 2 ? 'Ctrl+click another tab' : 'Ctrl+click to add or remove'}</small>`;
+    $('#cb-x', b).onclick = () => this.clearMarks(); $('#cb-go', b).onclick = () => { const m = this.marks.slice(); this.clearMarks(); actions.compareTabs(m); };
+  },
+  tabMenu(t, x, y) {
+    document.querySelectorAll('.ctxm').forEach(m => m.remove());
+    const m = el('div', 'ctxm'), others = this.list.filter(o => o.kind === 'doc' && o !== t);
+    const add = (label, fn, cls) => { const b = el('button', cls || ''); b.textContent = label; b.onclick = () => { m.remove(); fn(); }; m.appendChild(b); };
+    if (others.length) { const h = el('div', 'hd'); h.textContent = 'Compare with'; m.appendChild(h); for (const o of others.slice(0, 12)) add(o.info.name, () => actions.compareTabs([t, o])); const sp = el('div', 'sep'); m.appendChild(sp); }
+    add(this.marks.includes(t) ? 'Unselect for compare' : 'Select for compare (then pick more tabs)', () => this.toggleMark(t));
+    add('Rename', () => this.startRename(t)); add('Close', () => this.close(t));
+    document.body.appendChild(m); m.style.left = Math.min(x, innerWidth - m.offsetWidth - 8) + 'px'; m.style.top = Math.min(y, innerHeight - m.offsetHeight - 8) + 'px';
+    const off = e => { if (!m.contains(e.target)) { m.remove(); removeEventListener('mousedown', off, true); } }; addEventListener('mousedown', off, true);
+    addEventListener('keydown', function k(e) { if (e.key === 'Escape') { m.remove(); removeEventListener('keydown', k, true); } }, true);
   },
   startRename(t) {
     const i = this.list.indexOf(t), tab = $('#tabs').children[i], span = tab && $('.tt', tab); if (!span) return;
@@ -3227,6 +3260,11 @@ const actions = {
     const r = await api('diff/new', { left, right }).catch(e => { fail(e); return null; }); if (!r) return;
     const t = new DiffTab(r.sid, r.state); Tabs.add(t);
   },
+  async compareTabs(tabs) {
+    const docs = tabs.filter(t => t.kind === 'doc'); if (docs.length < 2) return toast('Select two or more file tabs to compare', 'info');
+    for (const d of docs) await d.ready();
+    for (const o of docs.slice(1)) await this.newDiff({ id: docs[0].info.id }, { id: o.info.id });
+  },
   async compareDisk(doc) { await doc.ready(); await this.newDiff({ disk: doc.info.id }, { id: doc.info.id }); },
   async compareWith(doc) { await doc.ready(); const p = await pickFile(null, 'Compare with…'); if (p) await this.newDiff({ id: doc.info.id }, { path: p }); },
   help() {
@@ -4297,6 +4335,34 @@ const DROP = (() => {
     } catch (err) { fail(err); }
   });
   return { upload };
+})();
+
+/** select a word anywhere (viewer, editor, table, compare, notes) and every other place it appears on screen is highlighted */
+const SAME = (() => {
+  if (!window.CSS || !CSS.highlights || typeof Highlight === 'undefined') return {};
+  let word = '', tm = 0, busy = false;
+  const apply = () => {
+    CSS.highlights.delete('kword'); if (!word) return;
+    const root = $('#main'); if (!root) return; const ranges = [], w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => n.nodeValue.length >= word.length && n.parentNode && !/^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(n.parentNode.tagName) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT });
+    let n; while ((n = w.nextNode()) && ranges.length < 3000) {
+      const t = n.nodeValue; let i = t.indexOf(word);
+      while (i >= 0 && ranges.length < 3000) { const r = document.createRange(); r.setStart(n, i); r.setEnd(n, i + word.length); ranges.push(r); i = t.indexOf(word, i + word.length); }
+    }
+    if (ranges.length) CSS.highlights.set('kword', new Highlight(...ranges));
+  };
+  const pick = () => {
+    const a = document.activeElement; let t = '';
+    if (a && a.tagName === 'TEXTAREA' && a.classList.contains('ce-ta')) t = a.value.slice(a.selectionStart, a.selectionEnd);
+    else if (!(a && /INPUT|TEXTAREA/.test(a.tagName) && a.selectionEnd > a.selectionStart)) t = getSelection().toString();
+    t = t.trim(); const nw = t && t.length >= 2 && t.length <= 80 && !/\s/.test(t) ? t : '';
+    if (nw !== word) { word = nw; apply(); }
+  };
+  document.addEventListener('selectionchange', () => { clearTimeout(tm); tm = setTimeout(pick, 120); });
+  document.addEventListener('keyup', () => { clearTimeout(tm); tm = setTimeout(pick, 120); });
+  document.addEventListener('mouseup', () => { clearTimeout(tm); tm = setTimeout(pick, 120); });
+  // rows are redrawn while scrolling: paint the new ones too
+  let mt = 0; new MutationObserver(() => { if (!word || busy) return; clearTimeout(mt); mt = setTimeout(apply, 100); }).observe($('#main'), { childList: true, subtree: true, characterData: true });
+  return { apply };
 })();
 
 Pick.start();
