@@ -3,6 +3,17 @@ import os, sys, tempfile
 sys.path.insert(0, os.path.dirname(__file__))
 from ui_common import *
 PASS = FAIL = 0
+def poll(f, t=12):
+    import time
+    end = time.time() + t
+    while time.time() < end:
+        try:
+            if f(): return True
+        except Exception: pass
+        time.sleep(0.2)
+    return False
+
+
 def check(name, cond, detail=""):
     global PASS, FAIL
     if cond: PASS += 1; print(f"  PASS  {name}")
@@ -18,7 +29,8 @@ with sync_playwright() as pw:
     pg.goto(g.url); pg.wait_for_timeout(1200)
     check("empty welcome", "Welcome to Kempt" in pg.inner_text(".wl-dark"))
     pg.evaluate("p => { for (const x of p) rememberRecent(x, false); prefs.set('session', [p[0], p[1]]); }", fs)
-    pg.reload(); pg.wait_for_timeout(1500)
+    pg.wait_for_timeout(1500)
+    pg.reload(); poll(lambda: pg.locator(".wl-dark .row").count() >= 3)
     check("recent listed", pg.locator(".wl-dark .row").count() == 3, pg.locator(".wl-dark .row").count())
     check("sizes filled in", "B" in pg.inner_text(".wl-dark .row >> nth=0"))
     pg.locator(".wl-dark .row .star").nth(1).click(); pg.wait_for_timeout(300)
@@ -30,7 +42,8 @@ with sync_playwright() as pw:
     pg.evaluate("document.documentElement.dataset.theme='dark'")
     check("dark variant visible", pg.locator(".wl-dark").is_visible() and not pg.locator(".wl-light").is_visible())
     check("version shown", "0." in pg.inner_text(".wl-dark .stats"))
-    pg.locator(".wl-dark .w-restore").click(); pg.wait_for_timeout(1500)
+    pg.locator(".wl-dark .w-restore").click()
+    poll(lambda: pg.locator("#tabs .tab").count() >= 2)
     check("restore opens the two tabs", pg.locator("#tabs .tab").count() == 2, pg.locator("#tabs .tab").count())
     pg.evaluate("() => { for (const t of Tabs.list.slice()) Tabs.close(t); }"); pg.wait_for_timeout(500)
     check("welcome returns", pg.locator("#welcome").count() == 1)
