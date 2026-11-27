@@ -3,6 +3,19 @@
 All notable changes are listed here. Format: [Keep a Changelog](https://keepachangelog.com/);
 versioning: [SemVer](https://semver.org/).
 
+## [0.2.4] - 2026-11-27
+
+### Added
+- New landing page (dark and light designs) with recent files, pinned files and "restore last session".
+- Opening a file from the command line while Kempt is running now adds it to the open window (drag and drop supported too).
+- Compare any two open tabs (Ctrl+click, or right-click "Compare with...").
+- Same-word highlighting when text is selected.
+- Optional desktop notification and tab flash when a new file arrives.
+
+### Fixed
+- Selection colour no longer hides text in the editor.
+- Windows installer now shows the correct version.
+
 ## [Unreleased]
 
 ## [0.2.3] - 2026-11-27
