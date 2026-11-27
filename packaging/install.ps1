@@ -5,12 +5,12 @@
 
 .EXAMPLE
   irm https://github.com/infrahomeserver-max/kempt/releases/latest/download/install.ps1 | iex
-  & ([scriptblock]::Create((irm https://github.com/infrahomeserver-max/kempt/releases/latest/download/install.ps1))) -ContextMenu
+  & ([scriptblock]::Create((irm https://github.com/infrahomeserver-max/kempt/releases/latest/download/install.ps1))) -NoContextMenu
 #>
 [CmdletBinding()]
 param(
   [string]$Tag,               # e.g. v0.2.4 (default: newest)
-  [switch]$ContextMenu,       # add "Open with Kempt" to the right-click menu
+  [switch]$NoContextMenu,     # skip the "Open with Kempt" right-click entry (added by default)
   [switch]$System,            # all users (needs an administrator PowerShell)
   [switch]$DryRun
 )
@@ -49,7 +49,7 @@ try {
   if (-not $inst) { Die 'install.ps1 was not found inside the zip.' }
 
   $args2 = @{}
-  if ($ContextMenu) { $args2.ContextMenu = $true }
+  if (-not $NoContextMenu) { $args2.ContextMenu = $true }
   if ($System) { $args2.System = $true }
   if ($DryRun) { $args2.DryRun = $true }
   Say 'Running the installer'
