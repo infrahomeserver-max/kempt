@@ -3822,11 +3822,19 @@ class MediaTab {
   onShow() { const sb = document.getElementById('sb-path'); if (sb) sb.textContent = this.path; }
 }
 /* ---- Paste & compare: two panels for pasted text; Beautify (JSON/XML, repairs broken JSON) and Compare, nothing is written to a file ---- */
+// replace the whole text of a box in a way the browser records as an edit, so Ctrl+Z (and the Undo button) bring the old text back
+function setBoxText(ta, text) {
+  ta.focus(); ta.select();
+  let ok = false; try { ok = document.execCommand('insertText', false, text); } catch (_) { }
+  if (!ok || ta.value !== text) ta.value = text;
+  ta.setSelectionRange(0, 0); ta.scrollTop = 0;
+}
 class PasteTab {
   constructor() {
     this.kind = 'paste'; this.icon = ic('columns', 14);
     this.panel = el('div', 'panel');
     const pane = (k, label) => `<div class="pane" data-s="${k}"><div class="ph"><span>${label}</span><span class="st"></span>
+      <button class="flat b-undo" title="Undo the last change in this box (Ctrl+Z)">Undo</button>
       <button class="flat b-fmt" title="Beautify this side: indent JSON or XML (broken JSON is repaired)">Beautify</button>
       <button class="flat b-pst" title="Replace this side with the clipboard text">Paste</button>
       <button class="flat b-cpy" title="Copy this side">Copy</button>
@@ -3847,12 +3855,13 @@ class PasteTab {
       ta.addEventListener('input', () => this.stat(k)); ta.addEventListener('paste', () => setTimeout(() => this.stat(k), 0));
       ta.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); guard(() => this.compare())(); } });
       $('.b-fmt', pn).onclick = guard(() => this.beautify(k));
-      $('.b-pst', pn).onclick = guard(async () => { let t = ''; try { t = await navigator.clipboard.readText(); } catch (e) { toast('The browser blocked reading the clipboard. Click in the box and press Ctrl+V instead.', 'info'); return; } ta.value = t; this.stat(k); if (t) ta.focus(); });
+      $('.b-pst', pn).onclick = guard(async () => { let t = ''; try { t = await navigator.clipboard.readText(); } catch (e) { toast('The browser blocked reading the clipboard. Click in the box and press Ctrl+V instead.', 'info'); return; } setBoxText(ta, t); this.stat(k); if (t) ta.focus(); });
       $('.b-cpy', pn).onclick = guard(async () => { try { await navigator.clipboard.writeText(ta.value); toast('Copied', 'ok', 1200); } catch (e) { ta.select(); document.execCommand('copy'); } });
-      $('.b-clr', pn).onclick = () => { ta.value = ''; this.stat(k); ta.focus(); };
+      $('.b-clr', pn).onclick = () => { setBoxText(ta, ''); this.stat(k); ta.focus(); };
+      $('.b-undo', pn).onclick = () => { ta.focus(); document.execCommand('undo'); this.stat(k); };
     }
     q('.b-both').onclick = guard(async () => { await this.beautify('left'); await this.beautify('right'); });
-    q('.b-swap').onclick = () => { const t = this.ta.left.value; this.ta.left.value = this.ta.right.value; this.ta.right.value = t; this.stat('left'); this.stat('right'); };
+    q('.b-swap').onclick = () => { const t = this.ta.left.value; setBoxText(this.ta.left, this.ta.right.value); setBoxText(this.ta.right, t); this.stat('left'); this.stat('right'); };
     q('.b-cmp').onclick = guard(() => this.compare());
     this.stat('left'); this.stat('right');
   }
@@ -3867,7 +3876,7 @@ class PasteTab {
   async beautify(k) {
     const ta = this.ta[k]; if (!ta.value.trim()) return;
     const r = await api('text/format', { text: ta.value, indent: this.indent() }).catch(e => { toast((k === 'left' ? 'Left: ' : 'Right: ') + (e.message || e), 'err', 6000); return null; });
-    if (!r) return; ta.value = r.text; this.stat(k);
+    if (!r) return; setBoxText(ta, r.text); this.stat(k);
     const fx = Object.entries(r.fixed || {}).map(([a, n]) => `${a}${n > 1 ? ' ×' + n : ''}`);
     if (r.kind === 'text') toast('Not JSON or XML, so there is nothing to indent.', 'info', 2500); else if (fx.length) toast('Repaired: ' + fx.join(', '), 'info', 5000);
   }
