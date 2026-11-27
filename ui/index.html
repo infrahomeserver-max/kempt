@@ -264,6 +264,8 @@ kbd { border-radius:4px; border-bottom-width:2px; padding:0 5px; color:var(--fg-
 button.primary kbd { background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.3); color:inherit; }
 ::selection { background:color-mix(in srgb, var(--accent) 35%, transparent); }
 ::highlight(kword) { background:rgba(255,159,28,.45); color:inherit; }
+.tab.newtab { animation:newtab 1.6s ease-out 1; }
+@keyframes newtab { 0% { box-shadow:0 0 0 0 var(--accent), inset 0 -3px 0 var(--accent); background:color-mix(in srgb, var(--accent) 45%, var(--bg2)); } 70% { box-shadow:0 0 0 8px transparent, inset 0 -3px 0 var(--accent); } 100% { box-shadow:0 0 0 0 transparent; } }
 .tab.mk { background:color-mix(in srgb, var(--accent) 22%, var(--bg2)); box-shadow:inset 0 2px 0 var(--accent); }
 .tab .mkn { background:var(--accent); color:var(--accent-fg); border-radius:9px; font-size:10.5px; min-width:16px; height:16px; line-height:16px; text-align:center; font-weight:700; }
 #cmpbar { position:fixed; left:50%; bottom:34px; transform:translateX(-50%); z-index:8000; display:flex; align-items:center; gap:10px; background:var(--bg2); border:1px solid var(--accent); border-radius:10px; padding:8px 12px; box-shadow:var(--shadow); }
@@ -365,6 +367,43 @@ button.danger:hover:not(:disabled) { background:var(--danger); border-color:var(
 .sw-system i:nth-child(1) { background:linear-gradient(90deg,#1e1e1e 50%,#ffffff 50%); } .sw-system i:nth-child(2) { background:#2f7fe0; } .sw-system i:nth-child(3) { background:#3fb950; }
 .about { display:flex; gap:14px; align-items:center; margin:18px 0 8px; } .about b { font-size:17px; }
 
+/* welcome (dark: dashboard; light: product hero) */
+.wl { width:100%; max-width:1240px; margin:0 auto; padding:26px 40px; text-align:left; align-self:flex-start; }
+.wl-light { display:none; } [data-theme="light"] .wl-light { display:grid; } [data-theme="light"] .wl-dark { display:none; }
+.panel#welcome { overflow:auto; display:flex; }
+.wl .hd { display:flex; align-items:center; gap:14px; margin-bottom:18px; } .wl .hd h1 { font-size:26px; margin:0; letter-spacing:-.4px; } .wl .hd p { margin:2px 0 0; color:var(--fg-dim); }
+.wl .hd .sp { flex:1; } .wl .hd .lg-img { border-radius:12px; }
+.wl .acts { display:flex; gap:8px; flex-wrap:wrap; } .wl .acts button { display:inline-flex; align-items:center; gap:8px; }
+.wl .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+.wl .stat, .wl .box { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+.wl .stat small { color:var(--fg-dim); font-size:12px; } .wl .stat b { display:block; font-size:22px; font-weight:600; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } .wl .stat span { color:var(--fg-dim); font-size:12px; }
+.wl .cols { display:grid; grid-template-columns:1.35fr 1fr 1fr; gap:14px; align-items:start; }
+.wl h3 { font-size:11.5px; letter-spacing:.9px; text-transform:uppercase; color:var(--fg-dim); margin:0 0 8px; font-weight:650; }
+.wl .pins { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+.wl .pin { display:flex; gap:10px; align-items:center; padding:9px 10px; border-radius:9px; background:var(--bg3, var(--bg-hover)); cursor:pointer; position:relative; min-width:0; }
+.wl .pin:hover, .wl .row:hover { background:var(--bg-hover); }
+.wl .pin .nm { min-width:0; } .wl .pin b, .wl .row b { display:block; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .wl .pin small, .wl .row small { color:var(--fg-dim); font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wl .pin .pv { display:none; }
+.wl .row { display:flex; align-items:center; gap:10px; padding:7px 8px; border-radius:8px; cursor:pointer; border-top:1px solid var(--border); } .wl .row:first-of-type { border-top:0; }
+.wl .row .nm { flex:1; min-width:0; } .wl .row .mt { color:var(--fg-dim); font-size:12px; white-space:nowrap; text-align:right; }
+.wl .star { border:0; background:transparent; color:var(--fg-dim); padding:0 4px; font-size:15px; cursor:pointer; line-height:1; } .wl .star.on { color:#f5c542; } .wl .star:hover { color:#f5c542; }
+.wl ul { list-style:none; margin:0; padding:0; font-size:13px; } .wl li { display:flex; justify-content:space-between; gap:10px; padding:5px 0; border-top:1px solid var(--border); } .wl li:first-child { border-top:0; }
+.wl .tip { padding:11px 12px; border-radius:9px; background:color-mix(in srgb, var(--accent) 12%, transparent); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent); font-size:13px; margin-bottom:14px; }
+.wl .sess { display:flex; align-items:center; gap:12px; margin-bottom:14px; border-color:color-mix(in srgb, var(--accent) 45%, var(--border)); }
+.wl .sess b { display:block; } .wl .sess small { color:var(--fg-dim); } .wl .sess .sp { flex:1; }
+.wl .drop { margin-top:14px; border:2px dashed var(--border); border-radius:12px; padding:14px; text-align:center; color:var(--fg-dim); font-size:13px; }
+.wl .priv { display:flex; gap:10px; align-items:center; color:var(--fg-dim); font-size:12.5px; }
+/* light: product hero */
+.wl-light { grid-template-columns:minmax(0,470px) minmax(0,1fr); gap:44px; align-items:center; padding-top:52px; }
+.wl-light h1 { font-size:38px; line-height:1.15; letter-spacing:-.8px; margin:14px 0 10px; } .wl-light .sub { color:var(--fg-dim); font-size:16px; margin:0 0 20px; }
+.wl-light .steps { display:grid; gap:10px; margin:24px 0 0; } .wl-light .st { display:flex; gap:12px; align-items:flex-start; } .wl-light .st i { font-style:normal; width:24px; height:24px; border-radius:50%; background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--accent); display:grid; place-items:center; font-weight:700; font-size:12px; flex:none; }
+.wl-light .st span { color:var(--fg-dim); font-size:13.5px; } .wl-light .st b { color:var(--fg); font-weight:500; }
+.wl-light .chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:18px; align-items:center; } .wl-light .chip { padding:3px 11px; border-radius:14px; background:var(--bg2); border:1px solid var(--border); font-size:12.5px; cursor:pointer; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .wl-light .chip:hover { background:var(--bg-hover); }
+.wl-light .win { border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:0 18px 50px rgba(20,40,80,.16); background:var(--bg); }
+.wl-light .win .tb { display:flex; background:var(--bg2); border-bottom:1px solid var(--border); font-size:12px; } .wl-light .win .t { padding:8px 14px; border-right:1px solid var(--border); color:var(--fg-dim); } .wl-light .win .t.on { background:var(--bg); color:var(--fg); box-shadow:inset 0 2px 0 var(--accent); }
+.wl-light .win .cd { padding:12px 0; font:12.5px/1.75 var(--mono, monospace); } .wl-light .win .cd div { display:flex; } .wl-light .win .cd i { font-style:normal; width:44px; text-align:right; padding-right:14px; color:var(--fg-dim); opacity:.7; }
+.wl-light .win .k { color:#0b5cad; } .wl-light .win .s { color:#a31515; } .wl-light .win .n { color:#098658; } .wl-light .win mark { background:#ffd27a; color:#111; }
+.wl-light .drop { margin-top:16px; }
 /* welcome */
 .welcome { max-width:620px; padding:32px; }
 .welcome svg { border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
@@ -993,6 +1032,7 @@ function openSettings() {
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="set-autostart"> Start in the background at login</label><p class="s-note">Keeps reminders and the tray icon working after you log in.</p>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px">Browser <select id="set-browser" aria-label="Browser"><option value="">System default</option><option value="chrome">Google Chrome</option><option value="firefox">Firefox</option><option value="edge">Microsoft Edge</option><option value="brave">Brave</option><option value="chromium">Chromium</option><option value="vivaldi">Vivaldi</option><option value="safari">Safari (macOS)</option></select></label><p class="s-note">Used when Kempt opens itself (<code>kempt gui</code>, the tray icon, login). If it is not installed, the system default is used.</p>
           <p class="s-note"><span id="set-bw-note"></span></p>
+          <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="set-notify"> Alert me when a file opens while Kempt is in the background</label><p class="s-note">Browsers do not let a page jump to the front by itself. This shows a notification; clicking it brings Kempt up. (Notifications must be allowed for this page.)</p>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="set-appwin"> Open in its own window</label><p class="s-note">Gives Kempt its own taskbar icon. Needs Chrome, Edge, Brave or Chromium.</p>
           <h4 style="margin-top:18px">Updates</h4>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:0"><input type="checkbox" id="set-upd"> Check for updates</label>
@@ -1046,7 +1086,7 @@ function openSettings() {
   const sh = q('#set-showhid'); sh.checked = !!prefs.get('showhid', false); sh.onchange = () => prefs.set('showhid', sh.checked);
   q('#set-reset').onclick = guard(async () => {
     const ok = await confirmBox('Reset preferences', 'Theme, fonts, accent, formats, shortcuts, sorting and similar choices go back to their defaults.\nYour files, notes, checklist, calendar, clock zones and holidays are kept.', 'Reset'); if (!ok) return;
-    const patch = {}; for (const k of ['theme', 'fs', 'indent', 'ws', 'dfmt', 'season', 'sound', 'expand', 'readonly', 'astext', 'wrap', 'accent', 'mono', 'clock12', 'nsort', 'ndone', 'keys', 'meet', 'showhid', 'updchk', 'updrepo', 'browser', 'appwin']) patch[k] = null;
+    const patch = {}; for (const k of ['theme', 'fs', 'indent', 'ws', 'dfmt', 'season', 'sound', 'expand', 'readonly', 'astext', 'wrap', 'accent', 'mono', 'clock12', 'nsort', 'ndone', 'keys', 'meet', 'showhid', 'updchk', 'updrepo', 'browser', 'appwin', 'notify']) patch[k] = null;
     await api('state/set', { patch }); location.reload();
   });
   const se = q('#set-season'); se.value = prefs.get('season', 'auto'); se.onchange = () => { prefs.set('season', se.value); const t = Tabs.list.find(x => x.kind === 'clock'); if (t) t.paint(); };
@@ -1070,6 +1110,8 @@ function openSettings() {
     [...bw.options].forEach(o => { if (o.value && !have.has(o.value)) { if (o.value === cur) o.textContent += ' (not found)'; else o.remove(); } });
     bw.value = cur; q('#set-bw-note').textContent = have.size ? 'Found on this computer: ' + [...bw.options].filter(o => o.value).map(o => o.textContent).join(', ') + '.' : 'No known browser was found; the system default is used.';
   }).catch(() => { });
+  const nt = q('#set-notify'); nt.checked = prefs.get('notify', true) !== false && typeof Notification !== 'undefined' && Notification.permission === 'granted';
+  nt.onchange = async () => { if (!nt.checked) return prefs.set('notify', false); if (typeof Notification === 'undefined') { nt.checked = false; return toast('This browser has no notifications.', 'info'); } const r = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission(); if (r === 'granted') { prefs.set('notify', true); toast('Done. Kempt will notify you.', 'ok'); } else { nt.checked = false; toast('Notifications are blocked for this page. Allow them in the browser\'s site settings.', 'info', 7000); } };
   const aw = q('#set-appwin'); aw.checked = !!prefs.get('appwin', false); aw.onchange = () => prefs.set('appwin', aw.checked);
   const ro = q('#set-readonly'); ro.checked = !!prefs.get('readonly', false); ro.onchange = () => prefs.set('readonly', ro.checked);
   const exp = q('#set-expand'); exp.checked = !!prefs.get('expand', false); exp.onchange = () => prefs.set('expand', exp.checked);
@@ -1575,27 +1617,21 @@ const Tabs = {
     inp.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); fin(true); } else if (e.key === 'Escape') { e.preventDefault(); fin(false); } };
     inp.onblur = () => fin(true); inp.onclick = inp.ondblclick = inp.onmousedown = e => e.stopPropagation();
   },
+  saveSession() {
+    clearTimeout(this._ss); this._ss = setTimeout(() => { const ps = this.list.filter(t => t.kind === 'doc' && t.info && t.info.path && !t.info.dropped).map(t => t.info.path); if (ps.length) prefs.set('session', ps.slice(0, 20)); }, 800);
+  },
   updateWelcome() {
     let w = $('#welcome');
-    if (this.list.length) { w && w.remove(); return; }
+    if (this.list.length) { w && w.remove(); this.saveSession(); return; }
     if (w) return;
     w = el('div', 'panel show'); w.id = 'welcome';
-    const recent = prefs.get('recent', []);
-    w.innerHTML = `<div class="welcome"><img class="logo logo-d" src="/logo-dark.png" width="84" height="84" alt=""><img class="logo logo-l" src="/logo-light.png" width="84" height="84" alt="">
-      <h1>Kempt</h1>
-      <p class="tag">Open huge JSON, XML and log files instantly. Find with several keywords, replace, fix broken JSON/XML, and compare two files side by side.</p>
-      <p class="cta"><button class="primary lg" id="w-open">${ic('folder', 18)}Open a file<kbd>Ctrl+O</kbd></button> <button class="lg" id="w-cmp">${ic('columns', 18)}Compare two files</button></p>
-      <p class="dim-hint">or drag files into this window</p>
-      <div class="recent">${recent.length ? '<div class="rh">Recent files</div>' : ''}${recent.map(p => `<a data-p="${esc(p)}" title="${esc(p)}">${FI.ic(p, 14)}<span>${esc(p)}</span></a>`).join('')}</div></div>`;
-    $('#main').appendChild(w);
-    $('#w-open', w).onclick = () => actions.open(); $('#w-cmp', w).onclick = () => actions.compare();
-    w.querySelectorAll('.recent a').forEach(a => a.onclick = () => actions.openPath(a.dataset.p));
+    w.innerHTML = Welcome.html(); $('#main').appendChild(w); Welcome.wire(w);
   },
 };
 
 function rememberRecent(path, setDir = true) {
   if (!path) return; let r = prefs.get('recent', []); r = [path, ...r.filter(p => p !== path)].slice(0, 12);
-  prefs.set('recent', r);
+  prefs.set('recent', r); const at = prefs.get('recentAt', {}); at[path] = Date.now(); for (const k of Object.keys(at)) if (!r.includes(k)) delete at[k]; prefs.set('recentAt', at);
   if (!setDir) return;
   const cut = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')); if (cut > 0) prefs.set('dir', path.slice(0, cut));   // next Open starts in this folder
 }
@@ -4277,6 +4313,65 @@ const FIND = {
     if (!txt) { out.hidden = true; return; } const body = txt.replace(/\n$/, ''), lines = body.split('\n').length; out.hidden = false; out.textContent = `${lines.toLocaleString()} line${lines === 1 ? '' : 's'} selected · ${txt.length.toLocaleString()} chars`; };
   document.addEventListener('selectionchange', () => { clearTimeout(tm); tm = setTimeout(show, 60); }); document.addEventListener('keyup', () => { clearTimeout(tm); tm = setTimeout(show, 60); }); document.addEventListener('mouseup', () => { clearTimeout(tm); tm = setTimeout(show, 60); }); }
 /* ───────────── startup ───────────── */
+
+const KEMPT_VERSION = '@VERSION@';
+/* ───────────── welcome screen ───────────── */
+const Welcome = {
+  NEWS: ['Compare open tabs: Ctrl+click two tabs', 'Drag & drop files to open them', 'A second file opens in this window', 'Select a word to highlight it everywhere', 'New logo'],
+  TIPS: ['Double-click a word and every other place it appears is highlighted, in the viewer, tables and compare.', 'Ctrl+click two tabs, then press Compare to see their differences.', 'Right-click a tab for “Compare with…”, rename and close.', 'Fix repairs broken JSON and XML in one click.', 'Find accepts several words at once: add more with Ctrl+E.'],
+  info: {},
+  ago(ms) {
+    if (!ms) return ''; const d = Date.now() - ms, m = 60000, h = 60 * m, day = 24 * h;
+    if (d < m) return 'just now'; if (d < h) return Math.floor(d / m) + ' min ago'; if (d < day) return Math.floor(d / h) + ' h ago'; if (d < 2 * day) return 'yesterday';
+    const dt = new Date(ms); return d < 7 * day ? dt.toLocaleDateString(undefined, { weekday: 'short' }) : dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  },
+  size(n) { if (n == null) return ''; const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0; while (n >= 1024 && i < 4) { n /= 1024; i++; } return (i ? n.toFixed(n < 10 ? 1 : 0) : n) + ' ' + u[i]; },
+  base(p) { return p.slice(Math.max(p.lastIndexOf('/'), p.lastIndexOf('\\')) + 1); },
+  dir(p) { const c = Math.max(p.lastIndexOf('/'), p.lastIndexOf('\\')); const d = c > 0 ? p.slice(0, c) : ''; const h = (window.HOME || ''); return h && d.startsWith(h) ? '~' + d.slice(h.length) : d; },
+  pinned() { const a = prefs.get('pinned', []); return Array.isArray(a) ? a : []; },
+  pin(p) { let a = this.pinned(); a = a.includes(p) ? a.filter(x => x !== p) : [p, ...a].slice(0, 8); prefs.set('pinned', a); },
+  rows() {
+    const rec = prefs.get('recent', []), at = prefs.get('recentAt', {}), pins = this.pinned();
+    return rec.slice(0, 8).map(p => { const i = this.info[p] || {}; return `<div class="row" data-p="${esc(p)}" title="${esc(p)}">${FI.ic(p, 16)}<div class="nm"><b>${esc(this.base(p))}</b><small>${esc(this.dir(p))}</small></div><span class="mt">${i.exists === false ? 'missing' : esc(this.size(i.size))}${at[p] ? (i.size != null ? ' · ' : '') + this.ago(at[p]) : ''}</span><button class="star${pins.includes(p) ? ' on' : ''}" data-star="${esc(p)}" title="${pins.includes(p) ? 'Unpin' : 'Pin to the top'}">${pins.includes(p) ? '★' : '☆'}</button></div>`; }).join('') || '<div class="dim" style="padding:8px">Files you open appear here.</div>';
+  },
+  pins() {
+    const pins = this.pinned(); if (!pins.length) return '<div class="dim" style="font-size:13px;margin-bottom:14px">Click ☆ next to a recent file to pin it here.</div>';
+    return '<div class="pins">' + pins.slice(0, 4).map(p => `<div class="pin" data-p="${esc(p)}" title="${esc(p)}">${FI.ic(p, 18)}<div class="nm"><b>${esc(this.base(p))}</b><small>${esc(this.dir(p))}</small></div><button class="star on" data-star="${esc(p)}" title="Unpin">★</button></div>`).join('') + '</div>';
+  },
+  html() {
+    const rec = prefs.get('recent', []), sess = prefs.get('session', []), at = prefs.get('recentAt', {}), ver = KEMPT_VERSION, last = rec[0];
+    const acts = `<button class="primary w-open" id="w-open">${ic('folder', 16)}Open a file<kbd>Ctrl+O</kbd></button><button class="w-new">${ic('plus', 16)}New<kbd>Alt+N</kbd></button><button class="w-cmp" id="w-cmp">${ic('columns', 16)}Compare</button><button class="w-paste">${ic('copy', 16)}Paste</button>`;
+    const dark = `<div class="wl wl-dark"><div class="hd"><img class="lg-img logo-d" src="/logo-dark.png" width="46" height="46" alt=""><div><h1>${rec.length ? 'Welcome back' : 'Welcome to Kempt'}</h1><p>Open a file, drag one in, or pick up where you left off.</p></div><span class="sp"></span><div class="acts">${acts}</div></div>
+      ${sess.length ? `<div class="box sess"><div class="ico" style="font-size:20px">⟲</div><div><b>Continue where you left off</b><small>${sess.length} tab${sess.length === 1 ? '' : 's'}: ${esc(sess.slice(0, 3).map(p => this.base(p)).join(', '))}${sess.length > 3 ? '…' : ''}</small></div><span class="sp"></span><button class="primary w-restore">Restore</button></div>` : ''}
+      <div class="stats"><div class="stat"><small>Last opened</small><b>${last ? esc(this.base(last)) : '—'}</b><span>${last && at[last] ? this.ago(at[last]) : 'nothing yet'}</span></div><div class="stat"><small>Recent files</small><b>${rec.length}</b><span>kept on this computer</span></div><div class="stat"><small>Pinned</small><b>${this.pinned().length}</b><span>shown at the top</span></div><div class="stat"><small>Version</small><b>${esc(ver || '')}</b><span>offline · no telemetry</span></div></div>
+      <div class="cols"><div class="box"><h3>📌 Pinned</h3><div id="w-pins">${this.pins()}</div><h3>🕘 Recent</h3><div id="w-rows">${this.rows()}</div></div>
+      <div class="box"><h3>✨ New in this version</h3><ul>${this.NEWS.map(n => `<li>${esc(n)}</li>`).join('')}</ul><div class="drop">⤓ Drag files anywhere in this window</div></div>
+      <div class="box"><h3>💡 Did you know?</h3><div class="tip">${esc(this.TIPS[new Date().getDate() % this.TIPS.length])}</div><h3>⌨ Keys</h3><ul><li>Find &amp; replace<kbd>Ctrl+F</kbd></li><li>Next change<kbd>F7</kbd></li><li>Rename tab<kbd>F2</kbd></li><li>Save<kbd>Ctrl+S</kbd></li></ul><div class="priv" style="margin-top:12px">🔒 Offline. No account, no cloud, no telemetry.</div></div></div></div>`;
+    const light = `<div class="wl wl-light"><div><img class="lg-img logo-l" src="/logo-light.png" width="56" height="56" alt=""><h1>See inside any file, even gigabytes.</h1><p class="sub">Kempt opens huge JSON, XML, logs and tables in an instant, offline and private.</p><div class="acts">${acts.replace(' id="w-open"', '').replace(' id="w-cmp"', '')}</div>
+      <div class="steps"><div class="st"><i>1</i><span><b>Open or drop</b> any file. Several files open as tabs.</span></div><div class="st"><i>2</i><span><b>Find, fix, format.</b> Select a word to see it everywhere.</span></div><div class="st"><i>3</i><span><b>Compare</b> two files, or Ctrl+click two open tabs.</span></div></div>
+      <div class="chips">${rec.length ? '<span class="dim" style="font-size:12.5px">Recent</span>' : ''}${rec.slice(0, 4).map(p => `<span class="chip" data-p="${esc(p)}" title="${esc(p)}">${esc(this.base(p))}</span>`).join('')}${sess.length ? '<button class="w-restore">Restore last session</button>' : ''}</div></div>
+      <div><div class="win"><div class="tb"><div class="t on">orders.json</div><div class="t">config.json</div><div class="t">server.log</div></div><div class="cd"><div><i>1</i><span>{</span></div><div><i>2</i><span>&nbsp;&nbsp;<span class="k">"order"</span>: <span class="s">"A-1042"</span>,</span></div><div><i>3</i><span>&nbsp;&nbsp;<span class="k">"customer"</span>: {</span></div><div><i>4</i><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"name"</span>: <span class="s">"<mark>Ada</mark> Lovelace"</span>,</span></div><div><i>5</i><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"email"</span>: <span class="s">"<mark>ada</mark>@example.com"</span></span></div><div><i>6</i><span>&nbsp;&nbsp;},</span></div><div><i>7</i><span>&nbsp;&nbsp;<span class="k">"items"</span>: [ … ],</span></div><div><i>8</i><span>&nbsp;&nbsp;<span class="k">"total"</span>: <span class="n">129.50</span></span></div><div><i>9</i><span>}</span></div></div></div><div class="drop">⤓ or drag files into this window</div></div></div>`;
+    return dark + light;
+  },
+  async fill(w) {
+    const paths = [...new Set([...prefs.get('recent', []).slice(0, 8), ...this.pinned()])]; if (!paths.length) return;
+    try { const r = await api('recent/info', { paths, peek: false }); for (const f of r.files) this.info[f.path] = f; } catch (_) { return; }
+    const rows = $('#w-rows', w); if (rows) { rows.innerHTML = this.rows(); this.bindRows(w); }
+  },
+  bindRows(w) {
+    w.querySelectorAll('.row, .pin, .chip').forEach(a => a.onclick = e => { if (e.target.closest('.star')) return; actions.openPath(a.dataset.p); });
+    w.querySelectorAll('.star').forEach(b => b.onclick = e => { e.stopPropagation(); this.pin(b.dataset.star); const pins = $('#w-pins', w), rows = $('#w-rows', w); if (pins) pins.innerHTML = this.pins(); if (rows) rows.innerHTML = this.rows(); this.bindRows(w); });
+  },
+  wire(w) {
+    w.querySelectorAll('.w-open').forEach(b => b.onclick = () => actions.open());
+    w.querySelectorAll('.w-cmp').forEach(b => b.onclick = () => actions.compare());
+    w.querySelectorAll('.w-new').forEach(b => b.onclick = () => actions.newFile());
+    w.querySelectorAll('.w-paste').forEach(b => b.onclick = () => actions.paste());
+    w.querySelectorAll('.w-restore').forEach(b => b.onclick = async () => { for (const p of prefs.get('session', [])) { try { await actions.openPath(p); } catch (_) { } } });
+    this.bindRows(w); this.fill(w);
+  },
+};
+
 /** show tabs the server built: at startup, for a second `kempt gui <file>`, or for a file dragged into the window */
 function applyTabs(list) {
   for (const t of list || []) {
@@ -4289,15 +4384,36 @@ function openView(v) { if (v === 'notes') actions.notes(); else if (v === 'clock
 /** a second `kempt gui <file>` (double-clicking another file) hands it to this window; the request waits on the server until something arrives */
 const CID = Math.random().toString(36).slice(2) + Date.now().toString(36);
 addEventListener('pagehide', () => { try { fetch('/api/inbox', { method: 'POST', keepalive: true, headers: { 'X-Token': TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ bye: true, cid: CID }) }); } catch (_) { } });
+let lastOpened = '';
+function flashTab() { const t = $('#tabs .tab.active, #tabs .tab.on'); if (t) { t.classList.remove('newtab'); void t.offsetWidth; t.classList.add('newtab'); } }
+/** a page cannot raise itself above other tabs, so when something opens while Kempt is in the background: mark the tab title and, if allowed, send a notification whose click brings Kempt to the front */
+function attention(what) {
+  const msg = 'Opened ' + (what || 'a file'), old = document.title.replace(/^● .*? — /, '');
+  document.title = '● ' + msg + ' — ' + old;
+  const back = () => { if (!document.hidden) { document.title = old; document.removeEventListener('visibilitychange', back); removeEventListener('focus', back); } };
+  document.addEventListener('visibilitychange', back); addEventListener('focus', back);
+  try {
+    if (typeof Notification === 'undefined') return;
+    if (prefs.get('notify', true) && Notification.permission === 'granted') { const n = new Notification('Kempt', { body: msg + ' — click to switch to Kempt', tag: 'kempt-open', icon: '/favicon.png' }); n.onclick = () => { try { window.focus(); } catch (_) { } n.close(); }; }
+    else if (Notification.permission === 'default' && !attention.told) { attention.told = true; toast('Kempt opened ' + (what || 'a file') + ' in the background. Turn on “Bring Kempt to the front…” in Settings to be alerted next time.', 'info', 12000); }
+  } catch (_) { }
+}
+/** tell the server which window is in front, so a new file goes to the one you are using */
+const touch = () => { try { api('inbox', { touch: true, cid: CID, vis: !document.hidden }); } catch (_) { } };
+document.addEventListener('visibilitychange', touch); addEventListener('focus', touch);
+/** ask once (on your first click) so the "file opened" alert can bring Kempt forward */
+addEventListener('click', function ask() { removeEventListener('click', ask, true); try { if (typeof Notification !== 'undefined' && Notification.permission === 'default' && !prefs.get('notifyAsked', false) && prefs.get('notify', true) !== false) { prefs.set('notifyAsked', true); Notification.requestPermission(); } } catch (_) { } }, true);
 async function inboxLoop() {
   for (;;) {
     try {
-      const r = await api('inbox', { wait: 15, cid: CID });
+      const r = await api('inbox', { wait: 15, cid: CID, vis: !document.hidden });
       for (const it of r.items || []) {
-        applyTabs(it.tabs); if (it.view) openView(it.view);
-        const n = (it.tabs || []).length; if (n) toast(n === 1 && it.tabs[0].kind === 'doc' ? 'Opened ' + it.tabs[0].info.name : n === 1 ? 'Opened the comparison' : `Opened ${n} tabs`, 'ok');
+        applyTabs(it.tabs); if (it.view) openView(it.view); flashTab();
+        const n = (it.tabs || []).length; if (n) lastOpened = n === 1 && it.tabs[0].kind === 'doc' ? it.tabs[0].info.name : n === 1 ? 'a comparison' : n + ' tabs';
+        if (n) toast(n === 1 && it.tabs[0].kind === 'doc' ? 'Opened ' + it.tabs[0].info.name : n === 1 ? 'Opened the comparison' : `Opened ${n} tabs`, 'ok');
       }
-      if ((r.items || []).length) { try { window.focus(); } catch (_) { } }
+      if (r.retry) await new Promise(res => setTimeout(res, r.retry * 1000));
+      if ((r.items || []).length) { try { window.focus(); } catch (_) { } if (document.hidden) attention(lastOpened); }
     } catch (e) { await new Promise(res => setTimeout(res, 3000)); }
   }
 }

@@ -70,16 +70,78 @@ pub fn stop_running() -> Result<bool> {
 
 /// Give files (or a tool name) to the Kempt window that is already open, so they appear there as new tabs.
 /// False when there is no open window (nobody is looking) or anything fails: the caller then opens a new browser tab as before.
-pub fn hand_over(i: &Instance, files: &[String], as_tabs: bool, view: Option<&str>) -> bool {
-    let Ok(mut s) = TcpStream::connect_timeout(&SocketAddr::from(([127, 0, 0, 1], i.port)), Duration::from_secs(1)) else { return false };
+/// Give files to the Kempt window that is already open. Err says why that was not possible.
+pub fn hand_over(i: &Instance, files: &[String], as_tabs: bool, view: Option<&str>) -> Result<(), &'static str> {
+    let Ok(mut s) = TcpStream::connect_timeout(&SocketAddr::from(([127, 0, 0, 1], i.port)), Duration::from_secs(1)) else { return Err("could not reach the running Kempt") };
     let _ = s.set_read_timeout(Some(Duration::from_secs(60)));
     let body = serde_json::json!({"files": files, "tabs": as_tabs, "view": view}).to_string();
     if write!(s, "POST /api/gui/open HTTP/1.0\r\nHost: 127.0.0.1:{}\r\nX-Token: {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}", i.port, i.token, body.len(), body).is_err() {
-        return false;
+        return Err("could not reach the running Kempt");
     }
     let mut out = String::new();
     let _ = s.read_to_string(&mut out);
-    out.split("\r\n\r\n").nth(1).and_then(|b| serde_json::from_str::<serde_json::Value>(b).ok()).is_some_and(|v| v["delivered"] == true)
+    if out.starts_with("HTTP/1.0 404") || out.starts_with("HTTP/1.1 404") {
+        return Err("the running Kempt is an older version (quit it with: pkill -x kempt)");
+    }
+    match out.split("\r\n\r\n").nth(1).and_then(|b| serde_json::from_str::<serde_json::Value>(b).ok()) {
+        Some(v) if v["delivered"] == true => Ok(()),
+        Some(_) => Err("no Kempt window is listening (its browser tab was closed, or is frozen)"),
+        None => Err("the running Kempt did not understand the request (older version? quit it with: pkill -x kempt)"),
+    }
+}
+
+/// Best effort (Linux, X11): bring Kempt's browser tab to the front. A web page cannot do this itself, so this uses xdotool/wmctrl:
+/// raise a window whose current tab is Kempt, otherwise activate a browser window and step through its tabs (Ctrl+Tab) until the title is Kempt's.
+/// Silently does nothing without those tools, or when the browser runs natively on Wayland.
+pub fn raise_window() {
+    if std::env::var_os("KEMPT_RAISE").is_none() {
+        return;   // experimental: off unless KEMPT_RAISE=1
+    }
+    #[cfg(target_os = "linux")]
+    {
+        use std::time::Duration;
+        fn run(cmd: &str, args: &[&str]) -> Option<String> {
+            let o = Command::new(cmd).args(args).stdin(Stdio::null()).stderr(Stdio::null()).output().ok()?;
+            if !o.status.success() {
+                return None;
+            }
+            Some(String::from_utf8_lossy(&o.stdout).trim().to_string())
+        }
+        fn is_kempt(t: &str) -> bool {
+            t.contains(" \u{2014} Kempt") || t.starts_with("Kempt - ") || t.starts_with("\u{25cf} Opened")
+        }
+        std::thread::sleep(Duration::from_millis(350));   // let the page set its title first
+        if run("wmctrl", &["-a", " \u{2014} Kempt"]).is_some() {
+            return;
+        }
+        if run("xdotool", &["version"]).is_none() {
+            return;
+        }
+        let mut found = None;
+        for class in ["google-chrome", "chromium", "brave-browser", "microsoft-edge", "Google-chrome", "Chromium", "Brave-browser", "Microsoft-edge"] {
+            if let Some(ids) = run("xdotool", &["search", "--onlyvisible", "--class", class]) {
+                if let Some(id) = ids.lines().last() {
+                    found = Some(id.to_string());
+                    break;
+                }
+            }
+        }
+        let Some(id) = found else { return };
+        let _ = run("xdotool", &["windowactivate", "--sync", &id]);
+        std::thread::sleep(Duration::from_millis(150));
+        for _ in 0..40 {
+            let Some(title) = run("xdotool", &["getactivewindow", "getwindowname"]) else { return };
+            if is_kempt(&title) {
+                return;
+            }
+            let class = run("xdotool", &["getactivewindow", "getwindowclassname"]).unwrap_or_default().to_lowercase();
+            if !(class.contains("chrom") || class.contains("brave") || class.contains("edge")) {
+                return;   // focus is somewhere else: never send keys to another program
+            }
+            let _ = run("xdotool", &["key", "--clearmodifiers", "ctrl+Tab"]);
+            std::thread::sleep(Duration::from_millis(80));
+        }
+    }
 }
 
 pub fn pct(s: &str) -> String {

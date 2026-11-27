@@ -371,7 +371,7 @@ pub struct App {
     inbox: (Mutex<Vec<Value>>, std::sync::Condvar),
     pollers: AtomicUsize,
     /// windows that are listening: id -> until when they count as open (a window that closes says goodbye)
-    pages: Mutex<HashMap<String, Instant>>,
+    pages: Mutex<HashMap<String, (Instant, bool, Instant)>>,   // window id -> (counts as open until, is in front, last seen in front)
 }
 
 fn expand(p: &str) -> PathBuf {
@@ -556,36 +556,54 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
                 return Ok(json!({"items": []}));
             }
             let wait = p["wait"].as_u64().unwrap_or(0).min(15);
+            let vis = p["vis"].as_bool();
             {
                 let mut g = app.pages.lock().unwrap();
-                g.retain(|_, t| *t > Instant::now());
-                g.insert(cid.clone(), Instant::now() + Duration::from_secs(wait + 4));
+                g.retain(|_, t| t.0 > Instant::now());
+                let e = g.entry(cid.clone()).or_insert((Instant::now(), false, Instant::now() - Duration::from_secs(3600)));
+                e.0 = Instant::now() + Duration::from_secs(wait + 4);
+                if let Some(v) = vis {
+                    e.1 = v;
+                    if v {
+                        e.2 = Instant::now();
+                    }
+                }
+            }
+            if p["touch"] == true {
+                return Ok(json!({"items": []}));
             }
             let (m, cv) = &app.inbox;
-            let mine = app.pollers.fetch_add(1, Ordering::AcqRel) < 3;   // a few windows at most; the rest just look and leave
+            let mine = app.pollers.fetch_add(1, Ordering::AcqRel) < 5;   // a few windows at most; the rest are told to come back later
+            let for_me = |q: &Vec<Value>| q.iter().any(|it| it["to"].as_str().is_none_or(|t| t == cid));
             let mut q = m.lock().unwrap();
-            if mine && q.is_empty() && wait > 0 {
-                let (g, _) = cv.wait_timeout_while(q, Duration::from_secs(wait), |q| q.is_empty()).unwrap();
+            if mine && !for_me(&q) && wait > 0 {
+                let (g, _) = cv.wait_timeout_while(q, Duration::from_secs(wait), |q| !q.iter().any(|it| it["to"].as_str().is_none_or(|t| t == cid))).unwrap();
                 q = g;
             }
-            let items: Vec<Value> = std::mem::take(&mut *q);
+            let (mine_items, rest): (Vec<Value>, Vec<Value>) = std::mem::take(&mut *q).into_iter().partition(|it| it["to"].as_str().is_none_or(|t| t == cid));
+            *q = rest;
             drop(q);
             app.pollers.fetch_sub(1, Ordering::AcqRel);
             if let Some(t) = app.pages.lock().unwrap().get_mut(&cid) {
-                *t = Instant::now() + Duration::from_secs(4);
+                t.0 = Instant::now() + Duration::from_secs(4);
             }
-            Ok(json!({"items": items}))
+            Ok(json!({"items": mine_items, "retry": if mine { 0 } else { 5 }}))
         }
         "gui/open" => {
-            let alive = app.pages.lock().unwrap().values().any(|t| *t > Instant::now());
+            // the window that was used last gets the file (several windows may be open)
+            let target: Option<String> = {
+                let g = app.pages.lock().unwrap();
+                g.iter().filter(|(_, t)| t.0 > Instant::now()).max_by_key(|(_, t)| (t.1, t.2, t.0)).map(|(k, _)| k.clone())
+            };
             let files: Vec<PathBuf> = p["files"].as_array().map(|a| a.iter().filter_map(|v| v.as_str()).map(|x| PathBuf::from(x)).collect()).unwrap_or_default();
             let view = gs(p, "view").map(str::to_string);
-            if !alive || (files.is_empty() && view.is_none()) {
+            let Some(target) = target else { return Ok(json!({"delivered": false})) };
+            if files.is_empty() && view.is_none() {
                 return Ok(json!({"delivered": false}));
             }
             let tabs = build_tabs(app, &files, p["tabs"].as_bool().unwrap_or(false))?;
             let (m, cv) = &app.inbox;
-            m.lock().unwrap().push(json!({"tabs": tabs, "view": view}));
+            m.lock().unwrap().push(json!({"tabs": tabs, "view": view, "to": target}));
             cv.notify_all();
             Ok(json!({"delivered": true}))
         }
@@ -972,6 +990,33 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
             Ok(json!({"ok": d.redo(), "info": info_json(&d.info())}))
         }
         // rename the tab: an unsaved file only changes its name, a file on disk is renamed in its folder
+        "recent/info" => {
+            // size, age and a short preview for the files shown on the welcome screen
+            let mut out = Vec::new();
+            for v in p["paths"].as_array().map(|a| a.as_slice()).unwrap_or(&[]).iter().take(24) {
+                let Some(path) = v.as_str() else { continue };
+                let pb = PathBuf::from(path);
+                match std::fs::metadata(&pb) {
+                    Ok(m) if m.is_file() => {
+                        let mut peek = String::new();
+                        if p["peek"].as_bool().unwrap_or(false) {
+                            use std::io::Read;
+                            if let Ok(mut f) = std::fs::File::open(&pb) {
+                                let mut buf = vec![0u8; 400];
+                                let n = f.read(&mut buf).unwrap_or(0);
+                                buf.truncate(n);
+                                if !buf.contains(&0) {
+                                    peek = String::from_utf8_lossy(&buf).lines().take(4).map(|l| l.chars().take(60).collect::<String>()).collect::<Vec<_>>().join("\n");
+                                }
+                            }
+                        }
+                        out.push(json!({"path": path, "exists": true, "size": m.len(), "peek": peek}));
+                    }
+                    _ => out.push(json!({"path": path, "exists": false})),
+                }
+            }
+            Ok(json!({"files": out}))
+        }
         "doc/rename" => {
             let d = app.doc(p)?;
             let name = gs(p, "name").unwrap_or("").trim().to_string();
@@ -1324,7 +1369,7 @@ fn handle(app: &Arc<App>, mut req: tiny_http::Request) {
         }
         // embed the saved settings so the page starts in the right theme with no flash (`<` escaped: safe inside <script>)
         let state = app.store.get().to_string().replace('<', "\\u003c");
-        let page = INDEX_HTML.replacen("/*@STATE@*/{}/*@END@*/", &state, 1).replacen("@VERSION@", env!("CARGO_PKG_VERSION"), 1);
+        let page = INDEX_HTML.replacen("/*@STATE@*/{}/*@END@*/", &state, 1).replace("@VERSION@", env!("CARGO_PKG_VERSION"));
         let r = Response::from_string(page)
             .with_header(hdr("Content-Type", "text/html; charset=utf-8"))
             .with_header(hdr("Cache-Control", "no-store"))
@@ -1518,9 +1563,15 @@ pub fn run(o: GuiOpts) -> Result<()> {
     if let Some(i) = crate::service::running_instance() {
         if !o.background {
             let abs: Vec<String> = o.files.iter().map(|f| crate::plat::canonical(f).unwrap_or_else(|_| f.clone()).display().to_string()).collect();
-            if !o.no_open && (!abs.is_empty() || o.view.is_some()) && crate::service::hand_over(&i, &abs, o.as_tabs, o.view.as_deref()) {
-                println!("Kempt is already open; added to it.");
-                return Ok(());
+            if !o.no_open && (!abs.is_empty() || o.view.is_some()) {
+                match crate::service::hand_over(&i, &abs, o.as_tabs, o.view.as_deref()) {
+                    Ok(()) => {
+                        crate::service::raise_window();
+                        println!("Kempt is already open; added to it.");
+                        return Ok(());
+                    }
+                    Err(why) => eprintln!("Could not add to the open Kempt window: {why}. Opening a new browser tab instead."),
+                }
             }
             let mut url = format!("http://127.0.0.1:{}/?t={}", i.port, i.token);
             for f in &o.files {

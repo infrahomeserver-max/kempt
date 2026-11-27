@@ -34,6 +34,22 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(1500)
     check("dropped file opens as a tab", pg.locator("#tabs .tab").count() == 3, pg.locator("#tabs .tab").count())
     check("dropped tab is c.txt", "c.txt" in pg.locator("#tabs .tab").nth(2).inner_text())
+    # background: the tab title is marked and a notification is sent; coming back restores the title
+    pg.evaluate("""() => { window.__n = []; window.Notification = class { constructor(t, o) { window.__n.push([t, o.body]); } close() {} static get permission() { return 'granted'; } };
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); attention('c.txt'); }""")
+    check("title marked while hidden", pg.title().startswith("\u25cf Opened c.txt"), pg.title())
+    check("notification sent", pg.evaluate("window.__n.length") == 1, pg.evaluate("window.__n"))
+    pg.evaluate("() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); }")
+    check("title restored", not pg.title().startswith("\u25cf") and pg.title().endswith("Kempt"), pg.title())
+    # two windows: the file goes to the one that was in front last, not to both
+    pg2 = br_ctx = browser.new_page(viewport={"width": 1300, "height": 800}); pg2.set_default_timeout(20000)
+    pg2.goto(g.url); pg2.wait_for_timeout(2500)
+    n1, n2 = pg.locator("#tabs .tab").count(), pg2.locator("#tabs .tab").count()
+    pg2.evaluate("touch()"); pg2.wait_for_timeout(300)
+    r = subprocess.run([BIN, "gui", c], env=env, capture_output=True, text=True, timeout=20)
+    pg.wait_for_timeout(1500); pg2.wait_for_timeout(500)
+    check("file went to the window in front only", pg2.locator("#tabs .tab").count() == n2 + 1 and pg.locator("#tabs .tab").count() == n1, (n1, n2, pg.locator("#tabs .tab").count(), pg2.locator("#tabs .tab").count(), r.stdout, r.stderr))
+    pg2.close()
     # page gone -> next launch must not claim hand-over
     pg.close(); pg.context.close() if False else None
     check("no page errors", not errs, errs)

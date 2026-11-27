@@ -18,7 +18,7 @@ with sync_playwright() as pw:
     pg.goto(g.url); pg.wait_for_timeout(1500)
     check("tab bar has no vertical scroll", pg.evaluate("(()=>{const t=document.querySelector('#tabs');return getComputedStyle(t).overflowY==='hidden'})()"))
     # file picker: folders and files look different
-    pg.click("#w-open"); pg.wait_for_timeout(500)
+    pg.click(".w-open >> visible=true"); pg.wait_for_timeout(500)
     pg.fill(".pick-path .pp", d); pg.press(".pick-path .pp", "Enter"); pg.wait_for_timeout(600)
     col = pg.evaluate("""(()=>{const c=s=>{const e=document.querySelector(s);return e?getComputedStyle(e).color:null};
       return [c('.pick-item.dir .pi .ic'), c('.pick-item:not(.dir) .pi .ic')]})()""")
