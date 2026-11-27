@@ -48,7 +48,7 @@ with sync_playwright() as pw:
     check("png opens in a picture tab", pg.evaluate("Tabs.active.kind") == "media" and pg.locator(".panel.show img").count() == 1)
     pg.evaluate("document.getElementById('btn-help').click()") if pg.locator("#btn-help").count() else None
     pg.keyboard.press("Escape"); pg.wait_for_timeout(200); pg.click("#btn-settings"); pg.wait_for_timeout(200)
-    pg.click(".sw1[title=Purple]"); pg.select_option("#set-mono", "sys"); pg.select_option("#set-c12", "1"); pg.select_option("#set-hf", "8"); pg.select_option("#set-ht", "18")
+    pg.click(".sw1[title=Purple]"); pg.select_option("#set-mono", "sys"); pg.click(".s-nav [data-p=tools]"); pg.select_option("#set-c12", "1"); pg.select_option("#set-hf", "8"); pg.select_option("#set-ht", "18")
     check("accent colour applies", pg.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()") == "#8b5cf6")
     check("clock format and working hours are saved", pg.evaluate("prefs.get('clock12') === true && FIND.cfg().from === 8 && FIND.cfg().to === 18"))
     pg.click("button[data-p=about]"); check("About shows the version", "version" in pg.inner_text("#s-ver"))

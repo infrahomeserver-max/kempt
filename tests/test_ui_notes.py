@@ -76,7 +76,7 @@ with sync_playwright() as pw:
     pg.click(".toast.remind .dn"); pg.wait_for_timeout(150)
     check("Done ticks the item and clears the badge", pg.locator(".nt .it.done").count() == 1 and pg.locator("#btn-notes .nb").is_hidden())
 
-    pg.click("#btn-settings"); pg.click(".s-nav [data-p=startup]"); pg.wait_for_selector("#set-sound")
+    pg.click("#btn-settings"); pg.click(".s-nav [data-p=tools]"); pg.wait_for_selector("#set-sound")
     check("Settings has the sound option", pg.is_checked("#set-sound") is False)
     pg.check("#set-sound"); pg.click("#set-snd-test"); pg.wait_for_timeout(100)
     check("Test button plays the sound", pg.evaluate("window.__osc") == n0 + 3, (pg.evaluate("window.__osc"), n0))

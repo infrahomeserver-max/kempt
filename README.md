@@ -131,6 +131,14 @@ The installer also creates `~/Applications/Kempt.app`, removes the download quar
 
 Needs Windows 10 or 11 (64-bit).
 
+**Quick install (PowerShell):** this downloads the newest release, checks it against `SHA256SUMS` and installs it, including the right-click "Open with Kempt" entry. Close Kempt first.
+
+```powershell
+irm https://github.com/infrahomeserver-max/kempt/releases/latest/download/install.ps1 | iex
+```
+
+Add `-NoContextMenu` to skip the right-click entry: `& ([scriptblock]::Create((irm https://github.com/infrahomeserver-max/kempt/releases/latest/download/install.ps1))) -NoContextMenu`. Or install by hand:
+
 1. Right-click the downloaded zip → **Extract All…** (do not run it from inside the zip).
 2. Open the extracted folder and **double-click `install.cmd`**. (Or in PowerShell: `.\install.ps1`.) No administrator rights are needed; it installs to `%LOCALAPPDATA%\Programs\Kempt`.
 3. Open a **new** terminal window (PATH changes only reach new windows) and run `kempt --version`, or use the **Kempt** entry in the Start menu.
@@ -259,11 +267,16 @@ Over SSH, forward the port: `ssh -L PORT:127.0.0.1:PORT host`, then open the pri
 **Nothing is written to your file until you press Save.** Every edit (replace, format, fix, copy a line)
 creates a separate working copy and can be undone with Ctrl+Z (the last 6 versions are kept).
 
+### The welcome screen
+With no file open Kempt shows a welcome screen: **Continue where you left off** (restores the tabs of last time), four counters kept on this computer (files opened this week, largest file opened, JSON files fixed, comparisons made), your **pinned** files (click the star next to a recent file) and **recent** files with their size and age, what is new in this version, a tip and the main keys. The counters are stored only in the settings file and never leave the computer. It switches to a lighter introduction in the light theme.
+
 ### Settings (gear icon, top right)
+The **Search settings** box at the top finds a setting on any page.
 - **Appearance:** theme (System, Dark, Light, Colour-blind safe), code font size, **code font** (built-in JetBrains Mono or your system's monospace font), **accent colour** (eight choices) and the World clock colour season.
 - **Editor:** indentation for Format and Fix (2 spaces, 4 spaces or Tab; changing it re-indents the JSON or XML file you have open), opening files read-only, opening delimited .txt/.csv as plain text, expanding JSON stored inside strings, the wrapped-line pane for long lines, and showing hidden files in the Open dialog.
-- **Calendar & clock:** first day of the week, **date format** (YYYY/MM/DD by default; ten others), 12- or 24-hour clock, and the working hours the meeting finder uses.
-- **General:** reminder sound (with a Test button), checklist sort order and whether ticked items show, start Kempt in the background at login, which browser Kempt opens in, and its own-window mode.
+- **Calendar & tools:** first day of the week, **date format** (YYYY/MM/DD by default; ten others), 12- or 24-hour clock, the working hours the meeting finder uses, the World clock colour season, the reminder sound (with a Test button) and the checklist sort order and whether ticked items show.
+- **Features (lite mode):** everything is on by default. Switch off what you do not use (open and edit files, Compare, Paste & compare, Checklist & notes, Calendar, World clock) and it disappears from the menus, welcome screen and shortcuts and is not started; for example *Just the clock* makes Kempt open straight into the world clock. The presets *Everything*, *Files only*, *Just the clock*, *Clock + calendar* and *Checklist only* set the switches in one click.
+- **General:** start Kempt in the background at login, which browser Kempt opens in, and its own-window mode.
 - **General** also holds **Updates** (check for a newer release, off by default; enter your GitHub `owner/repo` once, or build with `KEMPT_REPO=owner/repo`), **Backup** (Export / Import one JSON file with settings, zones, alerts, checklist and notes) and **Reset preferences**, which returns theme, fonts, accent, formats, shortcuts and sorting to their defaults and keeps your files, notes, checklist, calendar, zones and holidays.
 - **About:** the version, a short description and Quit Kempt.
 - **Help (F1)** has four tabs: **Shortcuts** (click any shortcut to change it), **Features**, **Formats** (every language Kempt can format, with a ✓ for each tool found on your computer and the command to install the others) and **Terminal**.
@@ -286,6 +299,8 @@ pass `--purge-settings` (Windows: `-PurgeSettings`), which also deletes the chec
 Every file opens in its own tab, and so does every comparison. Each tab keeps its own scroll position, search,
 undo history, and table state (sort, duplicates). Opening a file that is already open just switches to its tab.
 Closing a tab with unsaved changes asks first.
+
+**Tabs survive a reload.** If the browser discards or reloads the Kempt page (a laptop waking from sleep, a browser that frees background tabs, F5), the page asks the running program for the files it still holds and puts the tabs back in the same order, with unsaved edits and undo history. This needs no fixed port. If you have another Kempt window open it keeps its own tabs. If the Kempt program itself was stopped (for example the computer was shut down), only the files that were saved on disk come back, through *Continue where you left off*.
 
 ### Table view (CSV, TSV and other delimited files)
 `.csv`, `.tsv`, `.psv` and `.tab` files open as a table automatically. Any other text file (a `|`-separated log, say)
@@ -558,6 +573,7 @@ Colour depth (truecolor, 256 or 16 colours) is detected automatically. `--theme 
 | `format --check` | streamed comparison with early exit, no second copy |
 | Writing files | temp file in the same folder, then atomic rename. Invalid input leaves the original untouched; symlinks and permissions are preserved |
 | Viewer | memory-mapped file with a background line index; only the visible rows are rendered; search and filter run on background threads |
+| Opening | the line index is built on all CPU cores, in 8 MB slices read in parallel (at least six at once, which also helps a cold disk). On Windows files of 64 MB and over are mapped directly, with no private copy, so a 700 MB log shows its first rows at once |
 | Text diff | line hashes, then unique-line anchors, then Myers only inside the gaps; memory grows with the number of lines |
 | JSON diff | structural (arrays aligned by element) up to `--struct-limit` (default 40 MB per file); above that, streamed format then diff |
 
@@ -616,10 +632,12 @@ Formatting is lossless: minifying the formatted output gives back the original, 
 | Theme, font size or last folder were forgotten | they are stored in the settings file shown under *Saved settings*; check that the folder is writable, or delete the file to start fresh |
 | The browser tab has no icon | restart `kempt gui` (the icon is served by the program); some browsers cache a missing icon until the tab is reopened |
 | Windows: "Access denied" when saving | another program has the file open without sharing; close it and save again |
+| Windows: "cannot save over ... large file" | files of 64 MB and over are opened directly (for speed) and Windows locks them while Kempt has them open; use **Save As** to write a new file, or close the tab first |
+| The tabs were gone after the laptop slept | update to the newest version: the page now takes its tabs back after a reload (see *Tabs survive a reload*) |
 
 ## Known limits
 
-- **Windows: a file you are viewing cannot be shortened by another program** (Windows blocks shrinking a memory-mapped file). Appending to it, which is what normal logging does, works and follow mode picks it up. Close the file in Kempt before truncating or emptying it.
+- **Windows: a file you are viewing cannot be shortened by another program** (Windows blocks shrinking a memory-mapped file). Files under 64 MB are opened as a private copy, so this and saving over them are never a problem; bigger files are opened directly for speed and need **Save As**. Appending to it, which is what normal logging does, works and follow mode picks it up. Close the file in Kempt before truncating or emptying it.
 
 - Formatters that need the whole document (HTML, CSS, JS/TS, YAML, Markdown, Python, shell, SQL, C-family) run through external tools; files over `--max-size` (20 MB) are skipped unless you pass `--force`.
 - XML mixed content that starts with a child element (`<p><b>x</b> text</p>`) is indented before the first child. Text-first mixed content is preserved exactly.

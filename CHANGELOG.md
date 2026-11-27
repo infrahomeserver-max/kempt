@@ -3,6 +3,23 @@
 All notable changes are listed here. Format: [Keep a Changelog](https://keepachangelog.com/);
 versioning: [SemVer](https://semver.org/).
 
+## [0.2.5] - 2026-11-27
+
+### Added
+- **Lite mode** (Settings → Features): switch off the parts you do not use (files, Compare, Paste & compare, Checklist & notes, Calendar, World clock). They disappear from the menus, welcome screen and shortcuts and are not started; with one thing left Kempt opens straight into it. Presets: Everything, Files only, Just the clock, Clock + calendar, Checklist only.
+- **Settings redesign**: a larger window with a search box, switches instead of tick boxes, cards for each group and new *Calendar & tools* and *Features* pages.
+- **Welcome screen** counters: files opened this week, largest file, JSON files fixed and comparisons made (kept only on this computer), and a "Restore them" link when the last session had tabs.
+- **Windows one-line installer**: `irm https://github.com/infrahomeserver-max/kempt/releases/latest/download/install.ps1 | iex` (checks the download against `SHA256SUMS`, adds "Open with Kempt").
+
+### Changed
+- **Big files open much faster on Windows.** Files of 64 MB and over are opened directly instead of being copied first (a 766 MB log no longer waits for a 766 MB copy). Saving over such a file needs Save As and says so.
+- The line index is built in parallel on all cores (about 25 % faster to open a 766 MB log with two cores; more with more cores).
+- Calendar, clock and reminder settings moved to *Calendar & tools*.
+
+### Fixed
+- **Tabs and unsaved edits are no longer lost** when the browser page is discarded or reloaded (for example after the laptop sleeps): the page takes the open files back from the running program.
+- Flaky welcome-screen and find-mode tests on slow CI machines.
+
 ## [0.2.4] - 2026-11-27
 
 ### Added

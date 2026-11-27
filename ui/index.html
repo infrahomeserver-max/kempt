@@ -791,6 +791,32 @@ input.pk { min-width:0; } input[type=text].pk { width:var(--pkw, 150px); }
 .media .mimg img { image-rendering:auto; background:repeating-conic-gradient(var(--bg3) 0 25%, var(--bg) 0 50%) 0 0/16px 16px; box-shadow:var(--shadow); }
 .s-row.swr { display:flex; gap:8px; flex-wrap:wrap; } .sw1 { width:28px; height:28px; border-radius:50%; border:2px solid transparent; padding:0; color:#fff; font-weight:600; font-size:12px; cursor:pointer; } .sw1.on { box-shadow:0 0 0 2px var(--bg), 0 0 0 4px var(--fg-dim); } .wh2 { display:inline-flex; gap:6px; align-items:center; }
 input[type=checkbox], input[type=radio], input[type=range] { accent-color:var(--accent); }
+html[data-no~="files"] #btn-new, html[data-no~="files"] #btn-open, html[data-no~="files"] .w-open, html[data-no~="files"] .w-new, html[data-no~="files"] .wl .cols { display: none !important; }
+html[data-no~="compare"] .w-cmp { display: none !important; }
+html[data-no~="paste"] #btn-paste, html[data-no~="paste"] .w-paste { display: none !important; }
+html[data-no~="notes"] #btn-notes { display: none !important; }
+html[data-no~="cal"] #btn-cal { display: none !important; }
+html[data-no~="clock"] #btn-clock { display: none !important; }
+
+.modal.settings { width:min(980px,95vw); height:min(700px,90vh); }
+.s-head { gap:12px; } .s-head h3 { flex:none; padding-right:8px; }
+.s-find { margin-left:auto; width:240px; height:32px; background:var(--bg3); border:1px solid var(--border); border-radius:8px; color:var(--fg); padding:0 10px; font:inherit; font-size:13px; } .s-find:focus { outline:2px solid var(--accent); outline-offset:-1px; }
+.s-nav { width:216px; padding:14px 12px; gap:3px; } .s-nav button { height:38px; border-radius:8px; font-weight:500; }
+.s-body { padding:10px 32px 28px; } .s-body section { max-width:760px; }
+.s-body h4 { margin:26px 0 10px; font-size:12px; letter-spacing:.9px; }
+.s-body h4:first-child { margin-top:14px; }
+.s-body label.s-row:has(> input[type=checkbox]) { flex-direction:row; justify-content:flex-start; text-align:left; padding:11px 14px; margin-top:8px; background:var(--bg2); border:1px solid var(--border); border-radius:10px; cursor:pointer; }
+.s-body label.s-row > input[type=checkbox] { order:3; margin-left:auto; } .s-body label.s-row > button { order:2; margin-left:8px; }
+.s-body input[type=checkbox], .s-feat input[type=checkbox] { appearance:none; -webkit-appearance:none; flex:none; width:38px; height:22px; border-radius:11px; background:var(--bg3); border:1px solid var(--border); position:relative; cursor:pointer; transition:background .15s; margin:0; }
+.s-body input[type=checkbox]::after, .s-feat input[type=checkbox]::after { content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--fg-dim); transition:transform .15s, background .15s; }
+.s-body input[type=checkbox]:checked, .s-feat input[type=checkbox]:checked { background:var(--accent); border-color:var(--accent); } .s-body input[type=checkbox]:checked::after, .s-feat input[type=checkbox]:checked::after { transform:translateX(16px); background:#fff; }
+.s-body input[type=checkbox]:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.s-body .s-grid, .s-body .s-row:not(:has(> input[type=checkbox])) { padding:12px 14px; background:var(--bg2); border:1px solid var(--border); border-radius:10px; }
+.s-body .s-grid select, .s-row select { height:32px; }
+.s-feats { display:grid; gap:8px; margin-top:12px; } .s-body label.s-feat { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 16px; background:var(--bg2); border:1px solid var(--border); border-radius:10px; cursor:pointer; }
+.s-feat span { flex:1; min-width:0; } .s-feat span b { display:block; font-weight:600; } .s-feat span small { display:block; margin-top:2px; color:var(--fg-dim); font-size:12px; }
+.s-presets { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; } .s-presets button { height:30px; padding:0 14px; border-radius:15px; }
+.s-body .s-note { font-size:12.5px; }
 </style>
 </head>
 <body>
@@ -919,6 +945,30 @@ const prefs = {
   beacon() { const patch = this._p; this._p = {}; if (Object.keys(patch).length) fetch('/api/state/set', { method: 'POST', keepalive: true, headers: { 'X-Token': TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ patch }) }).catch(() => { }); },
   async flush() { clearTimeout(this._t); const patch = this._p; this._p = {}; if (Object.keys(patch).length) { try { await api('state/set', { patch }); } catch (e) { console.warn('settings not saved:', e.message); } } },
 };
+
+// Lite mode: the person ticks which parts of Kempt they use; everything is on by default. Hidden parts are removed from the menus,
+// welcome screen and shortcuts, and parts that are off are not started (no checklist / calendar loading, no timers).
+const Features = {
+  ALL: [['files', 'Open and edit files', 'Open, New, recent files, drag and drop'], ['compare', 'Compare', 'Compare two files or tabs'], ['paste', 'Paste & compare', 'Paste text without a file'],
+    ['notes', 'Checklist & notes', 'Reminders'], ['cal', 'Calendar', ''], ['clock', 'World clock', '']],
+  off() { const f = prefs.get('features', {}); return this.ALL.map(a => a[0]).filter(k => f[k] === false); },
+  on(k) { return !this.off().includes(k); },
+  set(k, v) { const f = { ...prefs.get('features', {}) }; if (v) delete f[k]; else f[k] = false; prefs.set('features', f); this.apply(); },
+  apply() { document.documentElement.dataset.no = this.off().join(' '); },
+  // with nothing to open, show the first tool that is on (a clock-only Kempt starts as a clock)
+  startView() { if (!this.off().length) return null; if (!this.on('files')) return ['clock', 'cal', 'notes', 'paste'].find(k => this.on(k)) || null; return null; },
+};
+Features.apply();
+
+// small, local-only usage figures for the welcome screen (kept in this browser profile's Kempt settings; nothing leaves the computer)
+const Stats = {
+  get() { return prefs.get('stats', {}); },
+  put(f) { const s = { ...this.get() }; f(s); prefs.set('stats', s); },
+  bump(k) { this.put(s => { s[k] = (s[k] || 0) + 1; }); },
+  opened() { this.put(s => { s.opens = [...(s.opens || []).filter(t => Date.now() - t < 30 * 864e5), Date.now()].slice(-300); }); },
+  big(info) { if (info && info.size && !info.dropped) { const b = this.get().big; if (!b || info.size > b.size) this.put(s => { s.big = { name: info.name, size: info.size }; }); } },
+  week() { return (this.get().opens || []).filter(t => Date.now() - t < 7 * 864e5).length; },
+};
 const mq = matchMedia('(prefers-color-scheme: light)');
 function applyTheme() {
   const pref = prefs.theme;
@@ -976,11 +1026,13 @@ function openSettings() {
   const back = el('div', 'modal-back'); back.id = 'settings';
   const themes = [['system', 'System', 'Follow the operating system'], ['dark', 'Dark', 'Neutral grey'], ['light', 'Light', 'White'], ['colorblind', 'Colour-blind safe', 'Blue and orange diffs']];
   back.innerHTML = `<div class="modal settings" role="dialog" aria-modal="true" aria-label="Settings">
-    <div class="s-head"><h3>Settings</h3><button class="icon s-close" aria-label="Close settings" title="Close (Esc)">${ic('x')}</button></div>
+    <div class="s-head"><h3>Settings</h3><input type="search" id="s-find" class="s-find" placeholder="Search settings" aria-label="Search settings" spellcheck="false"><button class="icon s-close" aria-label="Close settings" title="Close (Esc)">${ic('x')}</button></div>
     <div class="s-main">
       <nav class="s-nav" role="tablist">
         <button role="tab" data-p="appearance" aria-selected="true">${ic('palette')}Appearance</button>
         <button role="tab" data-p="editor" aria-selected="false">${ic('braces')}Editor</button>
+        <button role="tab" data-p="tools" aria-selected="false">${ic('cal')}Calendar &amp; tools</button>
+        <button role="tab" data-p="features" aria-selected="false">${ic('apps')}Features</button>
         <button role="tab" data-p="startup" aria-selected="false">${ic('bell')}General</button>
         <button role="tab" data-p="about" aria-selected="false">${ic('info')}About</button>
       </nav>
@@ -997,14 +1049,6 @@ function openSettings() {
           <div class="s-row"><select id="set-mono" aria-label="Code font"><option value="">JetBrains Mono (built in)</option><option value="sys">Your system's monospace font</option></select></div>
           <h4>Accent colour</h4>
           <div class="s-row swr" id="set-acc" role="radiogroup" aria-label="Accent colour"></div>
-          <h4>Calendar &amp; clock</h4>
-          <div class="s-grid"><label>First day of the week <select id="set-ws" aria-label="First day of the week">${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((d, i) => `<option value="${i}">${d}</option>`).join('')}</select></label>
-          <label>Clock <select id="set-c12" aria-label="Clock format"><option value="0">24-hour</option><option value="1">12-hour (AM/PM)</option></select></label>
-          <label>Working hours <span class="wh2"><select id="set-hf" aria-label="Working day starts"></select> to <select id="set-ht" aria-label="Working day ends"></select></span></label>
-          <label>Date format <select id="set-dfmt" aria-label="Date format">${DF.OPTS.map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select></label></div>
-          <h4>World clock colours</h4>
-          <div class="s-row"><select id="set-season" aria-label="World clock season colours"><option value="auto">Auto (follows the date)</option>${Object.entries(WC.SEASONS).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join('')}</select></div>
-          <p class="s-note">Day and night colours of the clock strips. Auto follows the season of the date shown (northern hemisphere).</p>
         </section>
         <section data-p="editor" hidden>
           <h4>Indentation</h4>
@@ -1022,12 +1066,28 @@ function openSettings() {
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:0"><input type="checkbox" id="set-expand"> Expand JSON stored inside strings</label>
           <p class="s-note">Shows escaped JSON inside strings as real JSON in Format and Compare. Changes the data's shape; Ctrl+Z undoes it.</p>
         </section>
-        <section data-p="startup" hidden>
-          <h4>Reminders</h4>
+        <section data-p="tools" hidden>
+          <h4>Calendar &amp; clock</h4>
+          <div class="s-grid"><label>First day of the week <select id="set-ws" aria-label="First day of the week">${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((d, i) => `<option value="${i}">${d}</option>`).join('')}</select></label>
+          <label>Clock <select id="set-c12" aria-label="Clock format"><option value="0">24-hour</option><option value="1">12-hour (AM/PM)</option></select></label>
+          <label>Working hours <span class="wh2"><select id="set-hf" aria-label="Working day starts"></select> to <select id="set-ht" aria-label="Working day ends"></select></span></label>
+          <label>Date format <select id="set-dfmt" aria-label="Date format">${DF.OPTS.map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select></label></div>
+          <h4>World clock colours</h4>
+          <div class="s-row"><select id="set-season" aria-label="World clock season colours"><option value="auto">Auto (follows the date)</option>${Object.entries(WC.SEASONS).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join('')}</select></div>
+          <p class="s-note">Day and night colours of the clock strips. Auto follows the season of the date shown (northern hemisphere).</p>
+          <h4 style="margin-top:18px">Reminders</h4>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:0"><input type="checkbox" id="set-sound"> Play a sound for reminders <button id="set-snd-test" type="button" style="margin-left:6px;height:24px;padding:0 8px">Test</button></label>
           <h4 style="margin-top:18px">Checklist</h4>
           <div class="s-grid"><label>Sort by <select id="set-nsort" aria-label="Checklist sort"><option value="date">Date</option><option value="imp">Important first</option><option value="new">Newest first</option><option value="az">A to Z</option></select></label></div>
           <label class="s-row" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="set-ndone"> Show ticked items</label>
+        </section>
+        <section data-p="features" hidden>
+          <h4>Features</h4>
+          <p class="s-note" style="display:block">Everything is on by default. Switch off what you do not use: it disappears from the menus, welcome screen and shortcuts, and is not started. With a single feature left, Kempt opens straight into it.</p>
+          <div class="s-presets" id="set-presets"></div>
+          <div id="set-features" class="s-feats"></div>
+        </section>
+        <section data-p="startup" hidden>
           <h4 style="margin-top:18px">Startup</h4>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="set-autostart"> Start in the background at login</label><p class="s-note">Keeps reminders and the tray icon working after you log in.</p>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px">Browser <select id="set-browser" aria-label="Browser"><option value="">System default</option><option value="chrome">Google Chrome</option><option value="firefox">Firefox</option><option value="edge">Microsoft Edge</option><option value="brave">Brave</option><option value="chromium">Chromium</option><option value="vivaldi">Vivaldi</option><option value="safari">Safari (macOS)</option></select></label><p class="s-note">Used when Kempt opens itself (<code>kempt gui</code>, the tray icon, login). If it is not installed, the system default is used.</p>
@@ -1068,8 +1128,19 @@ function openSettings() {
   const tabs = [...back.querySelectorAll('.s-nav [role=tab]')];
   const show = p => { tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.p === p))); back.querySelectorAll('.s-body section').forEach(x => x.hidden = x.dataset.p !== p); };
   tabs.forEach(t => t.onclick = () => show(t.dataset.p));
+  { const f = q('#s-find'); f.oninput = () => { const v = f.value.trim().toLowerCase(), secs = [...back.querySelectorAll('.s-body section')];
+      const rows = n => [...n.children].filter(c => !c.matches('h4'));
+      if (!v) { secs.forEach(x => { [...x.children].forEach(c => c.style.display = ''); }); const cur = tabs.find(t => t.getAttribute('aria-selected') === 'true'); show(cur ? cur.dataset.p : 'appearance'); return; }
+      secs.forEach(x => { x.hidden = false; let heading = null, any = false; const kids = [...x.children]; kids.forEach(c => { if (c.matches('h4')) { heading = c; c.style.display = 'none'; return; } const hit = (c.textContent + ' ' + [...c.querySelectorAll('[aria-label]')].map(e => e.getAttribute('aria-label')).join(' ')).toLowerCase().includes(v); c.style.display = hit ? '' : 'none'; if (hit) { any = true; if (heading) heading.style.display = ''; } }); x.hidden = !any; }); }; }
   back.querySelectorAll('.theme-card').forEach(c => c.onclick = () => { prefs.set('theme', c.dataset.v); applyTheme(); });
   const wsel = q('#set-ws'); wsel.value = String(prefs.get('ws', 1)); wsel.onchange = () => { prefs.set('ws', +wsel.value); const t = Tabs.list.find(x => x.kind === 'cal'); if (t && t.cal) t.cal.setOptions({ ws: +wsel.value }); };
+  { const box = q('#set-features'), pre = q('#set-presets');
+    const draw = () => { box.innerHTML = ''; for (const [k, name, hint] of Features.ALL) { const l = document.createElement('label'); l.className = 's-feat';
+        const t = document.createElement('span'); t.innerHTML = `<b>${esc(name)}</b>${hint ? `<small>${esc(hint)}</small>` : ''}`;
+        const c = document.createElement('input'); c.type = 'checkbox'; c.checked = Features.on(k); c.setAttribute('aria-label', name); c.onchange = () => { Features.set(k, c.checked); Tabs.updateWelcome && Tabs.updateWelcome(); draw(); };
+        l.append(t, c); box.appendChild(l); } };
+    const preset = (label, keep) => { const b = document.createElement('button'); b.textContent = label; b.onclick = () => { const f = {}; for (const [k] of Features.ALL) if (!keep.includes(k)) f[k] = false; prefs.set('features', f); Features.apply(); Tabs.updateWelcome && Tabs.updateWelcome(); draw(); }; pre.appendChild(b); };
+    if (box && pre) { preset('Everything', Features.ALL.map(a => a[0])); preset('Files only', ['files', 'compare', 'paste']); preset('Just the clock', ['clock']); preset('Clock + calendar', ['clock', 'cal']); preset('Checklist only', ['notes']); draw(); } }
   const dfs = q('#set-dfmt'); dfs.value = DF.cur(); dfs.onchange = () => { prefs.set('dfmt', dfs.value); for (const t of Tabs.list) { if (t.kind === 'clock') t.holidays(); if (t.kind === 'notes') t.render(); } };
   const mo = q('#set-mono'); mo.value = prefs.get('mono', ''); mo.onchange = () => { prefs.set('mono', mo.value); applyMono(); };
   const accHost = q('#set-acc'), cur = prefs.get('accent', '');
@@ -1632,6 +1703,7 @@ const Tabs = {
 
 function rememberRecent(path, setDir = true) {
   if (!path) return; let r = prefs.get('recent', []); r = [path, ...r.filter(p => p !== path)].slice(0, 12);
+  if (setDir) Stats.opened();
   prefs.set('recent', r); const at = prefs.get('recentAt', {}); at[path] = Date.now(); for (const k of Object.keys(at)) if (!r.includes(k)) delete at[k]; prefs.set('recentAt', at);
   if (!setDir) return;
   const cut = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')); if (cut > 0) prefs.set('dir', path.slice(0, cut));   // next Open starts in this folder
@@ -1947,7 +2019,7 @@ class CodeEditor {
 
 class DocTab {
   constructor(info, minified, opt) {
-    this.opt = opt || {}; this.info = info; this.kind = 'doc'; this.icon = FI.ic(info && (info.name || info.path) || '', 14); this.spec = null; this.job = null; this.curLine = -1; this.curMatch = -1; this.csel = null; this.anchor = null; this.word = ''; this.hoff = 0; this.maxLen = 0; this.matchTotal = 0;
+    this.opt = opt || {}; this.info = info; this.kind = 'doc'; Stats.big(info); this.icon = FI.ic(info && (info.name || info.path) || '', 14); this.spec = null; this.job = null; this.curLine = -1; this.curMatch = -1; this.csel = null; this.anchor = null; this.word = ''; this.hoff = 0; this.maxLen = 0; this.matchTotal = 0;
     this.panel = el('div', 'panel');
     this.panel.innerHTML = `
       <div class="toolbar">
@@ -2414,6 +2486,7 @@ class DocTab {
   async doFix() {
     await this.ready();
     const r = await api('doc/fix', { id: this.info.id, indent: this.indent() });
+    if (Object.keys(r.report || {}).length) Stats.bump('fixed');
     const keys = Object.keys(r.report);
     this.banner.hidden = true;
     if (!keys.length) return this.afterEdit(r.info, r.changed ? 'Looks valid — formatted it.  Ctrl+Z to undo.' : 'Nothing to fix — this is already valid and formatted.', 'info');
@@ -3271,17 +3344,19 @@ const actions = {
     }
   },
   async newFile() {
+    if (!Features.on('files')) return;
     // no questions: an empty untitled file opens at once; the folder and name are asked when you save it
     const used = new Set(Tabs.list.filter(t => t.kind === 'doc').map(t => t.info.name));
     let name = 'untitled.txt'; for (let i = 2; used.has(name); i++) name = `untitled-${i}.txt`;
     const r = await api('file/new', { dir: '', name, memory: true }).catch(e => { fail(e); return null; }); if (!r) return;
     Tabs.add(new DocTab(r.info, false, { edit: true }));
   },
-  notes() { const t = Tabs.list.find(x => x.kind === 'notes'); if (t) Tabs.activate(t); else Tabs.add(new NotesTab()); },
-  calendar() { const t = Tabs.list.find(x => x.kind === 'cal'); if (t) Tabs.activate(t); else Tabs.add(new CalendarTab()); },
-  clock() { const t = Tabs.list.find(x => x.kind === 'clock'); if (t) Tabs.activate(t); else Tabs.add(new ClockTab()); },
-  paste() { const t = Tabs.list.find(x => x.kind === 'paste'); if (t) Tabs.activate(t); else Tabs.add(new PasteTab()); },
+  notes() { if (!Features.on('notes')) return; const t = Tabs.list.find(x => x.kind === 'notes'); if (t) Tabs.activate(t); else Tabs.add(new NotesTab()); },
+  calendar() { if (!Features.on('cal')) return; const t = Tabs.list.find(x => x.kind === 'cal'); if (t) Tabs.activate(t); else Tabs.add(new CalendarTab()); },
+  clock() { if (!Features.on('clock')) return; const t = Tabs.list.find(x => x.kind === 'clock'); if (t) Tabs.activate(t); else Tabs.add(new ClockTab()); },
+  paste() { if (!Features.on('paste')) return; const t = Tabs.list.find(x => x.kind === 'paste'); if (t) Tabs.activate(t); else Tabs.add(new PasteTab()); },
   async compare(prefL, prefR) {
+    if (!Features.on('compare')) return;
     const cur = Tabs.active && Tabs.active.kind === 'doc' ? Tabs.active.info.path || '' : '';
     const res = await modal('Compare two files', `
       <label>Left file</label><div class="row2"><input type="text" id="cl" list="cmp-recent" value="${esc(prefL || cur)}" placeholder="Path of the first file" spellcheck="false"><button id="bl">Browse…</button></div>
@@ -3295,7 +3370,7 @@ const actions = {
   },
   async newDiff(left, right) {
     const r = await api('diff/new', { left, right }).catch(e => { fail(e); return null; }); if (!r) return;
-    const t = new DiffTab(r.sid, r.state); Tabs.add(t);
+    Stats.bump('cmp'); const t = new DiffTab(r.sid, r.state); Tabs.add(t);
   },
   async compareTabs(tabs) {
     const docs = tabs.filter(t => t.kind === 'doc'); if (docs.length < 2) return toast('Select two or more file tabs to compare', 'info');
@@ -4318,8 +4393,8 @@ const FIND = {
 const KEMPT_VERSION = '@VERSION@';
 /* ───────────── welcome screen ───────────── */
 const Welcome = {
-  NEWS: ['Compare open tabs: Ctrl+click two tabs', 'Drag & drop files to open them', 'A second file opens in this window', 'Select a word to highlight it everywhere', 'New logo'],
-  TIPS: ['Double-click a word and every other place it appears is highlighted, in the viewer, tables and compare.', 'Ctrl+click two tabs, then press Compare to see their differences.', 'Right-click a tab for “Compare with…”, rename and close.', 'Fix repairs broken JSON and XML in one click.', 'Find accepts several words at once: add more with Ctrl+E.'],
+  NEWS: ['Lite mode: Settings → Features', 'Tabs come back after a reload or sleep', 'Big files open faster on Windows', 'New, roomier Settings with search', 'Compare open tabs: Ctrl+click two tabs'],
+  TIPS: ['Double-click a word and every other place it appears is highlighted, in the viewer, tables and compare.', 'Ctrl+click two tabs, then press Compare to see their differences.', 'Right-click a tab for “Compare with…”, rename and close.', 'Fix repairs broken JSON and XML in one click.', 'Find accepts several words at once: add more with Ctrl+E.', 'Only need the clock? Settings → Features → Just the clock.'],
   info: {},
   ago(ms) {
     if (!ms) return ''; const d = Date.now() - ms, m = 60000, h = 60 * m, day = 24 * h;
@@ -4342,9 +4417,9 @@ const Welcome = {
   html() {
     const rec = prefs.get('recent', []), sess = prefs.get('session', []), at = prefs.get('recentAt', {}), ver = KEMPT_VERSION, last = rec[0];
     const acts = `<button class="primary w-open" id="w-open">${ic('folder', 16)}Open a file<kbd>Ctrl+O</kbd></button><button class="w-new">${ic('plus', 16)}New<kbd>Alt+N</kbd></button><button class="w-cmp" id="w-cmp">${ic('columns', 16)}Compare</button><button class="w-paste">${ic('copy', 16)}Paste</button>`;
-    const dark = `<div class="wl wl-dark"><div class="hd"><img class="lg-img logo-d" src="/logo-dark.png" width="46" height="46" alt=""><div><h1>${rec.length ? 'Welcome back' : 'Welcome to Kempt'}</h1><p>Open a file, drag one in, or pick up where you left off.</p></div><span class="sp"></span><div class="acts">${acts}</div></div>
+    const dark = `<div class="wl wl-dark"><div class="hd"><img class="lg-img logo-d" src="/logo-dark.png" width="46" height="46" alt=""><div><h1>${rec.length ? 'Welcome back' : 'Welcome to Kempt'}</h1><p>${sess.length ? `${sess.length} tab${sess.length === 1 ? ' was' : 's were'} open last time. <a href="#" class="w-restore-link">Restore ${sess.length === 1 ? 'it' : 'them'}</a>` : 'Open a file, drag one in, or pick up where you left off.'}</p></div><span class="sp"></span><div class="acts">${acts}</div></div>
       ${sess.length ? `<div class="box sess"><div class="ico" style="font-size:20px">⟲</div><div><b>Continue where you left off</b><small>${sess.length} tab${sess.length === 1 ? '' : 's'}: ${esc(sess.slice(0, 3).map(p => this.base(p)).join(', '))}${sess.length > 3 ? '…' : ''}</small></div><span class="sp"></span><button class="primary w-restore">Restore</button></div>` : ''}
-      <div class="stats"><div class="stat"><small>Last opened</small><b>${last ? esc(this.base(last)) : '—'}</b><span>${last && at[last] ? this.ago(at[last]) : 'nothing yet'}</span></div><div class="stat"><small>Recent files</small><b>${rec.length}</b><span>kept on this computer</span></div><div class="stat"><small>Pinned</small><b>${this.pinned().length}</b><span>shown at the top</span></div><div class="stat"><small>Version</small><b>${esc(ver || '')}</b><span>offline · no telemetry</span></div></div>
+      <div class="stats"><div class="stat"><small>Opened this week</small><b>${Stats.week()}</b><span>${Stats.week() === 1 ? 'file' : 'files'}</span></div><div class="stat"><small>Largest file</small><b>${Stats.get().big ? fmtSize(Stats.get().big.size) : '—'}</b><span>${Stats.get().big ? esc(this.base(Stats.get().big.name)) : 'nothing opened yet'}</span></div><div class="stat"><small>Fixed JSON</small><b>${Stats.get().fixed || 0}</b><span>broken files repaired</span></div><div class="stat"><small>Compared</small><b>${Stats.get().cmp || 0}</b><span>file pairs</span></div></div>
       <div class="cols"><div class="box"><h3>📌 Pinned</h3><div id="w-pins">${this.pins()}</div><h3>🕘 Recent</h3><div id="w-rows">${this.rows()}</div></div>
       <div class="box"><h3>✨ New in this version</h3><ul>${this.NEWS.map(n => `<li>${esc(n)}</li>`).join('')}</ul><div class="drop">⤓ Drag files anywhere in this window</div></div>
       <div class="box"><h3>💡 Did you know?</h3><div class="tip">${esc(this.TIPS[new Date().getDate() % this.TIPS.length])}</div><h3>⌨ Keys</h3><ul><li>Find &amp; replace<kbd>Ctrl+F</kbd></li><li>Next change<kbd>F7</kbd></li><li>Rename tab<kbd>F2</kbd></li><li>Save<kbd>Ctrl+S</kbd></li></ul><div class="priv" style="margin-top:12px">🔒 Offline. No account, no cloud, no telemetry.</div></div></div></div>`;
@@ -4364,6 +4439,7 @@ const Welcome = {
     w.querySelectorAll('.star').forEach(b => b.onclick = e => { e.stopPropagation(); this.pin(b.dataset.star); const pins = $('#w-pins', w), rows = $('#w-rows', w); if (pins) pins.innerHTML = this.pins(); if (rows) rows.innerHTML = this.rows(); this.bindRows(w); });
   },
   wire(w) {
+    w.querySelectorAll('.w-restore-link').forEach(a => a.onclick = e => { e.preventDefault(); const b = $('.w-restore', w); if (b) b.click(); });
     w.querySelectorAll('.w-open').forEach(b => b.onclick = () => actions.open());
     w.querySelectorAll('.w-cmp').forEach(b => b.onclick = () => actions.compare());
     w.querySelectorAll('.w-new').forEach(b => b.onclick = () => actions.newFile());
@@ -4502,10 +4578,12 @@ Pick.start();
     restoreWorkspace();
   } catch (e) { fail(e); }
   fillIcons(); inboxLoop();
-  Notes.load().then(async () => { try { await CAL.load(); await CAL.script(); CAL.sync(); } catch (_) { } }); setTimeout(() => Update.auto(), 4000);
+  if (Features.on('notes') || Features.on('cal')) Notes.load().then(async () => { try { await CAL.load(); await CAL.script(); CAL.sync(); } catch (_) { } });
+  setTimeout(() => Update.auto(), 4000);
   { const qs = new URLSearchParams(location.search);   // opened from the tray menu or by a second `kempt gui file`
     for (const f of qs.getAll('open')) actions.openPath(f);
     openView(qs.get('view'));
+    { const sv = Features.startView(); if (sv && !Tabs.list.length && !qs.has('open')) openView(sv === 'cal' ? 'calendar' : sv); }
     if (qs.has('open') || qs.has('view')) history.replaceState(null, '', location.pathname + '?t=' + encodeURIComponent(qs.get('t') || '')); }
 })();
 </script>
