@@ -25,7 +25,7 @@ param(
   [switch]$DryRun         # change nothing, just print the plan
 )
 $ErrorActionPreference = 'Stop'
-$Version = '0.2.4'
+$Version = '0.2.5'
 
 function Say($m)  { Write-Host "==> $m" -ForegroundColor Cyan }
 function Warn($m) { Write-Host "warning: $m" -ForegroundColor Yellow }
