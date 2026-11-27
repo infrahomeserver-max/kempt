@@ -3,6 +3,11 @@
 All notable changes are listed here. Format: [Keep a Changelog](https://keepachangelog.com/);
 versioning: [SemVer](https://semver.org/).
 
+## [0.2.6] - 2026-11-27
+
+### Fixed
+- **Paste & compare**: Beautify, Beautify both, Clear, Swap and Paste can now be undone with Ctrl+Z, and each side has an Undo button.
+
 ## [0.2.5] - 2026-11-27
 
 ### Added
