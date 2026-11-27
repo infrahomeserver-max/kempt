@@ -1618,7 +1618,8 @@ const Tabs = {
     inp.onblur = () => fin(true); inp.onclick = inp.ondblclick = inp.onmousedown = e => e.stopPropagation();
   },
   saveSession() {
-    clearTimeout(this._ss); this._ss = setTimeout(() => { const ps = this.list.filter(t => t.kind === 'doc' && t.info && t.info.path && !t.info.dropped).map(t => t.info.path); if (ps.length) prefs.set('session', ps.slice(0, 20)); }, 800);
+    clearTimeout(this._ss); this._ss = setTimeout(() => { const ps = this.list.filter(t => t.kind === 'doc' && t.info && t.info.path && !t.info.dropped).map(t => t.info.path); if (ps.length) prefs.set('session', ps.slice(0, 20));
+      prefs.set('tabIds', this.list.filter(t => t.kind === 'doc' && t.info).map(t => t.info.id).slice(0, 60)); if (this.active && this.active.info) prefs.set('tabAct', this.active.info.id); }, 800);
   },
   updateWelcome() {
     let w = $('#welcome');
@@ -4379,6 +4380,14 @@ function applyTabs(list) {
     else if (t.kind === 'diff') Tabs.add(new DiffTab(t.sid, t.state));
   }
 }
+async function restoreWorkspace(n = 0) {
+  try {
+    const have = new Set(Tabs.list.filter(t => t.info).map(t => t.info.id)), w = await api('workspace', { cid: CID }), ord = prefs.get('tabIds', []);
+    const left = (w.tabs || []).filter(t => !have.has(t.info.id)).sort((a, b) => { const x = ord.indexOf(a.info.id), y = ord.indexOf(b.info.id); return (x < 0 ? 1e9 : x) - (y < 0 ? 1e9 : y) || a.info.id - b.info.id; });
+    if (left.length) { applyTabs(left); const act = Tabs.list.find(t => t.info && t.info.id === prefs.get('tabAct', -1)); if (act) Tabs.activate(act); toast(`Restored ${left.length} open file${left.length === 1 ? '' : 's'}`, 'info'); }
+    else if (w.busy && n < 9 && !Tabs.list.length) setTimeout(() => restoreWorkspace(n + 1), 3000);
+  } catch (_) { }
+}
 function openView(v) { if (v === 'notes') actions.notes(); else if (v === 'clock') actions.clock(); else if (v === 'calendar') actions.calendar(); else if (v === 'paste') actions.paste(); }
 
 /** a second `kempt gui <file>` (double-clicking another file) hands it to this window; the request waits on the server until something arrives */
@@ -4488,6 +4497,9 @@ Pick.start();
     // measure column widths only after the embedded fonts are ready (give up after 1.5 s)
     await Promise.race([Promise.all(['400 13px Inter', '600 13px Inter', '400 12.5px "JetBrains Mono"', '700 12.5px "JetBrains Mono"'].map(f => document.fonts.load(f))), new Promise(r => setTimeout(r, 1500))]).catch(() => {});
     const s = await api('startup'); applyTabs(s.tabs);
+    // after a reload (browser discarded the tab, laptop woke from sleep) take back the documents the server still holds;
+    // the old page counts as open for up to ~20 s, so ask again for a while while the server says it is busy
+    restoreWorkspace();
   } catch (e) { fail(e); }
   fillIcons(); inboxLoop();
   Notes.load().then(async () => { try { await CAL.load(); await CAL.script(); CAL.sync(); } catch (_) { } }); setTimeout(() => Update.auto(), 4000);

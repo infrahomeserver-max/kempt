@@ -548,6 +548,24 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
     crate::jsonfmt::set_expand(gb(p, "expand").unwrap_or(false));
     match name {
         "startup" => Ok(json!({"tabs": *app.startup.lock().unwrap()})),
+        // a page that was discarded or reloaded (the browser frees background tabs, a laptop wakes from sleep) asks for the documents the server still
+        // holds, so open files, unsaved edits and undo history are not lost. Nothing is returned while another window is open (it owns them).
+        "workspace" => {
+            let now = Instant::now();
+            let me = p.get("cid").and_then(|v| v.as_str()).unwrap_or("");
+            if app.pages.lock().unwrap().iter().any(|(k, v)| k != me && v.0 > now) {
+                return Ok(json!({"tabs": [], "busy": !app.docs.lock().unwrap().is_empty()}));
+            }
+            // documents that belong to a comparison are not tabs of their own, and the startup tabs are already in the page
+            let mut skip: std::collections::HashSet<u64> = app.diffs.lock().unwrap().values().flat_map(|d| { let d = d.lock().unwrap(); [d.left.id, d.right.id] }).collect();
+            for t in app.startup.lock().unwrap().iter() {
+                if let Some(id) = t["info"]["id"].as_u64() { skip.insert(id); }
+            }
+            let mut ds: Vec<Arc<Doc>> = app.docs.lock().unwrap().values().filter(|d| !skip.contains(&d.id)).cloned().collect();
+            ds.sort_by_key(|d| d.id);
+            let tabs: Vec<Value> = ds.iter().map(|d| { let i = d.info(); json!({"kind": "doc", "info": info_json(&i), "minified": looks_minified(&i)}) }).collect();
+            Ok(json!({"tabs": tabs}))
+        }
         // the open window asks for files handed over by a second `kempt gui <file>`; the request waits (up to 20 s) until some arrive
         "inbox" => {
             let cid: String = gs(p, "cid").unwrap_or("").chars().take(40).collect();

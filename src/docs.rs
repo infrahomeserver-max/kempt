@@ -161,6 +161,9 @@ pub fn looks_delimited(c: &Copy, name: &str) -> bool {
     false
 }
 
+/// from this size up a file is mapped directly on Windows instead of copied first
+const BIG_DIRECT: u64 = 64 << 20;
+
 impl Doc {
     #[cfg(test)]
     pub fn open(id: u64, path: &Path) -> Result<Doc> {
@@ -174,9 +177,10 @@ impl Doc {
         if meta.is_dir() {
             bail!("{} is a directory", path.display());
         }
-        // On Windows a memory-mapped file cannot be replaced or deleted (and other programs could not save it),
-        // so work on a private copy there; elsewhere map the file directly (instant for any size).
-        let src = if cfg!(windows) && !is_gz { Source::open_detached(path)? } else { Source::open(path)? };
+        // On Windows a memory-mapped file cannot be replaced (and other programs could not save it), so small files are worked on as a
+        // private copy there. Copying a big file (hundreds of MB read and written, then scanned by antivirus) takes many seconds, so files
+        // from 64 MB up are mapped directly like on other systems: they open at once; saving over such a file needs "Save As".
+        let src = if cfg!(windows) && !is_gz && meta.len() < BIG_DIRECT { Source::open_detached(path)? } else { Source::open(path)? };
         let mut name = path.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
         if is_gz {
             name = name.trim_end_matches(".gz").to_string();
@@ -399,7 +403,13 @@ impl Doc {
         if let Ok(meta) = std::fs::metadata(&target) {
             let _ = std::fs::set_permissions(tmp.path(), meta.permissions());
         }
-        tmp.persist(&target).map_err(|e| anyhow::anyhow!("cannot save to {}: {}", target.display(), e.error))?;
+        tmp.persist(&target).map_err(|e| {
+            if cfg!(windows) && std::fs::metadata(&target).map(|m| m.len() >= BIG_DIRECT).unwrap_or(false) {
+                anyhow::anyhow!("cannot save over {} while Kempt has this large file open (Windows locks it). Use Save As to write a new file: {}", target.display(), e.error)
+            } else {
+                anyhow::anyhow!("cannot save to {}: {}", target.display(), e.error)
+            }
+        })?;
         {
             let mut h = self.h.lock().unwrap();
             h.saved = Some(h.cur);
