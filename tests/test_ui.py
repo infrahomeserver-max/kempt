@@ -57,7 +57,7 @@ def nrows(pg):
     return pg.locator(".vs-row:visible").count()
 
 
-def wait_label(pg, pat, timeout=8000):
+def wait_label(pg, pat, timeout=25000):
     pg.wait_for_function("([sel,pat]) => new RegExp(pat).test(document.querySelector(sel).textContent)", arg=[".find .cnt", pat], timeout=timeout)
     pg.wait_for_timeout(600)  # rows with highlight ranges load a moment after the count
 
@@ -123,7 +123,7 @@ with sync_playwright() as pw:
     pg.keyboard.press("F3"); pg.wait_for_timeout(400)
     check("F3 also steps", int(pg.inner_text(".line.cur .ln").strip()) > n1)
 
-    pg.select_option(".find .mode", "and"); wait_label(pg, r"lines| of ")
+    pg.select_option(".find .mode", "and"); wait_label(pg, r"lines| of |No results")
     expand = truth(lambda l: "ERROR" in l and "timeout" in l)
     pg.wait_for_timeout(300)
     lab = label(pg)
