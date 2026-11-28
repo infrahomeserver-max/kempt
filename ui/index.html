@@ -4561,7 +4561,7 @@ async function restoreWorkspace(n = 0) {
     for (const t of dup) api('doc/close', { id: t.info.id }).catch(() => { });   // the same file is already open here under another id (a hand-over got there first): drop the extra copy
     const left = (w.tabs || []).filter(t => !have.has(t.info.id) && !dup.includes(t)).sort((a, b) => { const x = ord.indexOf(a.info.id), y = ord.indexOf(b.info.id); return (x < 0 ? 1e9 : x) - (y < 0 ? 1e9 : y) || a.info.id - b.info.id; });
     if (left.length) { applyTabs(left); const act = Tabs.list.find(t => t.info && t.info.id === prefs.get('tabAct', -1)); if (act) Tabs.activate(act); toast(`Restored ${left.length} open file${left.length === 1 ? '' : 's'}`, 'info'); }
-    else if (w.busy && n < 9) setTimeout(() => restoreWorkspace(n + 1), Tabs.list.length ? 1000 : 3000);
+    else if (w.busy && n < 9 && !Tabs.list.length) setTimeout(() => restoreWorkspace(n + 1), 3000);
   } catch (_) { }
 }
 function openView(v) { if (v === 'notes') actions.notes(); else if (v === 'clock') actions.clock(); else if (v === 'calendar') actions.calendar(); else if (v === 'paste') actions.paste(); }
