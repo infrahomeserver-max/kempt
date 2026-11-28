@@ -418,6 +418,14 @@ match, and both can be undone. In regex mode, `$1` groups work.
 - Every keyword has its own colour in the text, in the chips under the box, and as ticks on the right-edge ruler.
 - `Enter`, `Shift+Enter` or `F3` step through matches ("3 of 120 lines"). Double-click any word to highlight all of its occurrences.
 
+### Log tools (the ⏱ button in the Find box)
+Open Find (`Ctrl+F`) and click **⏱** to show a row of log helpers. Nothing is read or indexed until you use one.
+- **Level chips** (Error, Warn, Info, Debug, Trace): click one or several to show only those levels; click again to clear.
+- **Go to time**: type `10:30`, `10:30:15` or `2026-11-27 10:30` and press Enter. Kempt jumps to the first line at or after that time with a binary search, so it is instant even in a multi-GB log. The log must be in time order. Stack-trace lines without their own timestamp are skipped over.
+- **Extract**: fill **From** and **To** (for example `10:30` and `10:45`) and click Extract to open just those lines in a new tab. The end time includes the whole minute. Limit 256 MB.
+- **Saved searches**: **Save** stores the current search (text and toggles) under a name; pick it later from the list; ✕ deletes it.
+Recognised timestamps: `2026-11-27 10:30:15`, `2026-11-27T10:30:15.123Z`, `[2026-11-27 10:30:15,123]`, with `-` or `/`.
+
 ### Fix
 Repairs broken **JSON**: trailing, missing or extra commas; single quotes; unquoted keys or values; `//` and
 `/* */` comments; `True`, `False`, `None`, `NaN`, `undefined`; hex and `+5` / `.5` numbers; raw newlines in

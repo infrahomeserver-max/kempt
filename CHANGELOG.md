@@ -46,6 +46,19 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Each `kempt gui <file>` launch writes one line to `launch.log` in the config folder (handed to the open window, or why not), to help track down double-clicks that seem to do nothing.
+
+### Fixed
+- Double-clicking a file while the Kempt tab is hidden behind other browser tabs now opens a new browser tab that comes to the front, instead of opening the file in the hidden tab where nothing seemed to happen.
+
+### Fixed
+- A file cut shorter or regenerated under the same name while open no longer crashes Kempt (blank window); it asks you to reopen the file instead.
+- A file deleted or renamed while Kempt runs is no longer brought back as an empty tab when the window reloads or reconnects.
+
+### Added
+- Log tools in the Find box (⏱): level chips, go to a time (binary search), extract a time range into a new tab, and named saved searches. All on demand.
+
 ## [0.2.3] - 2026-11-27
 
 ### Added

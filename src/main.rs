@@ -9,6 +9,7 @@ mod index;
 mod jsonfix;
 mod plat;
 mod jsonfmt;
+mod logtime;
 mod render;
 mod search;
 mod service;

@@ -181,6 +181,14 @@ mark.cm { background:#ff9f1c; color:#111; outline:2px solid #ff9f1c; border-radi
 .find .chips { display:flex; flex-wrap:wrap; gap:3px; }
 .find .chips { position:absolute; left:30px; top:100%; margin-top:4px; z-index:21; background:var(--bg2); border:1px solid var(--border); border-radius:6px; box-shadow:var(--shadow); padding:4px 6px; width:max-content; max-width:min(560px, 80vw); }
 .find .chips:empty { display:none; }
+.find .lg { flex-wrap:wrap; gap:4px; margin-top:4px; padding:4px 0 0; border-top:1px solid var(--border); }
+.find .lg[hidden] { display:none; }
+.find .lg input { width:auto; min-width:0; }
+.find .lv { display:inline-flex; gap:2px; }
+.find .lv button { padding:1px 7px; border-radius:10px; font-size:11px; }
+.find .lv button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+.find .lgm { font-size:11px; color:var(--muted); }
+.find .lgb.on { background:var(--bg3); }
 .chip { font-size:11px; padding:0 6px; border-radius:9px; border:1px solid var(--border); }
 .chip.c0 { background:var(--t0); } .chip.c1 { background:var(--t1); } .chip.c2 { background:var(--t2); }
 .chip.c3 { background:var(--t3); } .chip.c4 { background:var(--t4); } .chip.c5 { background:var(--t5); }
@@ -1467,8 +1475,8 @@ class ChunkCache {
 
 /* ───────────── find widget (shared by viewer and compare) ───────────── */
 class FindWidget {
-  constructor(host, { replace = false, onChange, onStep, onReplace, onReplaceAll, onClose }) {
-    this.cb = { onChange, onStep, onReplace, onReplaceAll, onClose }; this.hasReplace = replace;
+  constructor(host, { replace = false, onChange, onStep, onReplace, onReplaceAll, onClose, onTime, onRange }) {
+    this.cb = { onChange, onStep, onReplace, onReplaceAll, onClose, onTime, onRange }; this.hasReplace = replace;
     this.root = el('div', 'find'); this.root.hidden = true;
     this.root.innerHTML = `
       <button class="chev" title="Show replace (Ctrl+H)" ${replace ? '' : 'hidden'}>▸</button>
@@ -1481,11 +1489,22 @@ class FindWidget {
           <button class="tg ph" title="One phrase (Alt+P): search for exactly what is typed, spaces, quotes and dashes included, without splitting it into several words">“ ”</button>
           <select class="mode" title="Several words: OR = a line with any of them, AND = a line with all of them"><option value="or" title="A line matching any of the words counts">OR</option><option value="and" title="A line must contain all of the words">AND</option></select>
           <span class="cnt"></span>
+          <button class="flat lgb" title="Log tools: levels, go to a time, extract a time range, saved searches" hidden>⏱</button>
           <button class="flat prev" title="Previous match (Shift+Enter)">↑</button>
           <button class="flat next" title="Next match (Enter)">↓</button>
           <button class="flat x" title="Close (Esc)">✕</button>
         </div>
         <div class="chips"></div>
+        <div class="r lg" hidden>
+          <span class="lv"><button data-l="ERROR|FATAL|CRITICAL|SEVERE" class="lv-e">Error</button><button data-l="WARN|WARNING" class="lv-w">Warn</button><button data-l="INFO" class="lv-i">Info</button><button data-l="DEBUG" class="lv-d">Debug</button><button data-l="TRACE" class="lv-t">Trace</button></span>
+          <input type="text" class="gt" placeholder="Go to time: 10:30 or 2026-11-27 10:30:15" spellcheck="false" aria-label="Go to time" size="26">
+          <button class="gtb" title="Jump to the first line at or after this time (log must be in time order)">Go</button>
+          <input type="text" class="rf" placeholder="From" spellcheck="false" aria-label="Range start" size="9"><input type="text" class="rt" placeholder="To" spellcheck="false" aria-label="Range end" size="9">
+          <button class="rgb" title="Open only the lines between From and To in a new tab">Extract</button>
+          <select class="sv" title="Saved searches"><option value="">Saved searches…</option></select>
+          <button class="svb" title="Save the current search under a name">Save</button><button class="svd" title="Delete the chosen saved search" hidden>✕</button>
+          <span class="lgm"></span>
+        </div>
         <div class="r r2" hidden>
           <input type="text" class="rep" placeholder="Replace with (regex mode: $1 groups)" spellcheck="false" aria-label="Replace">
           <button class="rep1" title="Replace on the current line">Replace</button>
@@ -1502,6 +1521,7 @@ class FindWidget {
     this.q.addEventListener('input', fire);
     this.mode.addEventListener('change', () => this.changed());
     for (const k of ['case', 'word', 're', 'ph']) q('.' + k).addEventListener('click', e => { const key = k === 're' ? 'regex' : k === 'ph' ? 'phrase' : k; this.st[key] = !this.st[key]; e.currentTarget.classList.toggle('on', this.st[key]); this.changed(); this.q.focus(); });
+    this.initLog(q);
     q('.next').onclick = () => this.cb.onStep(1); q('.prev').onclick = () => this.cb.onStep(-1);
     q('.x').onclick = () => this.close();
     q('.rep1').onclick = () => this.cb.onReplace && this.cb.onReplace(this.rep.value);
@@ -1514,6 +1534,40 @@ class FindWidget {
       else if (e.key === 'F3') { e.preventDefault(); this.cb.onStep(e.shiftKey ? -1 : 1); }
     });
   }
+  /** log tools row: levels, go to time, extract range, saved searches (all on demand) */
+  initLog(q) {
+    const b = q('.lgb'), row = q('.lg'), msg = q('.lgm'); if (!this.cb.onTime) return;
+    b.hidden = false;
+    const say = (t, bad) => { msg.textContent = t || ''; msg.style.color = bad ? 'var(--err, #d44)' : ''; };
+    const tryit = async f => { try { say(''); await f(); } catch (e) { say(e.message, true); } };
+    b.onclick = () => { row.hidden = !row.hidden; b.classList.toggle('on', !row.hidden); if (!row.hidden) { this.loadSaved(); tryit(() => this.cb.onTime('')).then(() => 0); } };
+    const lv = [...row.querySelectorAll('.lv button')];
+    lv.forEach(x => x.onclick = () => {
+      x.classList.toggle('on'); const on = lv.filter(y => y.classList.contains('on')).map(y => y.dataset.l);
+      this.q.value = on.length ? '\\b(' + on.join('|') + ')\\b' : ''; this.st.regex = true; this.st.case = true; this.st.phrase = false;
+      for (const [k, key] of [['re', 'regex'], ['case', 'case'], ['ph', 'phrase']]) q('.' + k).classList.toggle('on', !!this.st[key]);
+      this.changed(); this.q.focus();
+    });
+    q('.gtb').onclick = () => tryit(() => this.cb.onTime(q('.gt').value));
+    q('.gt').addEventListener('keydown', e => { if (e.key === 'Enter') { e.stopPropagation(); e.preventDefault(); q('.gtb').click(); } });
+    q('.rgb').onclick = () => tryit(() => this.cb.onRange(q('.rf').value, q('.rt').value));
+    for (const c of ['.rf', '.rt']) q(c).addEventListener('keydown', e => { if (e.key === 'Enter') { e.stopPropagation(); e.preventDefault(); q('.rgb').click(); } });
+    this.sv = q('.sv'); this.svd = q('.svd');
+    this.sv.onchange = () => {
+      const x = this.saved().find(v => v.n === this.sv.value); this.svd.hidden = !x; if (!x) return;
+      this.q.value = x.s.q; Object.assign(this.st, { case: !!x.s.case, word: !!x.s.word, regex: !!x.s.regex, phrase: !!x.s.phrase }); this.mode.value = x.s.mode || 'or';
+      for (const [k, key] of [['re', 'regex'], ['case', 'case'], ['word', 'word'], ['ph', 'phrase']]) q('.' + k).classList.toggle('on', !!this.st[key]);
+      this.changed(); this.q.focus();
+    };
+    q('.svb').onclick = async () => {
+      const sp = this.spec(); if (!sp) return say('Type a search first.', true);
+      const n = ((await promptBox('Save search', 'Name', sp.q.slice(0, 40))) || '').trim(); if (!n) return;
+      const l = this.saved().filter(v => v.n !== n); l.unshift({ n, s: sp }); prefs.set('saved', l.slice(0, 40)); this.loadSaved(n);
+    };
+    this.svd.onclick = () => { prefs.set('saved', this.saved().filter(v => v.n !== this.sv.value)); this.loadSaved(); };
+  }
+  saved() { const l = prefs.get('saved', []); return Array.isArray(l) ? l.filter(v => v && v.n && v.s && typeof v.s.q === 'string') : []; }
+  loadSaved(sel) { if (!this.sv) return; this.sv.innerHTML = '<option value="">Saved searches…</option>' + this.saved().map(v => `<option>${esc(v.n)}</option>`).join(''); this.sv.value = sel || ''; this.svd.hidden = !sel; }
   get active() { return !this.root.hidden && this.q.value.trim() !== ''; }
   spec() { const q = this.q.value; if (!q.trim() || this.root.hidden) return null; return { q, case: this.st.case, word: this.st.word, regex: this.st.regex, phrase: this.st.phrase, mode: this.mode.value }; }
   open(replaceMode, seed) {
@@ -2063,7 +2117,7 @@ class DocTab {
     this.cache = new ChunkCache(c => this.fetchChunk(c), () => this.scroller.render());
     this.scroller = new VScroll(q('.vsroot'), { rowH: 20, fill: (r, i) => this.fillRow(r, i), onRender: (f, n) => this.onRender(f, n), onHScroll: d => this.hscroll(d) });
     this.scroller.root.classList.add('mono');
-    this.find = new FindWidget(this.ed, { replace: true, onChange: s => this.setSpec(s), onStep: d => this.step(d), onReplace: guard(v => this.replaceHere(v)), onReplaceAll: guard(v => this.replaceAll(v)), onClose: () => { this.scroller.root.focus(); if (this._back) { this._back = false; this.setMode('edit').catch(fail); } } });
+    this.find = new FindWidget(this.ed, { replace: true, onChange: s => this.setSpec(s), onStep: d => this.step(d), onReplace: guard(v => this.replaceHere(v)), onReplaceAll: guard(v => this.replaceAll(v)), onTime: v => this.logTime(v), onRange: (a, b) => this.logRange(a, b), onClose: () => { this.scroller.root.focus(); if (this._back) { this._back = false; this.setMode('edit').catch(fail); } } });
     q('.b-find').onclick = guard(() => this.openFind(true));
     q('.b-fmt').onclick = guard(() => this.doFormat()); q('.b-fix').onclick = guard(() => this.doFix());
     q('.b-undo').onclick = guard(() => this.undo()); q('.b-redo').onclick = guard(() => this.redo());
@@ -2385,6 +2439,16 @@ class DocTab {
   }
   goto() {
     return promptBox('Go to line', `Line number (1 – ${fmtNum(this.info.lines)})`, '').then(v => { const n = parseInt(String(v || '').replace(/[ ,_]/g, ''), 10); if (n >= 1) this.jump(Math.min(n, this.info.lines) - 1); });
+  }
+  async logTime(at) {
+    const r = await api('log/time', { id: this.info.id, at });
+    const m = $('.lgm', this.find.root); if (!at.trim()) { m.textContent = `Log covers ${r.span[0]} → ${r.span[1]}`; const f = $('.rf', this.find.root); if (!f.placeholder.includes(' ')) { f.placeholder = 'From'; } return; }
+    this.jump(r.line); m.textContent = (r.outside ? 'Outside the log, nearest line: ' : 'Line ' + fmtNum(r.line + 1) + ' · ') + (r.found || '');
+  }
+  async logRange(a, b) {
+    if (!a.trim() || !b.trim()) throw new Error('Enter both From and To, e.g. 10:30 and 10:45.');
+    const r = await api('log/range', { id: this.info.id, from: a, to: b });
+    Tabs.add(new DocTab(r.info, false)); toast(`Opened ${fmtNum(r.lines)} lines in a new tab`);
   }
   jump(line) { this.curLine = line; this.scroller.scrollToRow(line, true); this.scroller.render(); this.updateStatus(); }
 

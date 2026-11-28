@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 
 /// Only these keys are ever stored.
-const KEYS: &[&str] = &["theme", "indent", "fs", "dir", "recent", "tdelim", "theader", "astext", "expand", "readonly", "zones", "clock12", "hols", "holc", "sound", "appwin", "notify", "pinned", "recentAt", "session", "tabIds", "tabAct", "features", "stats", "stableAddr", "tourDone", "notifyAsked", "season", "browser", "fold", "dstx", "dsta", "meet", "ws", "dfmt", "hdf", "keys", "updchk", "updlast", "updseen", "updrepo", "ncat", "nfilt", "nsort", "ndone", "wrap", "accent", "mono", "showhid"];
+const KEYS: &[&str] = &["theme", "indent", "fs", "dir", "recent", "tdelim", "theader", "astext", "expand", "readonly", "zones", "clock12", "hols", "holc", "sound", "appwin", "notify", "pinned", "recentAt", "session", "tabIds", "tabAct", "features", "stats", "saved", "stableAddr", "tourDone", "notifyAsked", "season", "browser", "fold", "dstx", "dsta", "meet", "ws", "dfmt", "hdf", "keys", "updchk", "updlast", "updseen", "updrepo", "ncat", "nfilt", "nsort", "ndone", "wrap", "accent", "mono", "showhid"];
 const MAX_BYTES: usize = 64 * 1024;
 
 /// Checklist items and the scratchpad live in their own file so they never compete with the settings for space.

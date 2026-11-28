@@ -10,6 +10,8 @@ use std::sync::Arc;
 
 pub struct Source {
     pub map: Option<Arc<memmap2::Mmap>>,
+    /// the file this map reads directly (not a private copy): if it is cut shorter by someone else, reading the map would kill the process
+    origin: Option<std::path::PathBuf>,
     /// keeps temp files alive for the lifetime of the Source
     _tmp: Vec<tempfile::NamedTempFile>,
 }
@@ -30,7 +32,7 @@ impl Source {
 
     pub fn from_file(f: &File, tmp: Vec<tempfile::NamedTempFile>) -> Result<Source> {
         let map = if f.metadata()?.len() == 0 { None } else { Some(Arc::new(unsafe { memmap2::Mmap::map(f)? })) };
-        Ok(Source { map, _tmp: tmp })
+        Ok(Source { map, origin: None, _tmp: tmp })
     }
 
     /// Copy the file into an anonymous temp file and map that, leaving the original unlocked.
@@ -59,7 +61,17 @@ impl Source {
             }
             return Self::from_file(&tmp, vec![]);
         }
-        Self::from_file(&f, vec![])
+        let mut s = Self::from_file(&f, vec![])?;
+        s.origin = Some(path.to_path_buf());
+        Ok(s)
+    }
+
+    /// True when the mapped file on disk is now shorter than the map (truncated or replaced by a smaller file).
+    pub fn shrunk(&self) -> bool {
+        match (&self.origin, &self.map) {
+            (Some(p), Some(m)) => std::fs::metadata(p).map_or(false, |md| md.len() < m.len() as u64), // renamed or deleted: the open map stays valid,
+            _ => false,
+        }
     }
 
     /// Open and, for JSON/XML, stream-format into a temp file so the result is human-readable.

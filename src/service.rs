@@ -32,6 +32,24 @@ pub fn write_instance(port: u16, token: &str) {
     }
 }
 
+/// One line per `kempt gui <file>` launch (what happened and why) in `launch.log`, newest last, at most 80 lines.
+/// Meant for tracking down "I double-clicked and nothing opened"; contains file names only.
+pub fn log_launch(msg: &str) {
+    let p = plat::config_dir().join("launch.log");
+    let old = std::fs::read_to_string(&p).unwrap_or_default();
+    let mut lines: Vec<&str> = old.lines().collect();
+    if lines.len() > 79 {
+        lines.drain(..lines.len() - 79);
+    }
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
+    let mut out = lines.join("\n");
+    if !out.is_empty() {
+        out.push('\n');
+    }
+    out.push_str(&format!("{now} pid={} {msg}\n", std::process::id()));
+    let _ = std::fs::write(&p, out);
+}
+
 fn address_path() -> PathBuf {
     plat::config_dir().join("address.json")
 }

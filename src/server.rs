@@ -388,7 +388,12 @@ impl App {
 
     fn doc(&self, p: &Value) -> std::result::Result<Arc<Doc>, ApiError> {
         let id = gu(p, "id")?;
-        self.docs.lock().unwrap().get(&id).cloned().ok_or(ApiError { status: 404, msg: "document is not open (closed or server restarted)".into() })
+        let d = self.docs.lock().unwrap().get(&id).cloned().ok_or(ApiError { status: 404, msg: "document is not open (closed or server restarted)".into() })?;
+        // a file that was cut shorter or replaced while open must not be read from its old mapping (that would crash the program)
+        if d.current().src.shrunk() {
+            return Err(ApiError { status: 409, msg: "This file was changed or replaced on disk and is now shorter. Close this tab and open the file again.".into() });
+        }
+        Ok(d)
     }
 
     /// the table view of a document (rebuilt if the document changed since it was made)
@@ -547,7 +552,18 @@ fn table_meta(t: &crate::table::Table) -> Value {
 fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
     crate::jsonfmt::set_expand(gb(p, "expand").unwrap_or(false));
     match name {
-        "startup" => Ok(json!({"tabs": *app.startup.lock().unwrap()})),
+        "startup" => {
+            // tabs for files that were deleted or renamed since Kempt started are dropped, not shown again
+            let mut st = app.startup.lock().unwrap();
+            let gone = |t: &Value| t["info"]["path"].as_str().is_some_and(|f| !f.is_empty() && !std::path::Path::new(f).exists());
+            let ids: Vec<u64> = st.iter().filter(|t| gone(t)).filter_map(|t| t["info"]["id"].as_u64()).collect();
+            if !ids.is_empty() {
+                st.retain(|t| !gone(t));
+                let mut g = app.docs.lock().unwrap();
+                for id in ids { g.remove(&id); }
+            }
+            Ok(json!({"tabs": *st}))
+        }
         // a page that was discarded or reloaded (the browser frees background tabs, a laptop wakes from sleep) asks for the documents the server still
         // holds, so open files, unsaved edits and undo history are not lost. Nothing is returned while another window is open (it owns them).
         "workspace" => {
@@ -560,6 +576,14 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
             let mut skip: std::collections::HashSet<u64> = app.diffs.lock().unwrap().values().flat_map(|d| { let d = d.lock().unwrap(); [d.left.id, d.right.id] }).collect();
             for t in app.startup.lock().unwrap().iter() {
                 if let Some(id) = t["info"]["id"].as_u64() { skip.insert(id); }
+            }
+            // a file that was deleted or renamed since it was opened is not brought back as a tab (and is let go)
+            {
+                let gone: Vec<u64> = app.docs.lock().unwrap().values().filter(|d| !skip.contains(&d.id) && d.path().is_some_and(|f| !f.exists())).map(|d| d.id).collect();
+                if !gone.is_empty() {
+                    let mut g = app.docs.lock().unwrap();
+                    for id in gone { g.remove(&id); }
+                }
             }
             let mut ds: Vec<Arc<Doc>> = app.docs.lock().unwrap().values().filter(|d| !skip.contains(&d.id)).cloned().collect();
             ds.sort_by_key(|d| d.id);
@@ -611,7 +635,9 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
             // the window that was used last gets the file (several windows may be open)
             let target: Option<String> = {
                 let g = app.pages.lock().unwrap();
-                g.iter().filter(|(_, t)| t.0 > Instant::now()).max_by_key(|(_, t)| (t.1, t.2, t.0)).map(|(k, _)| k.clone())
+                // only a window you can actually see gets the file; a Kempt tab hidden behind other tabs would open it where nobody looks,
+                // so then the caller opens a fresh browser tab instead (which comes to the front)
+                g.iter().filter(|(_, t)| t.0 > Instant::now() && t.1).max_by_key(|(_, t)| (t.2, t.0)).map(|(k, _)| k.clone())
             };
             let files: Vec<PathBuf> = p["files"].as_array().map(|a| a.iter().filter_map(|v| v.as_str()).map(|x| PathBuf::from(x)).collect()).unwrap_or_default();
             let view = gs(p, "view").map(str::to_string);
@@ -899,6 +925,63 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
             let b = c.bytes();
             let b = b.strip_prefix(&[0xEF, 0xBB, 0xBF][..]).unwrap_or(b);
             Ok(json!({"text": String::from_utf8_lossy(b), "size": c.size()}))
+        }
+        // ---- log time tools (on demand; nothing is read until asked)
+        "log/time" => {
+            let d = app.doc(p)?;
+            let c = d.current();
+            let n = c.count();
+            let line = |i: usize| c.line(i).to_vec();
+            let Some((a, b)) = crate::logtime::span(n, &line) else {
+                return bad("No timestamps found at the start of the lines (expected 2026-11-27 10:30:15 or 2026-11-27T10:30:15Z).");
+            };
+            let span = json!([crate::logtime::show(a), crate::logtime::show(b)]);
+            let Some(at) = gs(p, "at").filter(|t| !t.trim().is_empty()) else {
+                return Ok(json!({"span": span}));
+            };
+            let Some(t) = crate::logtime::parse_target(at, Some(a / 1_000_000_000), false) else {
+                return bad("Could not read that time. Try 10:30, 10:30:15 or 2026-11-27 10:30.");
+            };
+            let i = crate::logtime::first_at_or_after(n, &line, t).unwrap_or(0);
+            let found = crate::logtime::key(c.line(i)).map(crate::logtime::show);
+            Ok(json!({"line": i, "found": found, "span": span, "outside": t < a || t > b}))
+        }
+        "log/range" => {
+            let d = app.doc(p)?;
+            let c = d.current();
+            let n = c.count();
+            let line = |i: usize| c.line(i).to_vec();
+            let Some((a, _)) = crate::logtime::span(n, &line) else { return bad("No timestamps found at the start of the lines."); };
+            let day = Some(a / 1_000_000_000);
+            let (Some(f), Some(t)) = (
+                crate::logtime::parse_target(gs(p, "from").unwrap_or(""), day, false),
+                crate::logtime::parse_target(gs(p, "to").unwrap_or(""), day, true),
+            ) else {
+                return bad("Could not read the times. Try 10:30 and 10:45, or 2026-11-27 10:30.");
+            };
+            if t < f {
+                return bad("The end time is before the start time.");
+            }
+            let s0 = crate::logtime::first_at_or_after(n, &line, f).unwrap_or(0);
+            let mut e0 = crate::logtime::first_at_or_after(n, &line, t.saturating_add(1)).unwrap_or(n);
+            if e0 <= s0 || crate::logtime::key(c.line(e0.min(n - 1))).is_none_or(|k| k <= t) {
+                e0 = n;   // the end time is past the last line
+            }
+            if crate::logtime::key(c.line(s0)).is_none_or(|k| k > t) {
+                return bad("No lines in that time range.");
+            }
+            let mut out = Vec::new();
+            for i in s0..e0 {
+                out.extend_from_slice(c.raw(i));
+                if out.len() > (256 << 20) {
+                    return bad("That range is larger than 256 MB. Pick a narrower one.");
+                }
+            }
+            let base = d.info().name.rsplit_once('.').map_or(d.info().name.clone(), |x| x.0.to_string());
+            let label = format!("{base} {}-{}.log", gs(p, "from").unwrap_or("").trim().replace(':', "."), gs(p, "to").unwrap_or("").trim().replace(':', "."));
+            let doc = Arc::new(Doc::untitled(app.id(), &label, &out)?);
+            app.docs.lock().unwrap().insert(doc.id, doc.clone());
+            Ok(json!({"info": info_json(&doc.info()), "path": "", "lines": e0 - s0}))
         }
         "lines" => {
             let d = app.doc(p)?;
@@ -1584,11 +1667,15 @@ pub fn run(o: GuiOpts) -> Result<()> {
             if !o.no_open && (!abs.is_empty() || o.view.is_some()) {
                 match crate::service::hand_over(&i, &abs, o.as_tabs, o.view.as_deref()) {
                     Ok(()) => {
+                        crate::service::log_launch(&format!("handed over to the open window: {}", abs.join(" ")));
                         crate::service::raise_window();
                         println!("Kempt is already open; added to it.");
                         return Ok(());
                     }
-                    Err(why) => eprintln!("Could not add to the open Kempt window: {why}. Opening a new browser tab instead."),
+                    Err(why) => {
+                        crate::service::log_launch(&format!("could not hand over ({why}); opening a new browser tab: {}", abs.join(" ")));
+                        eprintln!("Could not add to the open Kempt window: {why}. Opening a new browser tab instead.")
+                    }
                 }
             }
             let mut url = format!("http://127.0.0.1:{}/?t={}", i.port, i.token);

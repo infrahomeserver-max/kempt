@@ -94,6 +94,12 @@ jobs:
           python3 tests/test_features.py
           python3 tests/test_stable.py
           python3 tests/test_tour.py
+          python3 tests/test_logtools.py
+          python3 tests/test_truncate.py
+          python3 tests/test_gone.py
+          python3 tests/test_logtools.py
+          python3 tests/test_truncate.py
+          python3 tests/test_logtools.py
           python3 tests/test_compare_tabs.py
           python3 tests/test_clock_new.py
           python3 tests/test_notes_new.py
