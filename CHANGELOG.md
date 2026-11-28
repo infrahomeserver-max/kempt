@@ -46,6 +46,21 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Opening a pipe, device or socket as a file is refused instead of waiting on it forever. Settings, notes and the launch log are written readable by you only. Closing a big file gives its memory back at once.
+- New automated checks: junk requests against every route, damaged and hostile files, script-injection payloads, file permissions and 16-thread load (tests/test_fuzz_api.py, test_fuzz_files.py, test_xss.py, test_perms.py).
+
+### Fixed
+- Several double-clicks while the browser is starting now open a single tab: exactly one launch opens the browser, the others wait and hand their file to it, and a big file is read only once.
+
+### Fixed
+- Double-clicking a file that is already open switches to its tab instead of adding a second copy, and the page starts listening for double-clicked files immediately (faster when the browser was just started).
+
+### Fixed
+- Double-clicking several times while the browser is still starting adds the files to the tab that is loading, instead of opening one tab per click.
+- Rows that fail to load while a page is still starting are tried again, and a tab that loaded in the background draws itself when you switch to it (it could stay blank).
+- `scripts/release.sh` no longer stops silently when a local tag differs from GitHub's; it fetches tags with force and says what failed.
+
 ## [0.2.8] - 2026-11-28
 
 ### Fixed

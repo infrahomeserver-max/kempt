@@ -1463,7 +1463,13 @@ class ChunkCache {
   async load(c) {
     this.pending.add(c); const g = this.gen;
     try {
-      const rows = await this.fetchChunk(c);
+      let rows, err;
+      for (const wait of [0, 300, 900, 2000]) {   // a request that fails while the page is still loading is tried again, not left blank
+        if (wait) await new Promise(r => setTimeout(r, wait));
+        if (g !== this.gen) return;
+        try { rows = await this.fetchChunk(c); err = null; break; } catch (e) { err = e; }
+      }
+      if (err) throw err;
       if (g !== this.gen) return;
       this.map.set(c, rows); if (this.stale) { this.stale.delete(c); if (!this.stale.size) this.stale = null; }
       if (this.map.size > 80) this.map.delete(this.map.keys().next().value);
@@ -4537,16 +4543,20 @@ const Welcome = {
 /** show tabs the server built: at startup, for a second `kempt gui <file>`, or for a file dragged into the window */
 function applyTabs(list) {
   for (const t of list || []) {
-    if (t.kind === 'doc') { Tabs.add(new DocTab(t.info, !!t.minified)); if (!t.info.dropped) rememberRecent(t.info.path, false); }
+    if (t.kind === 'doc') { if (Tabs.list.some(x => x.kind === 'doc' && x.info && (x.info.id === t.info.id || (t.info.path && !t.info.dropped && !x.info.dropped && x.info.path === t.info.path && !(x.dirty && x.dirty()))))) continue;   // never two tabs for one document (the startup list, a restore and a hand-over can all name it)
+      Tabs.add(new DocTab(t.info, !!t.minified)); if (!t.info.dropped) rememberRecent(t.info.path, false); }
     else if (t.kind === 'diff') Tabs.add(new DiffTab(t.sid, t.state));
   }
 }
 async function restoreWorkspace(n = 0) {
   try {
-    const have = new Set(Tabs.list.filter(t => t.info).map(t => t.info.id)), w = await api('workspace', { cid: CID }), ord = prefs.get('tabIds', []);
-    const left = (w.tabs || []).filter(t => !have.has(t.info.id)).sort((a, b) => { const x = ord.indexOf(a.info.id), y = ord.indexOf(b.info.id); return (x < 0 ? 1e9 : x) - (y < 0 ? 1e9 : y) || a.info.id - b.info.id; });
+    const w = await api('workspace', { cid: CID }), have = new Set(Tabs.list.filter(t => t.info).map(t => t.info.id)), ord = prefs.get('tabIds', []);
+    const havePath = new Set(Tabs.list.filter(t => t.info && t.info.path && !t.info.dropped).map(t => t.info.path));
+    const dup = (w.tabs || []).filter(t => t.kind === 'doc' && t.info && !have.has(t.info.id) && t.info.path && !t.info.dropped && havePath.has(t.info.path));
+    for (const t of dup) api('doc/close', { id: t.info.id }).catch(() => { });   // the same file is already open here under another id (a hand-over got there first): drop the extra copy
+    const left = (w.tabs || []).filter(t => !have.has(t.info.id) && !dup.includes(t)).sort((a, b) => { const x = ord.indexOf(a.info.id), y = ord.indexOf(b.info.id); return (x < 0 ? 1e9 : x) - (y < 0 ? 1e9 : y) || a.info.id - b.info.id; });
     if (left.length) { applyTabs(left); const act = Tabs.list.find(t => t.info && t.info.id === prefs.get('tabAct', -1)); if (act) Tabs.activate(act); toast(`Restored ${left.length} open file${left.length === 1 ? '' : 's'}`, 'info'); }
-    else if (w.busy && n < 9 && !Tabs.list.length) setTimeout(() => restoreWorkspace(n + 1), 3000);
+    else if (w.busy && n < 9) setTimeout(() => restoreWorkspace(n + 1), Tabs.list.length ? 1000 : 3000);
   } catch (_) { }
 }
 function openView(v) { if (v === 'notes') actions.notes(); else if (v === 'clock') actions.clock(); else if (v === 'calendar') actions.calendar(); else if (v === 'paste') actions.paste(); }
@@ -4569,15 +4579,41 @@ function attention(what) {
   } catch (_) { }
 }
 /** tell the server which window is in front, so a new file goes to the one you are using */
-const touch = () => { try { api('inbox', { touch: true, cid: CID, vis: !document.hidden }); } catch (_) { } };
+const touch = () => { try { api('inbox', { touch: true, cid: CID, vis: !document.hidden }).then(r => { if (r && r.retired) retireThisTab(); }).catch(() => { }); } catch (_) { } };
 document.addEventListener('visibilitychange', touch); addEventListener('focus', touch);
+/** a tab that loaded in the background may have drawn nothing yet: draw again when it comes to the front */
+const redraw = () => { if (document.hidden) return; try { for (const t of Tabs.list) { const sc = t.scroller || t.sc; if (sc && sc.render) { if (t.cache && t.cache.map && !t.cache.map.size) t.cache.clear(); sc.render(); } } } catch (_) { } };
+document.addEventListener('visibilitychange', redraw); addEventListener('focus', redraw);
 /** ask once (on your first click) so the "file opened" alert can bring Kempt forward */
 addEventListener('click', function ask() { removeEventListener('click', ask, true); try { if (typeof Notification !== 'undefined' && Notification.permission === 'default' && !prefs.get('notifyAsked', false) && prefs.get('notify', true) !== false) { prefs.set('notifyAsked', true); Notification.requestPermission(); } } catch (_) { } }, true);
+function retireThisTab() {
+  try { api('inbox', { bye: true, cid: CID }); } catch (_) { }
+  try { window.close(); } catch (_) { }
+  document.body.innerHTML = '<div style="font:15px system-ui;padding:48px;text-align:center;color:#999">Kempt moved to a newer tab.<br>You can close this one.</div>';
+  document.title = 'Kempt (moved)';
+}
 async function inboxLoop() {
   for (;;) {
     try {
       const r = await api('inbox', { wait: 15, cid: CID, vis: !document.hidden });
+      if (r.retired) { retireThisTab(); return; }
       for (const it of r.items || []) {
+        if (it.retire) {   // a newer Kempt tab opened (this one was hidden): let go so the documents move there and only one tab stays
+          retireThisTab(); return;
+        }
+        // the same file handed over again (double-clicked twice): switch to the tab you already have
+        const seen = new Set();
+        it.tabs = (it.tabs || []).filter(t => {
+          if (t.kind !== 'doc' || !t.info) return true;
+          const have = Tabs.list.find(x => x.kind === 'doc' && x.info && (x.info.id === t.info.id || (t.info.path && !t.info.dropped && x.info.path === t.info.path && !(x.dirty && x.dirty()))));
+          if (have || (t.info.path && seen.has(t.info.path))) {
+            if (have && have.info.id !== t.info.id) api('doc/close', { id: t.info.id }).catch(() => { });
+            if (have) Tabs.activate(have);
+            toast('Already open: ' + t.info.name, 'ok'); return false;
+          }
+          if (t.info.path) seen.add(t.info.path);
+          return true;
+        });
         applyTabs(it.tabs); if (it.view) openView(it.view); flashTab();
         const n = (it.tabs || []).length; if (n) lastOpened = n === 1 && it.tabs[0].kind === 'doc' ? it.tabs[0].info.name : n === 1 ? 'a comparison' : n + ' tabs';
         if (n) toast(n === 1 && it.tabs[0].kind === 'doc' ? 'Opened ' + it.tabs[0].info.name : n === 1 ? 'Opened the comparison' : `Opened ${n} tabs`, 'ok');
@@ -4699,6 +4735,7 @@ Pick.start();
 (async () => {
   Tabs.updateWelcome();
   setTimeout(() => Tour.maybe(), 600);
+  inboxLoop();   // listen for double-clicked files straight away, so a freshly opened tab is found within a moment
   try {
     // measure column widths only after the embedded fonts are ready (give up after 1.5 s)
     await Promise.race([Promise.all(['400 13px Inter', '600 13px Inter', '400 12.5px "JetBrains Mono"', '700 12.5px "JetBrains Mono"'].map(f => document.fonts.load(f))), new Promise(r => setTimeout(r, 1500))]).catch(() => {});
@@ -4707,7 +4744,7 @@ Pick.start();
     // the old page counts as open for up to ~20 s, so ask again for a while while the server says it is busy
     restoreWorkspace();
   } catch (e) { fail(e); }
-  fillIcons(); inboxLoop();
+  fillIcons();
   if (Features.on('notes') || Features.on('cal')) Notes.load().then(async () => { try { await CAL.load(); await CAL.script(); CAL.sync(); } catch (_) { } });
   setTimeout(() => Update.auto(), 4000);
   { const qs = new URLSearchParams(location.search);   // opened from the tray menu or by a second `kempt gui file`

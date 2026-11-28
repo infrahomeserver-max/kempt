@@ -146,7 +146,7 @@ with sync_playwright() as pw:
     pg.fill(".pp", other); pg.press(".pp", "Enter"); pg.wait_for_selector(".tgrid .td", timeout=6000)
     pg.wait_for_timeout(700)
     pg.context.close(); g.stop()
-    check("only the small settings file (plus the running-copy marker) was written", sorted(f for f in os.listdir(CFG) if f != "instance.json") == ["state.json"], os.listdir(CFG))
+    check("only the small settings file (plus the running-copy marker) was written", set(os.listdir(CFG)) <= {"state.json", "instance.json", "address.json", "launch.log", "opening.lock"} and "state.json" in os.listdir(CFG), os.listdir(CFG))
     g = Gui([]); pg = new_page(g.url); pg.wait_for_selector("#welcome")
     check("theme is remembered after a restart (new port)", pg.evaluate("document.documentElement.dataset.theme") == "light")
     check("recent files are remembered", other in pg.inner_text(".recent"), pg.inner_text(".recent"))

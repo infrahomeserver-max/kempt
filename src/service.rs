@@ -35,19 +35,26 @@ pub fn write_instance(port: u16, token: &str) {
 /// One line per `kempt gui <file>` launch (what happened and why) in `launch.log`, newest last, at most 80 lines.
 /// Meant for tracking down "I double-clicked and nothing opened"; contains file names only.
 pub fn log_launch(msg: &str) {
+    use std::io::Write;
     let p = plat::config_dir().join("launch.log");
-    let old = std::fs::read_to_string(&p).unwrap_or_default();
-    let mut lines: Vec<&str> = old.lines().collect();
-    if lines.len() > 79 {
-        lines.drain(..lines.len() - 79);
+    // launches can arrive in the same instant, so lines are appended (not rewritten); the file is cut down only when it grows past ~20 KB
+    if std::fs::metadata(&p).is_ok_and(|m| m.len() > 20_000) {
+        let old = std::fs::read_to_string(&p).unwrap_or_default();
+        let lines: Vec<&str> = old.lines().collect();
+        let keep = lines[lines.len().saturating_sub(80)..].join("\n");
+        let _ = std::fs::write(&p, keep + "\n");
     }
     let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
-    let mut out = lines.join("\n");
-    if !out.is_empty() {
-        out.push('\n');
+    let mut oo = std::fs::OpenOptions::new();
+    oo.create(true).append(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        oo.mode(0o600);   // file names of what you opened: for you only
     }
-    out.push_str(&format!("{now} pid={} {msg}\n", std::process::id()));
-    let _ = std::fs::write(&p, out);
+    if let Ok(mut f) = oo.open(&p) {
+        let _ = f.write_all(format!("{now} pid={} {msg}\n", std::process::id()).as_bytes());
+    }
 }
 
 fn address_path() -> PathBuf {
@@ -117,10 +124,10 @@ pub fn stop_running() -> Result<bool> {
 /// Give files (or a tool name) to the Kempt window that is already open, so they appear there as new tabs.
 /// False when there is no open window (nobody is looking) or anything fails: the caller then opens a new browser tab as before.
 /// Give files to the Kempt window that is already open. Err says why that was not possible.
-pub fn hand_over(i: &Instance, files: &[String], as_tabs: bool, view: Option<&str>) -> Result<(), &'static str> {
+pub fn hand_over(i: &Instance, files: &[String], as_tabs: bool, view: Option<&str>, any: bool) -> Result<(), &'static str> {
     let Ok(mut s) = TcpStream::connect_timeout(&SocketAddr::from(([127, 0, 0, 1], i.port)), Duration::from_secs(1)) else { return Err("could not reach the running Kempt") };
     let _ = s.set_read_timeout(Some(Duration::from_secs(60)));
-    let body = serde_json::json!({"files": files, "tabs": as_tabs, "view": view}).to_string();
+    let body = serde_json::json!({"files": files, "tabs": as_tabs, "view": view, "any": any}).to_string();
     if write!(s, "POST /api/gui/open HTTP/1.0\r\nHost: 127.0.0.1:{}\r\nX-Token: {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}", i.port, i.token, body.len(), body).is_err() {
         return Err("could not reach the running Kempt");
     }
@@ -281,7 +288,41 @@ pub fn open_app_window(url: &str) -> bool {
 
 /// Open the interface the way the user prefers: own window if asked for (and a Chromium browser exists), else the browser chosen in
 /// Settings, else the system default.
+fn opening_lock() -> PathBuf {
+    plat::config_dir().join("opening.lock")
+}
+
+fn lock_age() -> Option<u64> {
+    std::fs::metadata(opening_lock()).ok()?.modified().ok()?.elapsed().ok().map(|d| d.as_secs())
+}
+
+/// True if a browser tab for Kempt was opened by a `kempt gui` launch within the last 20 seconds.
+pub fn opening_recently() -> bool {
+    lock_age().is_some_and(|a| a < 20)
+}
+
+/// Several launches can arrive in the same instant (double-clicking a few times while the browser starts). Exactly one of them gets
+/// `true` here and opens the browser tab; the others wait for that tab to load and hand their files to it.
+pub fn claim_opening() -> bool {
+    use std::fs::OpenOptions;
+    if lock_age().is_some_and(|a| a >= 20) {
+        let _ = std::fs::remove_file(opening_lock());
+    }
+    OpenOptions::new().write(true).create_new(true).open(opening_lock()).is_ok()
+}
+
+/// Tell the running Kempt that a fresh browser tab is about to open: Kempt tabs nobody can see step aside.
+pub fn retire_hidden(i: &Instance) {
+    if let Ok(mut s) = TcpStream::connect_timeout(&SocketAddr::from(([127, 0, 0, 1], i.port)), Duration::from_secs(1)) {
+        let _ = s.set_read_timeout(Some(Duration::from_secs(5)));
+        let _ = write!(s, "POST /api/gui/retire HTTP/1.0\r\nHost: 127.0.0.1:{}\r\nX-Token: {}\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{{}}", i.port, i.token);
+        let mut out = String::new();
+        let _ = s.read_to_string(&mut out);
+    }
+}
+
 pub fn open_ui(url: &str, own_window: bool) {
+    let _ = std::fs::write(opening_lock(), b"");   // a tab is being opened right now (see claim_opening)
     if own_window && open_app_window(url) {
         return;
     }

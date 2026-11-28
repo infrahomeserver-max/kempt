@@ -36,7 +36,8 @@ git diff --quiet && git diff --cached --quiet || die "you have uncommitted chang
 $(git status --short)"
 [[ -z $(git ls-files --others --exclude-standard) ]] || die "there are untracked files; add or remove them first:
 $(git ls-files --others --exclude-standard)"
-git fetch --quiet origin --tags
+git fetch --quiet --force origin "refs/tags/*:refs/tags/*" || die "cannot fetch from GitHub (network or login?). Run: git fetch origin --tags --force   and read the message"
+git fetch --quiet origin || die "cannot fetch from GitHub (network or login?)"
 LOCAL=$(git rev-parse HEAD); REMOTE=$(git rev-parse origin/main)
 if [[ $LOCAL != "$REMOTE" ]]; then
   if git merge-base --is-ancestor "$LOCAL" "$REMOTE"; then die "this clone is BEHIND origin/main. Run: git pull --ff-only"

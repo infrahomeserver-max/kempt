@@ -192,6 +192,31 @@ mod tests {
     }
 
     #[test]
+    fn never_panics_on_junk() {
+        // a small xorshift generator: deterministic "random" bytes, digits and separators
+        let mut x = 0x9E3779B97F4A7C15u64;
+        let mut next = move || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        let alphabet = b"0123456789-/:T .,Z[](\x00\xff\xe2abc";
+        for _ in 0..20000 {
+            let len = (next() % 40) as usize;
+            let line: Vec<u8> = (0..len).map(|_| alphabet[(next() % alphabet.len() as u64) as usize]).collect();
+            let _ = key(&line);
+            let _ = parse_target(&String::from_utf8_lossy(&line), Some(20261127), next() % 2 == 0);
+        }
+        // every prefix of a good line
+        let good = b"[2026-11-27T10:30:15.123456Z] INFO x";
+        for n in 0..=good.len() {
+            let _ = key(&good[..n]);
+        }
+        assert_eq!(first_at_or_after(1, &|_| b"2026-11-27 10:00:00".to_vec(), 20261127100000000), Some(0));
+    }
+
+    #[test]
     fn shows_a_key() {
         assert_eq!(show(20261127103015123), "2026-11-27 10:30:15");
     }

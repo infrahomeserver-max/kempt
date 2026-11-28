@@ -85,10 +85,29 @@ impl Store {
         std::fs::create_dir_all(dir).map_err(|e| format!("cannot create {}: {e}", dir.display()))?;
         let tmp = self.path.with_extension("json.tmp");
         let bytes = if self.encrypt { seal(text.as_bytes())? } else { text.into_bytes() };
-        std::fs::write(&tmp, bytes).map_err(|e| format!("cannot write {}: {e}", tmp.display()))?;
+        write_private(&tmp, &bytes).map_err(|e| format!("cannot write {}: {e}", tmp.display()))?;
         std::fs::rename(&tmp, &self.path).map_err(|e| format!("cannot write {}: {e}", self.path.display()))?;
         Ok(Value::Object(m))
     }
+}
+
+/// Write a file that only the owner can read (settings hold the paths of recently opened files, notes are private).
+fn write_private(path: &std::path::Path, bytes: &[u8]) -> std::io::Result<()> {
+    use std::io::Write;
+    let mut oo = std::fs::OpenOptions::new();
+    oo.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        oo.mode(0o600);
+    }
+    let mut f = oo.open(path)?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = f.set_permissions(std::fs::Permissions::from_mode(0o600));   // also when an older, looser file is being replaced
+    }
+    f.write_all(bytes)
 }
 
 /// Notes are stored encrypted (AES-256-GCM). The key is made on first use and kept in its own owner-only file,

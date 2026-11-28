@@ -370,6 +370,8 @@ pub struct App {
     /// files a second `kempt gui <file>` handed to the window that is already open (the page long-polls `inbox`)
     inbox: (Mutex<Vec<Value>>, std::sync::Condvar),
     pollers: AtomicUsize,
+    seen: Mutex<HashMap<String, u64>>,   // window id -> when it first called (ms since epoch); windows older than `retire_at` are told to step aside
+    retire_at: AtomicU64,
     /// windows that are listening: id -> until when they count as open (a window that closes says goodbye)
     pages: Mutex<HashMap<String, (Instant, bool, Instant)>>,   // window id -> (counts as open until, is in front, last seen in front)
 }
@@ -421,6 +423,10 @@ impl App {
 
     fn open_path_as(&self, path: &str, mode: &str) -> std::result::Result<Arc<Doc>, ApiError> {
         let pb = expand(path.trim());
+        // pipes, devices and sockets are not files: reading one could wait forever or never end
+        if std::fs::metadata(&pb).is_ok_and(|m| !m.is_file() && !m.is_dir()) {
+            return Err(ApiError { status: 400, msg: format!("{} is not a regular file (it is a pipe, device or socket).", pb.display()) });
+        }
         let doc = Arc::new(Doc::open_as(self.id(), &pb, mode)?);
         self.docs.lock().unwrap().insert(doc.id, doc.clone());
         Ok(doc)
@@ -597,6 +603,17 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
                 app.pages.lock().unwrap().remove(&cid);
                 return Ok(json!({"items": []}));
             }
+            {   // a window that is older than the last "open a fresh tab" launch steps aside, even if the browser had it frozen until now
+                let now_ms = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
+                let born = *app.seen.lock().unwrap().entry(cid.clone()).or_insert(now_ms);
+                if born < app.retire_at.load(Ordering::Acquire) {
+                    app.pages.lock().unwrap().remove(&cid);
+                    app.seen.lock().unwrap().remove(&cid);
+                    return Ok(json!({"items": [], "retired": true}));
+                }
+                let mut sg = app.seen.lock().unwrap();
+                if sg.len() > 200 { sg.retain(|_, b| *b + 86_400_000 > now_ms); }
+            }
             let wait = p["wait"].as_u64().unwrap_or(0).min(15);
             let vis = p["vis"].as_bool();
             {
@@ -631,13 +648,25 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
             }
             Ok(json!({"items": mine_items, "retry": if mine { 0 } else { 5 }}))
         }
+        // a launch is about to open a fresh browser tab: the Kempt tabs nobody can see step aside so only one stays
+        "gui/retire" => {
+            app.retire_at.store(std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0), Ordering::Release);
+            let ids: Vec<String> = { let mut g = app.pages.lock().unwrap(); let k: Vec<String> = g.iter().filter(|(_, t)| t.0 > Instant::now()).map(|(k, _)| k.clone()).collect(); g.clear(); k };
+            if !ids.is_empty() {
+                let (m, cv) = &app.inbox;
+                let mut q = m.lock().unwrap();
+                for h in ids { q.push(json!({"retire": true, "to": h})); }
+                cv.notify_all();
+            }
+            Ok(json!({"ok": true}))
+        }
         "gui/open" => {
             // the window that was used last gets the file (several windows may be open)
             let target: Option<String> = {
                 let g = app.pages.lock().unwrap();
                 // only a window you can actually see gets the file; a Kempt tab hidden behind other tabs would open it where nobody looks,
                 // so then the caller opens a fresh browser tab instead (which comes to the front)
-                g.iter().filter(|(_, t)| t.0 > Instant::now() && t.1).max_by_key(|(_, t)| (t.2, t.0)).map(|(k, _)| k.clone())
+                g.iter().filter(|(_, t)| t.0 > Instant::now() && (t.1 || p["any"] == true)).max_by_key(|(_, t)| (t.1, t.2, t.0)).map(|(k, _)| k.clone())
             };
             let files: Vec<PathBuf> = p["files"].as_array().map(|a| a.iter().filter_map(|v| v.as_str()).map(|x| PathBuf::from(x)).collect()).unwrap_or_default();
             let view = gs(p, "view").map(str::to_string);
@@ -1146,6 +1175,7 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
                     job.cancel.store(true, Ordering::Relaxed);
                 }
             }
+            crate::plat::trim_memory();   // a closed big file frees its line index: hand that memory back to the system now
             Ok(json!({"ok": true}))
         }
 
@@ -1634,6 +1664,9 @@ fn build_tabs(app: &Arc<App>, files: &[PathBuf], as_tabs: bool) -> std::result::
         let l = f.display().to_string().to_ascii_lowercase();
         [".xlsx", ".xlsm", ".xltx", ".xltm", ".xlsb"].iter().any(|e| l.ends_with(e))
     };
+    // launches that arrive together must not each open (and index) the same big file: one at a time, the later ones find it already open
+    static OPEN_ONE_AT_A_TIME: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    let _one = OPEN_ONE_AT_A_TIME.lock().unwrap_or_else(|e| e.into_inner());
     let mut opened: Vec<Arc<Doc>> = Vec::new();
     let mut tabs = Vec::new();
     let any_book = files.iter().any(|f| is_book(f));
@@ -1645,7 +1678,13 @@ fn build_tabs(app: &Arc<App>, files: &[PathBuf], as_tabs: bool) -> std::result::
                 tabs.push(json!({"kind": "doc", "info": i, "minified": false}));
             }
         } else {
-            opened.push(app.open_path(&f.display().to_string())?);
+            // already open and unedited: reuse it (no second read of a multi-GB file, no duplicate tab)
+            let same = app.docs.lock().unwrap().values().find(|d| d.version() <= 1 && d.path().is_some_and(|p| p == *f)).cloned();
+            if let Some(d) = same {
+                tabs.push(json!({"kind": "doc", "info": info_json(&d.info()), "minified": looks_minified(&d.info()), "reuse": true}));
+            } else {
+                opened.push(app.open_path(&f.display().to_string())?);
+            }
         }
     }
     if opened.len() == 2 && !as_tabs && !any_book {
@@ -1666,7 +1705,7 @@ pub fn run(o: GuiOpts) -> Result<()> {
         if !o.background {
             let abs: Vec<String> = o.files.iter().map(|f| crate::plat::canonical(f).unwrap_or_else(|_| f.clone()).display().to_string()).collect();
             if !o.no_open && (!abs.is_empty() || o.view.is_some()) {
-                match crate::service::hand_over(&i, &abs, o.as_tabs, o.view.as_deref()) {
+                match crate::service::hand_over(&i, &abs, o.as_tabs, o.view.as_deref(), false) {
                     Ok(()) => {
                         crate::service::log_launch(&format!("handed over to the open window: {}", abs.join(" ")));
                         crate::service::raise_window();
@@ -1674,7 +1713,31 @@ pub fn run(o: GuiOpts) -> Result<()> {
                         return Ok(());
                     }
                     Err(why) => {
-                        crate::service::log_launch(&format!("could not hand over ({why}); opening a new browser tab: {}", abs.join(" ")));
+                        // No window is listening yet. Several launches can arrive together while the browser is still starting, so exactly one
+                        // of them (claim_opening) opens the tab; all of them then wait for it to load and hand their file to it.
+                        let own = o.app_window || crate::state::Store::new().get()["appwin"] == true;
+                        let first = crate::service::claim_opening();
+                        if first {
+                            let mut url = format!("http://127.0.0.1:{}/?t={}", i.port, i.token);
+                            if let Some(v) = &o.view {
+                                url.push_str(&format!("&view={v}"));
+                            }
+                            crate::service::log_launch(&format!("no window yet ({why}); opened a browser tab and waiting to hand over: {}", abs.join(" ")));
+                            crate::service::retire_hidden(&i);
+                            crate::service::open_ui(&url, own);
+                        }
+                        if first || crate::service::opening_recently() {
+                            for _ in 0..75 {
+                                std::thread::sleep(std::time::Duration::from_millis(200));
+                                if crate::service::hand_over(&i, &abs, o.as_tabs, o.view.as_deref(), true).is_ok() {
+                                    crate::service::log_launch(&format!("handed over after waiting for the new tab to load: {}", abs.join(" ")));
+                                    crate::service::raise_window();
+                                    println!("Kempt is already open; added to it.");
+                                    return Ok(());
+                                }
+                            }
+                        }
+                        crate::service::log_launch(&format!("the new tab never answered; opening one with the file in its address: {}", abs.join(" ")));
                         eprintln!("Could not add to the open Kempt window: {why}. Opening a new browser tab instead.")
                     }
                 }
@@ -1732,6 +1795,8 @@ pub fn run(o: GuiOpts) -> Result<()> {
         own_window: o.app_window || crate::state::Store::new().get()["appwin"] == true,
         inbox: (Mutex::new(Vec::new()), std::sync::Condvar::new()),
         pollers: AtomicUsize::new(0),
+        seen: Mutex::new(HashMap::new()),
+        retire_at: AtomicU64::new(0),
         pages: Mutex::new(HashMap::new()),
     });
     clean_drops();
