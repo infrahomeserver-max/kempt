@@ -3,11 +3,13 @@
 All notable changes are listed here. Format: [Keep a Changelog](https://keepachangelog.com/);
 versioning: [SemVer](https://semver.org/).
 
-## [0.2.6] - 2026-11-27
+## [0.2.7] - 2026-11-28
 
 ### Added
 - **First-run introduction**: a seven-step tour of what Kempt can do, shown once to new users (not to anyone who already has recent files) and available later from Settings → About, Help and the welcome screen.
 - **Same address after a restart**: Kempt reuses its last port and access token when that port is free, so a link from the browser history or a bookmark opens again after Kempt was restarted. Settings → General → *Keep the same address between runs* (on by default) turns it off. The token is kept in a private file (`address.json`, owner-only) outside the settings backup. `--port` is unchanged.
+
+## [0.2.6] - 2026-11-27
 
 ### Fixed
 - **Paste & compare**: Beautify, Beautify both, Clear, Swap and Paste can now be undone with Ctrl+Z, and each side has an Undo button.
