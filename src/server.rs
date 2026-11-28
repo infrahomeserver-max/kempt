@@ -1610,10 +1610,25 @@ pub fn run(o: GuiOpts) -> Result<()> {
         }
         return Ok(());
     }
-    let server = Server::http(("127.0.0.1", o.port)).map_err(|e| anyhow::anyhow!("cannot start the server: {e}"))?;
+    // "Keep the same address between runs" (Settings, on by default): reuse the last port and token when the port is free, so links in the
+    // browser history and bookmarks still work after Kempt was restarted. Not used with an explicit --port.
+    let stable = o.port == 0 && crate::state::Store::new().get()["stableAddr"] != false;
+    let saved = if stable { crate::service::read_address() } else { None };
+    if !stable {
+        crate::service::forget_address();
+    }
+    let server = match &saved {
+        Some((p, _)) => Server::http(("127.0.0.1", *p)).or_else(|_| Server::http(("127.0.0.1", 0u16))),
+        None => Server::http(("127.0.0.1", o.port)),
+    }
+    .map_err(|e| anyhow::anyhow!("cannot start the server: {e}"))?;
     let port = server.server_addr().to_ip().map(|a| a.port()).unwrap_or(o.port);
+    let token = saved.map(|(_, t)| t).unwrap_or_else(random_token);
+    if stable {
+        crate::service::write_address(port, &token);
+    }
     let app = Arc::new(App {
-        token: random_token(),
+        token,
         port,
         next: AtomicU64::new(1),
         docs: Mutex::new(HashMap::new()),

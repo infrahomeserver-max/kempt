@@ -817,6 +817,14 @@ html[data-no~="clock"] #btn-clock { display: none !important; }
 .s-feat span { flex:1; min-width:0; } .s-feat span b { display:block; font-weight:600; } .s-feat span small { display:block; margin-top:2px; color:var(--fg-dim); font-size:12px; }
 .s-presets { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; } .s-presets button { height:30px; padding:0 14px; border-radius:15px; }
 .s-body .s-note { font-size:12.5px; }
+
+.tour-back { align-items:center; padding-top:0; z-index:120; background:rgba(8,10,14,.62); }
+.tour { width:min(520px,92vw); background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:30px 34px 22px; box-shadow:0 24px 70px rgba(0,0,0,.45); text-align:left; }
+.tour-ic { width:56px; height:56px; border-radius:15px; background:var(--accent); color:#fff; display:grid; place-items:center; font-size:26px; font-weight:700; margin-bottom:16px; }
+.tour h2 { margin:0 0 8px; font-size:22px; letter-spacing:-.2px; } .tour-p { margin:0 0 12px; color:var(--fg-dim); line-height:1.55; font-size:14.5px; }
+.tour ul { margin:0 0 16px; padding:0; list-style:none; display:grid; gap:7px; } .tour li { padding-left:22px; position:relative; font-size:13.5px; } .tour li::before { content:"✓"; position:absolute; left:2px; color:var(--accent); font-weight:700; }
+.tour-dots { display:flex; gap:7px; justify-content:center; margin:6px 0 16px; } .tour-dots i { width:7px; height:7px; border-radius:50%; background:var(--border); } .tour-dots i.on { background:var(--accent); width:20px; border-radius:4px; }
+.tour-foot { display:flex; gap:8px; align-items:center; } .tour-foot .sp { flex:1; } .tour-foot button { height:34px; padding:0 16px; border-radius:8px; }
 </style>
 </head>
 <body>
@@ -1093,6 +1101,7 @@ function openSettings() {
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px">Browser <select id="set-browser" aria-label="Browser"><option value="">System default</option><option value="chrome">Google Chrome</option><option value="firefox">Firefox</option><option value="edge">Microsoft Edge</option><option value="brave">Brave</option><option value="chromium">Chromium</option><option value="vivaldi">Vivaldi</option><option value="safari">Safari (macOS)</option></select></label><p class="s-note">Used when Kempt opens itself (<code>kempt gui</code>, the tray icon, login). If it is not installed, the system default is used.</p>
           <p class="s-note"><span id="set-bw-note"></span></p>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="set-notify"> Alert me when a file opens while Kempt is in the background</label><p class="s-note">Browsers do not let a page jump to the front by itself. This shows a notification; clicking it brings Kempt up. (Notifications must be allowed for this page.)</p>
+          <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="set-stable"> Keep the same address between runs</label><p class="s-note">Kempt remembers its last port and access token, so a link from your browser history or a bookmark opens again after Kempt was restarted (if that port is still free). Turn off to get a new random address every time; this applies the next time Kempt starts.</p>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="set-appwin"> Open in its own window</label><p class="s-note">Gives Kempt its own taskbar icon. Needs Chrome, Edge, Brave or Chromium.</p>
           <h4 style="margin-top:18px">Updates</h4>
           <label class="s-row" style="display:flex;gap:8px;align-items:center;margin-top:0"><input type="checkbox" id="set-upd"> Check for updates</label>
@@ -1108,7 +1117,7 @@ function openSettings() {
           <div class="about"><svg viewBox="0 0 128 128" width="44" height="44"><rect x="6" y="6" width="116" height="116" rx="24" fill="var(--accent)"/><g fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M52 38 L30 64 L52 90"/><path d="M76 38 L98 64 L76 90"/></g></svg>
             <div><b>Kempt</b> <span class="s-note" id="s-ver">version @VERSION@</span><br><span class="s-note">Open, search, fix, format and compare big JSON, XML and log files.</span></div></div>
           <p class="s-note">Runs on this computer only; nothing is uploaded. Notes and checklist are stored encrypted.</p>
-          <p class="s-actions"><button id="set-help">Help &amp; shortcuts</button><button id="set-quit" class="danger" title="Stop the Kempt server on this computer">Quit Kempt</button></p>
+          <p class="s-actions"><button id="set-tour">Show the introduction</button><button id="set-help">Help &amp; shortcuts</button><button id="set-quit" class="danger" title="Stop the Kempt server on this computer">Quit Kempt</button></p>
           <p class="s-note">Fonts: Inter and JetBrains Mono (SIL Open Font License 1.1).</p>
         </section>
       </div></div></div>`;
@@ -1183,6 +1192,8 @@ function openSettings() {
   }).catch(() => { });
   const nt = q('#set-notify'); nt.checked = prefs.get('notify', true) !== false && typeof Notification !== 'undefined' && Notification.permission === 'granted';
   nt.onchange = async () => { if (!nt.checked) return prefs.set('notify', false); if (typeof Notification === 'undefined') { nt.checked = false; return toast('This browser has no notifications.', 'info'); } const r = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission(); if (r === 'granted') { prefs.set('notify', true); toast('Done. Kempt will notify you.', 'ok'); } else { nt.checked = false; toast('Notifications are blocked for this page. Allow them in the browser\'s site settings.', 'info', 7000); } };
+  const sb = q('#set-stable'); sb.checked = prefs.get('stableAddr', true) !== false; sb.onchange = () => prefs.set('stableAddr', sb.checked);
+  q('#set-tour').onclick = () => { close(); Tour.open(); };
   const aw = q('#set-appwin'); aw.checked = !!prefs.get('appwin', false); aw.onchange = () => prefs.set('appwin', aw.checked);
   const ro = q('#set-readonly'); ro.checked = !!prefs.get('readonly', false); ro.onchange = () => prefs.set('readonly', ro.checked);
   const exp = q('#set-expand'); exp.checked = !!prefs.get('expand', false); exp.onchange = () => prefs.set('expand', exp.checked);
@@ -3400,7 +3411,7 @@ const actions = {
       <section data-p="feat" hidden><div class="hp-feat">${feat.map(([t, d]) => `<div><b>${esc(t)}</b><p>${d}</p></div>`).join('')}</div></section>
       <section data-p="fmt" hidden><p class="hp-note">Format and Fix work on the file you have open. A ✓ marks tools found on this computer; for the others, run the install command. Fix repairs broken JSON and XML.</p><div class="hp-fmt"><b>Language</b><b>Tool</b><b>Install</b>${langs.map(([l, t, i]) => `<span>${esc(l)}</span><span class="tl" data-t="${esc(t)}">${esc(t)}</span><code>${esc(i)}</code>`).join('')}</div></section>
       <section data-p="cli" hidden><div class="hp-cli">${cmds.map(([c, d]) => `<code>${esc(c)}</code><span>${esc(d)}</span>`).join('')}</div></section>`;
-    modal('Help', body, [{ label: 'Close', primary: true, value: true }]);
+    modal('Help', body, [{ label: 'Introduction', value: () => { setTimeout(() => Tour.open(), 50); return true; } }, { label: 'Close', primary: true, value: true }]);
     const m = $('#modals .modal:last-child'); if (!m) return; m.classList.add('help2');
     api('tools/status').then(r => { const have = new Set(r.tools.filter(t => t.found).map(t => t.name)); m.querySelectorAll('.hp-fmt .tl').forEach(x => { const n = x.dataset.t; if (n === 'Built in' || have.has(n)) { x.textContent = '✓ ' + n; x.style.color = 'var(--ok)'; } else { x.style.color = 'var(--fg-dim)'; x.title = 'Not found on this computer'; const t = r.tools.find(q => q.name === n), c = x.nextElementSibling; if (t && c) c.textContent = t.install; } }); }).catch(() => { });
     const draw = () => {
@@ -4431,7 +4442,7 @@ const Welcome = {
       <div class="stats"><div class="stat"><small>Opened this week</small><b>${Stats.week()}</b><span>${Stats.week() === 1 ? 'file' : 'files'}</span></div><div class="stat"><small>Largest file</small><b>${Stats.get().big ? fmtSize(Stats.get().big.size) : '—'}</b><span>${Stats.get().big ? esc(this.base(Stats.get().big.name)) : 'nothing opened yet'}</span></div><div class="stat"><small>Fixed JSON</small><b>${Stats.get().fixed || 0}</b><span>broken files repaired</span></div><div class="stat"><small>Compared</small><b>${Stats.get().cmp || 0}</b><span>file pairs</span></div></div>
       <div class="cols"><div class="box"><h3>📌 Pinned</h3><div id="w-pins">${this.pins()}</div><h3>🕘 Recent</h3><div id="w-rows">${this.rows()}</div></div>
       <div class="box"><h3>✨ New in this version</h3><ul>${this.NEWS.map(n => `<li>${esc(n)}</li>`).join('')}</ul><div class="drop">⤓ Drag files anywhere in this window</div></div>
-      <div class="box"><h3>💡 Did you know?</h3><div class="tip">${esc(this.TIPS[new Date().getDate() % this.TIPS.length])}</div><h3>⌨ Keys</h3><ul><li>Find &amp; replace<kbd>Ctrl+F</kbd></li><li>Next change<kbd>F7</kbd></li><li>Rename tab<kbd>F2</kbd></li><li>Save<kbd>Ctrl+S</kbd></li></ul><div class="priv" style="margin-top:12px">🔒 Offline. No account, no cloud, no telemetry.</div></div></div></div>`;
+      <div class="box"><h3>💡 Did you know?</h3><div class="tip">${esc(this.TIPS[new Date().getDate() % this.TIPS.length])} <a href="#" class="w-tour">Take the tour</a></div><h3>⌨ Keys</h3><ul><li>Find &amp; replace<kbd>Ctrl+F</kbd></li><li>Next change<kbd>F7</kbd></li><li>Rename tab<kbd>F2</kbd></li><li>Save<kbd>Ctrl+S</kbd></li></ul><div class="priv" style="margin-top:12px">🔒 Offline. No account, no cloud, no telemetry.</div></div></div></div>`;
     const light = `<div class="wl wl-light"><div><img class="lg-img logo-l" src="/logo-light.png" width="56" height="56" alt=""><h1>See inside any file, even gigabytes.</h1><p class="sub">Kempt opens huge JSON, XML, logs and tables in an instant, offline and private.</p><div class="acts">${acts.replace(' id="w-open"', '').replace(' id="w-cmp"', '')}</div>
       <div class="steps"><div class="st"><i>1</i><span><b>Open or drop</b> any file. Several files open as tabs.</span></div><div class="st"><i>2</i><span><b>Find, fix, format.</b> Select a word to see it everywhere.</span></div><div class="st"><i>3</i><span><b>Compare</b> two files, or Ctrl+click two open tabs.</span></div></div>
       <div class="chips">${rec.length ? '<span class="dim" style="font-size:12.5px">Recent</span>' : ''}${rec.slice(0, 4).map(p => `<span class="chip" data-p="${esc(p)}" title="${esc(p)}">${esc(this.base(p))}</span>`).join('')}${sess.length ? '<button class="w-restore">Restore last session</button>' : ''}</div></div>
@@ -4448,6 +4459,7 @@ const Welcome = {
     w.querySelectorAll('.star').forEach(b => b.onclick = e => { e.stopPropagation(); this.pin(b.dataset.star); const pins = $('#w-pins', w), rows = $('#w-rows', w); if (pins) pins.innerHTML = this.pins(); if (rows) rows.innerHTML = this.rows(); this.bindRows(w); });
   },
   wire(w) {
+    w.querySelectorAll('.w-tour').forEach(a => a.onclick = e => { e.preventDefault(); Tour.open(); });
     w.querySelectorAll('.w-restore-link').forEach(a => a.onclick = e => { e.preventDefault(); const b = $('.w-restore', w); if (b) b.click(); });
     w.querySelectorAll('.w-open').forEach(b => b.onclick = () => actions.open());
     w.querySelectorAll('.w-cmp').forEach(b => b.onclick = () => actions.compare());
@@ -4575,9 +4587,54 @@ const SAME = (() => {
   return { apply };
 })();
 
+/* ---- first-run introduction: what Kempt is and how to use it. Shown once (no tabs open, not an existing user), and from the welcome screen, Help and Settings. ---- */
+const Tour = {
+  SLIDES: [
+    { ic: 'K', t: 'Welcome to Kempt', p: 'Open, search, fix, format and compare big JSON, XML and log files. Everything runs on this computer: nothing is uploaded and no account is needed.',
+      b: ['Opens files of hundreds of MB in a second or two', 'Works offline, in your browser or its own window', 'One small program: GUI, terminal viewer and command line'] },
+    { ic: '📂', t: 'Open anything, any size', p: 'Drag a file onto the window, press Ctrl+O, or run kempt gui file.log. Every file gets its own tab; opening another file while Kempt runs adds a tab here.',
+      b: ['Recent and pinned files are on the welcome screen', 'Ctrl+Tab switches tabs, Ctrl+W closes one', '.gz, Excel and CSV files open as readable tables'] },
+    { ic: '🔍', t: 'Find what matters', p: 'Press Ctrl+F and type. Several words search at once and each gets its own colour; the ruler on the right shows where the matches are.',
+      b: ['Enter / Shift+Enter step through matches, F3 too', 'OR, AND, exclude (-word) and "exact phrase"', 'Ctrl+H replaces; Ctrl+G jumps to a line'] },
+    { ic: '🛠', t: 'Fix and format', p: 'Format indents JSON or XML. Fix repairs broken JSON (single quotes, comments, trailing commas, missing brackets) and tells you what it changed.',
+      b: ['Every change can be undone with Ctrl+Z', 'Edit in place, then Save or Save As', 'Python, shell, C and more format with optional helper tools'] },
+    { ic: '⇄', t: 'Compare', p: 'Compare two files, or Ctrl+click two open tabs. Paste & compare (Alt+P) works on text you paste, with no file at all.',
+      b: ['Changes are highlighted word by word', 'Copy a change from one side to the other', 'Beautify first, so only real differences show'] },
+    { ic: '🧰', t: 'More in the toolbar', p: 'A private checklist with reminders (stored encrypted), a calendar with a meeting finder, and a world clock with a time converter.',
+      b: ['Checklist & notes, Calendar and World clock open as tabs', 'Reminders can pop up as desktop notifications', 'None of them slow down opening files'] },
+    { ic: '⚙', t: 'Make it yours', p: 'Settings has themes, fonts, date formats and more. Features (lite mode) switches off what you do not use, for example a clock-only Kempt.',
+      b: ['F1 shows every shortcut', 'Settings has a search box', 'You can show this introduction again from Settings → About'] },
+  ],
+  i: 0, back: null,
+  should() { if (navigator.webdriver && !new URLSearchParams(location.search).has('tour')) return false; return !prefs.get('tourDone', false) && !(prefs.get('recent', []) || []).length && !Tabs.list.length; },
+  maybe() { if (this.should()) setTimeout(() => { if (this.should() && !$('#modals .tour')) this.open(); }, 700); },
+  done() { prefs.set('tourDone', true); },
+  open(at = 0) {
+    if (this.back) this.back.remove();
+    this.i = at; const back = this.back = el('div', 'modal-back tour-back'); back.setAttribute('role', 'dialog'); back.setAttribute('aria-modal', 'true'); back.setAttribute('aria-label', 'Introduction to Kempt');
+    back.innerHTML = '<div class="tour"><div class="tour-ic"></div><h2></h2><p class="tour-p"></p><ul></ul><div class="tour-dots"></div><div class="tour-foot"><button class="t-skip flat">Skip</button><span class="sp"></span><button class="t-back">Back</button><button class="t-next primary">Next</button></div></div>';
+    $('#modals').appendChild(back);
+    const close = () => { this.done(); back.remove(); this.back = null; };
+    const go = n => { if (n >= this.SLIDES.length) return close(); this.i = Math.max(0, n); this.draw(); };
+    $('.t-skip', back).onclick = close; $('.t-back', back).onclick = () => go(this.i - 1); $('.t-next', back).onclick = () => go(this.i + 1);
+    back.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } else if (e.key === 'ArrowRight') go(this.i + 1); else if (e.key === 'ArrowLeft') go(this.i - 1); });
+    back.addEventListener('mousedown', e => { if (e.target === back) close(); });
+    this.draw();
+  },
+  draw() {
+    const b = this.back, s = this.SLIDES[this.i], last = this.i === this.SLIDES.length - 1;
+    $('.tour-ic', b).textContent = s.ic; $('h2', b).textContent = s.t; $('.tour-p', b).textContent = s.p;
+    $('ul', b).innerHTML = s.b.map(x => `<li>${esc(x)}</li>`).join('');
+    $('.tour-dots', b).innerHTML = this.SLIDES.map((_, k) => `<i class="${k === this.i ? 'on' : ''}"></i>`).join('');
+    $('.t-back', b).style.visibility = this.i ? 'visible' : 'hidden'; $('.t-skip', b).style.visibility = last ? 'hidden' : 'visible';
+    const nx = $('.t-next', b); nx.textContent = last ? 'Start using Kempt' : 'Next'; nx.focus();
+  },
+};
+
 Pick.start();
 (async () => {
   Tabs.updateWelcome();
+  setTimeout(() => Tour.maybe(), 600);
   try {
     // measure column widths only after the embedded fonts are ready (give up after 1.5 s)
     await Promise.race([Promise.all(['400 13px Inter', '600 13px Inter', '400 12.5px "JetBrains Mono"', '700 12.5px "JetBrains Mono"'].map(f => document.fonts.load(f))), new Promise(r => setTimeout(r, 1500))]).catch(() => {});

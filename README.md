@@ -188,6 +188,7 @@ kempt gui app.log              # open a file straight away
 kempt gui old.json new.json    # two files open as a side-by-side comparison
 kempt gui --no-open            # only print the address (use this over SSH)
 ```
+0. The first time you start Kempt (and only if it has no recent files yet) a short **introduction** (seven steps: what Kempt is, opening files, find, fix and format, compare, the toolbar tools, settings) is shown. Use the arrow keys or Next, Skip it any time, and open it again from **Settings → About → Show the introduction**, the **Introduction** button in Help, or *Take the tour* on the welcome screen.
 1. Your browser opens at an address like `http://127.0.0.1:41873/?t=…`. The long `t=` value is a private key for this session; only your browser tab knows it.
 2. Press **Open** (or drag a file in) and pick a file. Huge files open in a fraction of a second.
 3. Try **Find** (Ctrl+F), **Fix** for broken JSON/XML, **Format**, **Compare**, and the clock and checklist buttons at the top. Press the **?** (Help) button for all shortcuts.
@@ -276,9 +277,9 @@ The **Search settings** box at the top finds a setting on any page.
 - **Editor:** indentation for Format and Fix (2 spaces, 4 spaces or Tab; changing it re-indents the JSON or XML file you have open), opening files read-only, opening delimited .txt/.csv as plain text, expanding JSON stored inside strings, the wrapped-line pane for long lines, and showing hidden files in the Open dialog.
 - **Calendar & tools:** first day of the week, **date format** (YYYY/MM/DD by default; ten others), 12- or 24-hour clock, the working hours the meeting finder uses, the World clock colour season, the reminder sound (with a Test button) and the checklist sort order and whether ticked items show.
 - **Features (lite mode):** everything is on by default. Switch off what you do not use (open and edit files, Compare, Paste & compare, Checklist & notes, Calendar, World clock) and it disappears from the menus, welcome screen and shortcuts and is not started; for example *Just the clock* makes Kempt open straight into the world clock. The presets *Everything*, *Files only*, *Just the clock*, *Clock + calendar* and *Checklist only* set the switches in one click.
-- **General:** start Kempt in the background at login, which browser Kempt opens in, and its own-window mode.
+- **General:** **Keep the same address between runs** (on by default: old links in the browser history and bookmarks open again after a restart), start Kempt in the background at login, which browser Kempt opens in, and its own-window mode.
 - **General** also holds **Updates** (check for a newer release, off by default; enter your GitHub `owner/repo` once, or build with `KEMPT_REPO=owner/repo`), **Backup** (Export / Import one JSON file with settings, zones, alerts, checklist and notes) and **Reset preferences**, which returns theme, fonts, accent, formats, shortcuts and sorting to their defaults and keeps your files, notes, checklist, calendar, zones and holidays.
-- **About:** the version, a short description and Quit Kempt.
+- **About:** the version, a short description, **Show the introduction** (the first-run tour) and Quit Kempt.
 - **Help (F1)** has four tabs: **Shortcuts** (click any shortcut to change it), **Features**, **Formats** (every language Kempt can format, with a ✓ for each tool found on your computer and the command to install the others) and **Terminal**.
 
 ### Saved settings and the last folder
@@ -611,7 +612,7 @@ Formatting is lossless: minifying the formatted output gives back the original, 
 
 ## Privacy and security
 
-- The GUI is a small web server that listens on `127.0.0.1` only. It requires a random per-run token and a loopback `Host` header, so other machines and other web pages cannot talk to it. It sends a strict Content-Security-Policy.
+- The GUI is a small web server that listens on `127.0.0.1` only. It requires a random access token (new each run, or the same as last time while *Keep the same address between runs* is on; it is stored in a private file, `address.json`, readable only by you, and never in the settings backup) and a loopback `Host` header, so other machines and other web pages cannot talk to it. It sends a strict Content-Security-Policy.
 - Nothing is uploaded. The interface and its fonts are embedded in the program, so it works offline. The one exception is the opt-in update check: the program runs the system `curl` once a day to read `api.github.com/repos/<owner>/<repo>/releases/latest` and shows a notice; it never downloads or installs anything.
 - Kempt writes only to files you explicitly save, and does so atomically. The only other thing it stores is the small settings file described above (theme, last folder, recent file names). Working copies are anonymous temporary files that disappear when the program exits.
 
@@ -628,7 +629,7 @@ Formatting is lossless: minifying the formatted output gives back the original, 
 | Using it over SSH | `kempt gui --no-open --port 8765`, then `ssh -L 8765:127.0.0.1:8765 host` and open the address locally |
 | "`prettier` is not installed" (or ruff, shfmt, ...) | install the helper tools with `--with-tools`, then check `kempt doctor` |
 | `--with-tools` skipped something | the installer says what and why (for example "Node.js too old", "no python3-venv"); `--no-system-packages` means you install OS packages yourself |
-| The page says it can't reach the server | the session ended; start `kempt gui` again (the address contains a one-time token) |
+| The page says it can't reach the server, or an old link from the browser history shows "This site can't be reached" | Kempt is not running. Start it with `kempt gui` (or open any file with Kempt): it reuses its last address, so the same link works again. If it was started with `--port`, or **Settings → General → Keep the same address between runs** is off, or that port is now used by another program, the address is new: use the one it prints. Keep Kempt running with **Start in the background at login** and the link always works |
 | Theme, font size or last folder were forgotten | they are stored in the settings file shown under *Saved settings*; check that the folder is writable, or delete the file to start fresh |
 | The browser tab has no icon | restart `kempt gui` (the icon is served by the program); some browsers cache a missing icon until the tab is reopened |
 | Windows: "Access denied" when saving | another program has the file open without sharing; close it and save again |

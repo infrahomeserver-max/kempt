@@ -32,6 +32,34 @@ pub fn write_instance(port: u16, token: &str) {
     }
 }
 
+fn address_path() -> PathBuf {
+    plat::config_dir().join("address.json")
+}
+
+/// The port and access token of the last run, kept so the same address works again after a restart (old links in the browser history and
+/// bookmarks keep working). A separate private file: it is not part of the settings, so a settings backup never contains the token.
+pub fn read_address() -> Option<(u16, String)> {
+    let v: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(address_path()).ok()?).ok()?;
+    let port = u16::try_from(v["port"].as_u64()?).ok().filter(|p| *p >= 1024)?;
+    let tok = v["token"].as_str()?.to_string();
+    (tok.len() == 32 && tok.bytes().all(|b| b.is_ascii_hexdigit())).then_some((port, tok))
+}
+
+pub fn write_address(port: u16, token: &str) {
+    let p = address_path();
+    let _ = std::fs::create_dir_all(p.parent().unwrap());
+    let _ = std::fs::write(&p, serde_json::json!({"port": port, "token": token}).to_string());
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = std::fs::set_permissions(&p, std::fs::Permissions::from_mode(0o600));
+    }
+}
+
+pub fn forget_address() {
+    let _ = std::fs::remove_file(address_path());
+}
+
 pub fn clear_instance() {
     let _ = std::fs::remove_file(instance_path());
 }
