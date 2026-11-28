@@ -99,6 +99,7 @@ jobs:
           python3 tests/test_stable.py
           python3 tests/test_tour.py
           python3 tests/test_burst.py
+          python3 tests/test_picker_race.py
           python3 tests/test_retire.py
           python3 tests/test_dupopen.py
           python3 tests/test_logtools.py

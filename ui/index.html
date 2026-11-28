@@ -1669,9 +1669,14 @@ function pickFile(startPath, title = 'Open file', withText = false, folder = fal
     const prevFocus = document.activeElement;
     const done = v => { pickFile.openAs = withText && $('.as', m) ? $('.as', m).value : 'auto'; back.remove(); restoreFocus(prevFocus); resolve(v); };
     const join = (d, n) => { const s = (d.includes("\\") && !d.includes("/")) ? "\\" : "/"; return (d.endsWith(s) ? d : d + s) + n; };
+    let typed = false;   // you typed a path: a folder listing that arrives late must not overwrite it
+    pp.addEventListener('input', () => { typed = true; });
+    const nav = p => { typed = false; return go(p); };
+    let seq = 0;   // only the newest listing counts: a slower, older one must not replace it
     async function go(path) {
+      const my = ++seq;
       try {
-        const j = await api('fs', { path }); cur = j.path; parent = j.parent; home = j.home; entries = j.entries; pp.value = cur; sel = null; prefs.set('dir', cur); draw();
+        const j = await api('fs', { path }); if (my !== seq) return; cur = j.path; parent = j.parent; home = j.home; entries = j.entries; if (!typed) pp.value = cur; sel = null; prefs.set('dir', cur); draw();
       } catch (e) { if (path) { prefs.set('dir', ''); return go(''); } toast(e.message, 'err'); }   // remembered folder is gone: fall back to home
     }
     function draw() {
@@ -1680,14 +1685,14 @@ function pickFile(startPath, title = 'Open file', withText = false, folder = fal
         if (folder && !e.d) continue; if (!hid.checked && e.n.startsWith('.')) continue; if (f && !e.n.toLowerCase().includes(f)) continue;
         const it = el('div', 'pick-item' + (e.d ? ' dir' : '') + (sel === e.n ? ' sel' : '')); it.innerHTML = `<span class="pi">${FI.ic(e.n, 16, e.d)}</span><span>${esc(e.n)}</span><span class="sz">${e.d ? '' : fmtSize(e.s)}</span>`;
         it.onclick = () => { sel = e.n; draw(); if (!e.d) pp.value = join(cur, e.n); };
-        it.ondblclick = () => e.d ? go(join(cur, e.n)) : done(join(cur, e.n));
+        it.ondblclick = () => e.d ? nav(join(cur, e.n)) : done(join(cur, e.n));
         list.appendChild(it);
       }
       if (!list.children.length) list.innerHTML = '<div style="padding:12px;color:var(--fg-dim)">Nothing here.</div>';
     }
-    $('.up', m).onclick = () => parent && go(parent); $('.home', m).onclick = () => go(home);
+    $('.up', m).onclick = () => parent && nav(parent); $('.home', m).onclick = () => nav(home);
     flt.oninput = draw; hid.onchange = draw;
-    pp.onkeydown = async e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); const v = pp.value.trim(); try { const j = await api('fs', { path: v }); if (v === j.path || v.replace(/\/$/, '') === j.path) go(v); else done(v); } catch (er) { done(v); } } };
+    pp.onkeydown = async e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); const v = pp.value.trim(); try { const j = await api('fs', { path: v }); if (v === j.path || v.replace(/\/$/, '') === j.path) nav(v); else done(v); } catch (er) { done(v); } } };
     $('.cancel', m).onclick = () => done(null);
     $('.ok', m).onclick = () => { if (folder) return done(sel && entries.find(x => x.n === sel && x.d) ? join(cur, sel) : cur); const v = pp.value.trim(); if (sel && !entries.find(x => x.n === sel).d) done(join(cur, sel)); else if (v && v !== cur) done(v); else toast('Pick a file first', 'info'); };
     back.addEventListener('mousedown', e => { if (e.target === back) done(null); });

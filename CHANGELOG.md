@@ -47,6 +47,9 @@ versioning: [SemVer](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- Open dialog no longer shows a folder you did not ask for when its first (slow) listing arrives after you typed a path.
+
+### Fixed
 - Opening a pipe, device or socket as a file is refused instead of waiting on it forever. Settings, notes and the launch log are written readable by you only. Closing a big file gives its memory back at once.
 - New automated checks: junk requests against every route, damaged and hostile files, script-injection payloads, file permissions and 16-thread load (tests/test_fuzz_api.py, test_fuzz_files.py, test_xss.py, test_perms.py).
 
