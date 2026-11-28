@@ -610,6 +610,16 @@ Formatting is lossless: minifying the formatted output gives back the original, 
 
 ---
 
+## Releasing (for maintainers)
+
+One script does a release safely: `scripts/release.sh` (or `scripts/release.sh minor`, `... 1.0.0`, `... --dry-run` to only check).
+
+1. While you work, write what changed under `## [Unreleased]` in `CHANGELOG.md`, commit and `git push` as usual.
+2. Wait until **CI** and **Security audit** are green on GitHub.
+3. On the main branch, in an up-to-date clone with nothing uncommitted, run `scripts/release.sh`.
+
+It stops with a clear message if the tree is dirty, the clone is behind or has unpushed commits, the tag already exists, the changelog entry is empty or CI is not green. Otherwise it bumps the version everywhere (`Cargo.toml`, `Cargo.lock`, `install.sh`, `install.ps1`, this README), turns `[Unreleased]` into the new version with today's date, builds and checks `kempt --version`, commits, pushes, waits for CI on that commit, then tags `vX.Y.Z`; the tag starts the Release workflow that builds the packages. With the GitHub CLI (`gh auth login`) it checks CI by itself; without it, it asks you to confirm. Never tag by hand and never re-use a tag that was already released.
+
 ## Privacy and security
 
 - The GUI is a small web server that listens on `127.0.0.1` only. It requires a random access token (new each run, or the same as last time while *Keep the same address between runs* is on; it is stored in a private file, `address.json`, readable only by you, and never in the settings backup) and a loopback `Host` header, so other machines and other web pages cannot talk to it. It sends a strict Content-Security-Policy.
