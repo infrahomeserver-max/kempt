@@ -625,6 +625,9 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
                     e.1 = v;
                     if v {
                         e.2 = Instant::now();
+                        // the tab a launch opened has loaded and is in front: that launch is finished, so the next double-click (if you have
+                        // switched to another tab by then) opens a fresh tab, which the browser brings to the front
+                        let _ = std::fs::remove_file(crate::service::opening_lock());
                     }
                 }
             }

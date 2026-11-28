@@ -288,7 +288,7 @@ pub fn open_app_window(url: &str) -> bool {
 
 /// Open the interface the way the user prefers: own window if asked for (and a Chromium browser exists), else the browser chosen in
 /// Settings, else the system default.
-fn opening_lock() -> PathBuf {
+pub fn opening_lock() -> PathBuf {
     plat::config_dir().join("opening.lock")
 }
 

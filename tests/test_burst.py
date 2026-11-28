@@ -54,7 +54,7 @@ with sync_playwright() as pw:
     # 2. the Kempt tab is hidden behind other tabs; a burst of double-clicks
     for p in lv: p.evaluate("() => { Object.defineProperty(document,'hidden',{get:()=>true,configurable:true}); document.dispatchEvent(new Event('visibilitychange')); }")
     time.sleep(1)
-    before = len(open(opens).read().split()); os.path.exists(os.path.join(cfg,'opening.lock')) and os.remove(os.path.join(cfg,'opening.lock'))
+    before = len(open(opens).read().split())
     pump(br, pages, 1500, False, burst(6))
     lv = live(pages)
     chk("hidden tab: exactly one new browser tab (%d)" % (len(open(opens).read().split()) - before), len(open(opens).read().split()) - before == 1)
@@ -62,7 +62,7 @@ with sync_playwright() as pw:
     # 3. the new tab itself loads in the background (window on another desktop): still no second tab
     for p in lv: p.evaluate("() => { Object.defineProperty(document,'hidden',{get:()=>true,configurable:true}); document.dispatchEvent(new Event('visibilitychange')); }")
     time.sleep(1)
-    before = len(open(opens).read().split()); os.path.exists(os.path.join(cfg,'opening.lock')) and os.remove(os.path.join(cfg,'opening.lock'))
+    before = len(open(opens).read().split())
     pump(br, pages, 1500, True, burst(6))
     lv = live(pages)
     chk("new tab in background: exactly one browser tab (%d)" % (len(open(opens).read().split()) - before), len(open(opens).read().split()) - before == 1)

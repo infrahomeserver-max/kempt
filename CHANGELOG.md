@@ -46,6 +46,9 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Double-clicking a file again right after Kempt opened now brings a fresh tab forward when you have switched to another browser tab (before, the file was added to the hidden tab and nothing came to the front for about 20 seconds).
+
 ## [0.2.9] - 2026-11-28
 
 ### Fixed
