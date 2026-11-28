@@ -46,6 +46,8 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.8] - 2026-11-28
+
 ### Fixed
 - Each `kempt gui <file>` launch writes one line to `launch.log` in the config folder (handed to the open window, or why not), to help track down double-clicks that seem to do nothing.
 
