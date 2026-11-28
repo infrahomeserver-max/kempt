@@ -968,7 +968,8 @@ fn api(app: &Arc<App>, name: &str, p: &Value) -> ApiResult {
                 e0 = n;   // the end time is past the last line
             }
             if crate::logtime::key(c.line(s0)).is_none_or(|k| k > t) {
-                return bad("No lines in that time range.");
+                let (a, b) = crate::logtime::span(n, &line).unwrap_or((a, a));
+                return bad(format!("No lines in that time range. This log covers {} to {}.", crate::logtime::show(a), crate::logtime::show(b)));
             }
             let mut out = Vec::new();
             for i in s0..e0 {
