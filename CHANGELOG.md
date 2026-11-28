@@ -46,6 +46,8 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.9] - 2026-11-28
+
 ### Fixed
 - Open dialog no longer shows a folder you did not ask for when its first (slow) listing arrives after you typed a path.
 
